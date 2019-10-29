@@ -1,0 +1,11 @@
+{
+  "statistics": {
+    "header": "Статистика",
+    "time_generate": "Время генерации:",
+    "memory_usage": "Использовано памяти:",
+    "memory_peak": "Пиковое значение:",
+    "count_queries": "Количество запросов:",
+    "count_time": "шт. за",
+    "seconds": "секунд"
+  }
+}

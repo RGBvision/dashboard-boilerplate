@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * This file is part of the RGB.dashboard package.
+ *
+ * (c) Alexey Graham <contact@rgbvision.net>
+ *
+ * @package    RGB.dashboard
+ * @author     Alexey Graham <contact@rgbvision.net>
+ * @copyright  2017-2019 RGBvision
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    1.7
+ * @link       https://dashboard.rgbvision.net
+ * @since      Class available since Release 1.0
+ */
+
+class ModelConstants extends Model
+{
+
+    private static function generate_timezone_list()
+    {
+
+        $timezones = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
+
+        $timezone_offsets = array();
+        foreach ($timezones as $timezone) {
+            $tz = new DateTimeZone($timezone);
+            $timezone_offsets[$timezone] = $tz->getOffset(new DateTime);
+        }
+
+        // sort timezone by offset
+        asort($timezone_offsets);
+
+        $timezone_list = array();
+        foreach ($timezone_offsets as $timezone => $offset) {
+            $offset_prefix = $offset < 0 ? '-' : '+';
+            $offset_formatted = gmdate('H:i', abs($offset));
+            $pretty_offset = "UTC${offset_prefix}${offset_formatted}";
+            $timezone_list[$timezone] = "(${pretty_offset}) $timezone";
+        }
+
+        return $timezone_list;
+    }
+
+    public static function getConstants()
+    {
+        $new = array();
+
+        $new['TIMEZONE'] = array(
+            'TYPE' => 'dropdown',
+            'DEFAULT' => 'Europe/Moscow',
+            'VARIANT' => self::generate_timezone_list(),
+            'LANG' => 'constants_title_timezone'
+        );
+
+        $constants = defined('CP_CONFIG_DEFAULTS') ? CP_CONFIG_DEFAULTS : null;
+
+        foreach ($constants AS $key => $params) {
+            $params['DEFAULT'] = (defined($key)
+                ? constant($key)
+                : $params['DEFAULT']);
+
+            if ($params['TYPE'] === 'folder') {
+                $params['DEFAULT'] = trim($params['DEFAULT'], '/');
+            }
+            else if ($params['TYPE'] === 'bool') {
+                $params['DEFAULT'] = (bool)$params['DEFAULT'];
+            }
+            else if ($params['TYPE'] === 'integer') {
+                $params['DEFAULT'] = (int)$params['DEFAULT'];
+            }
+            else if ($params['TYPE'] === 'string') {
+                $params['DEFAULT'] = (string)$params['DEFAULT'];
+            }
+            else if ($params['TYPE'] === 'dropdown') {
+                $params['VARIANT'] = (is_array($params['VARIANT'])
+                    ? $params['VARIANT']
+                    : explode(',', $params['VARIANT']));
+            }
+
+            $params['LANG'] = 'constants_title_' . strtolower($key);
+
+            $new[$key] = $params;
+        }
+
+        unset($constants);
+
+        return $new;
+    }
+
+
+    public static function saveConstants()
+    {
+        Router::demo();
+
+        $type = 'danger';
+
+        $Smarty = Tpl::getInstance();
+
+        $permission = Permission::perm('constants_edit');
+
+        $default = self::getConstants();
+
+        if ($permission) {
+            $set = '<?php' . "\r\n";
+
+            $constants = Request::post('const');
+
+            if (!empty($constants))
+                foreach ($default AS $key => $constant) {
+                    $input = isset($constants[$key])
+                        ? $constants[$key]
+                        : $constant['DEFAULT'];
+
+                    $set .= "\r\n\t";
+                    $set .= "//-- " . $Smarty->_get($constant['LANG']);
+                    $set .= "\r\n\t";
+
+                    if ($default[$key]['TYPE'] == 'string')
+                        $set .= "define('" . $key . "', '" . (string)$input . "');";
+                    else if ($default[$key]['TYPE'] == 'integer')
+                        $set .= "define('" . $key . "', " . (int)$input . ");";
+                    else if ($default[$key]['TYPE'] == 'folder')
+                        $set .= "define('" . $key . "', '/" . trim($input, '/') . "');";
+                    else if ($default[$key]['TYPE'] == 'bool')
+                        $set .= "define('" . $key . "', " . ((bool)$input ? 'true' : 'false') . ");";
+                    else if ($default[$key]['TYPE'] == 'dropdown')
+                        $set .= "define('" . $key . "', '" . (string)$input . "');";
+                    else if ($default[$key]['TYPE'] == 'tags')
+                        $set .= "define('" . $key . "', '" . (string)$input . "');";
+
+                    $set .= "\r\n";
+                }
+
+            $result = file_put_contents(CP_DIR . '/configs/environment.php', $set);
+
+            if ($result > 0) {
+                $message = $Smarty->_get('constants_message_edit_success');
+                $type = 'success';
+            } else {
+                $message = $Smarty->_get('constants_message_edit_danger');
+            }
+
+        } else {
+            $message = $Smarty->_get('constants_message_perm_danger');
+        }
+
+        Router::response($type, $message, 'index.php?router=constants');
+    }
+}

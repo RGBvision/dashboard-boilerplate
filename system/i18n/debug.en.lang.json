@@ -1,0 +1,11 @@
+{
+  "statistics": {
+    "header": "Statistics",
+    "time_generate": "Time genaration:",
+    "memory_usage": "Memory usage:",
+    "memory_peak": "Memory peak usage:",
+    "count_queries": "Count queries:",
+    "count_time": "for",
+    "seconds": "seconds"
+  }
+}

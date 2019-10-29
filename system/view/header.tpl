@@ -1,0 +1,1 @@
+<h2>{$data.header}</h2>
