@@ -4,9 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-## 3.0.0-rc.1 - 2021-11-11
+## [3.0.0-rc.1] - 2021-11-11
 
 Complete system redesign
 
@@ -20,7 +18,7 @@ Complete system redesign
 - Require PHP 7.4+
 - New web interface based on [Bootstrap 5](https://getbootstrap.com/)
 
-## 2.0.0 - 2019-12-03
+## [2.0.0] - 2019-12-03
 
 Private release
 
@@ -28,6 +26,6 @@ Private release
 
 - Require PHP 7.1+
 
-## 1.0.0 - 2017-07-21
+## [1.0.0] - 2017-07-21
 
 Private release
