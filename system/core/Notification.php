@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.3
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 2.0
  */
 
 class Notification
@@ -21,37 +21,52 @@ class Notification
 		//--
 	}
 
-	public static function success(string $msg, array $arg = array()): void
+
+    /**
+     * Display success notification
+     *
+     * @param string $msg message
+     * @param array $arg additional parameters
+     */
+    public static function success(string $msg, array $arg = []): void
     {
-		$Smarty = Tpl::getInstance();
+		$Template = Template::getInstance();
 
 		$array = array(
 			'success' => true,
-			'header' => $Smarty->_get('message_header_success'),
+			'header' => $Template->_get('message_header_success'),
 			'message' => $msg,
 			'theme' => 'success'
 		);
 
 		if (!empty($arg)) {
-            array_merge($array, $arg);
+            $array = array_merge($array, $arg);
         }
 
 		Json::show($array, true);
 	}
 
-	public static function error(string $msg, array $arg = array()): void
+
+    /**
+     * Display error notification
+     *
+     * @param string $msg message
+     * @param array $arg additional parameters
+     */
+
+	public static function error(string $msg, array $arg = []): void
     {
-		$Smarty = Tpl::getInstance();
+		$Template = Template::getInstance();
 
 		$array = array(
 			'success' => false,
-			'header' => $Smarty->_get('message_header_error'),
+			'header' => $Template->_get('message_header_error'),
 			'message' => $msg,
 			'theme' => 'danger'
 		);
 
 		if (!empty($arg)) {
-            array_merge($array, $arg);
+            $array = array_merge($array, $arg);
         }
 
 		Json::show($array, true);

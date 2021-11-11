@@ -1,23 +1,23 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.5
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Settings
 {
-    protected static $settings = null;
-    protected static $instance = null;
+    protected static ?array $settings = null;
+    protected static ?Settings $instance = null;
 
     protected function __construct()
     {
@@ -25,22 +25,28 @@ class Settings
 				SELECT
 					*
 				FROM
-					" . PREFIX . "settings
+					settings
 			";
 
-        $query = DB::Query($sql, SYSTEM_CACHE_LIFETIME);
+        $query = DB::query($sql);
 
-        $settings = array();
+        $settings = [];
 
-        while ($row = $query->getAssoc()) {
-            $settings[$row['type']][$row['key']] = $row['array']
-                ? unserialize($row['value'], ['allowed_classes' => false])
-                : $row['value'];
+        foreach ($query as $_row) {
+            $row = Arrays::toObject($_row);
+            $settings[$row->type][$row->key] = $row->array
+                ? unserialize($row->value, ['allowed_classes' => false])
+                : $row->value;
         }
 
         self::$settings = $settings;
     }
 
+    /**
+     * Initialization
+     *
+     * @return Settings|null
+     */
     public static function init(): ?Settings
     {
         if (!isset(self::$instance)) {
@@ -50,7 +56,14 @@ class Settings
         return self::$instance;
     }
 
-    public static function get($type = '', $key = '')
+    /**
+     * Get value by type and key
+     *
+     * @param string $type раздел
+     * @param string $key ключ
+     * @return array|mixed|null
+     */
+    public static function get(string $type = '', string $key = '')
     {
         if ($key === '' || $type === '') {
             return self::$settings;
@@ -59,37 +72,55 @@ class Settings
         return self::$settings[$type][$key] ?? null;
     }
 
-    public static function loadUserSettings(): void
+    /**
+     * Set value by type and key
+     *
+     * @param string $type раздел
+     * @param string $key ключ
+     * @param array|mixed|null $value значение
+     */
+    public static function set(string $type, string $key, $value): void
+    {
+        self::$settings[$type][$key] = $value;
+    }
+
+    /**
+     * Load user settings
+     *
+     * @param int $uid user ID
+     */
+    public static function loadUserSettings(int $uid): void
     {
         $sql = "
 				SELECT
 					settings
 				FROM
-					" . PREFIX . "users
+					users
 				WHERE
-					user_id = '" . UID . "'
+					user_id = ?
 				LIMIT 1
 			";
 
-        $user = DB::Query($sql)->getObject();
+        if ($settings = DB::cell($sql, $uid)) {
+            self::$settings['user_settings'] = Json::decode($settings);
+        }
 
-        if ($user) {
-            $_SESSION['user_settings'] = Arrays::safe_unserialize($user->settings);
+        if (($user_lang = self::$settings['user_settings']['user_lang']) && Session::checkvar("accept_langs.$user_lang")) {
+            Session::setvar('current_language', $user_lang);
+            Locales::set($user_lang);
         }
 
     }
 
-    public static function saveUserSettings(): void
+    /**
+     * Save user settings
+     *
+     * @param int $uid user ID
+     */
+    public static function saveUserSettings(int $uid): void
     {
-        if (!empty($_SESSION['user_settings'])) {
-            DB::Query("
-				UPDATE
-					" . PREFIX . "users
-				SET
-					settings = '" . Arrays::safe_serialize($_SESSION['user_settings']) . "'
-				WHERE
-					user_id  = '" . UID . "'
-			");
+        if (!empty(self::$settings['user_settings'])) {
+            DB::update("users", ["settings" => Json::encode(self::$settings['user_settings'])], ["user_id" => $uid]);
         }
     }
 

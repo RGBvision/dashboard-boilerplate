@@ -1,80 +1,75 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.7
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Auth
 {
+
     protected function __construct()
     {
         //
     }
 
-    protected static function setConstants(int $uid, int $group, string $name): void
+    protected static function setConstants(int $uid, int $group, string $template): void
     {
         define('UID', $uid);
         define('UGROUP', $group);
-        define('UNAME', $name);
+        define('TPL_DIR', $template);
     }
 
     protected static function setSessionVars(stdClass $user): void
     {
         Session::setvar('user_id', (int)$user->user_id);
-        Session::setvar('organization_settings', unserialize($user->org_settings, ['allowed_classes' => false]));
-        Session::setvar('organization_name', $user->org_name);
-        Session::setvar('user_name', $user->name); // Todo
         Session::setvar('user_firstname', $user->firstname);
         Session::setvar('user_lastname', $user->lastname);
         Session::setvar('user_password', $user->password);
         Session::setvar('user_group', (int)$user->user_group_id);
         Session::setvar('user_email', $user->email);
         Session::setvar('user_ip', IP::getIp());
-
-        if (file_exists(CP_DIR . '/uploads/avatars/' . md5((int)$user->user_id) . '-' . md5((int)$user->organization_id) . '.jpg')) {
-            Session::setvar('user_avatar', '/uploads/avatars/' . md5((int)$user->user_id) . '-' . md5((int)$user->organization_id) . '.jpg');
-        } else {
-            Session::setvar('user_avatar', '/uploads/avatars/default.jpg');
-        }
+        Session::setvar('user_avatar', User::getAvatar((int)$user->user_id));
+        Session::setvar('tpl_dir', $user->template);
     }
 
-    //--- Check if user logged in
+    // Check if user logged in
     public static function authCheck(): void
     {
-        if (Session::checkvar('user_id') === false) {
+        if (!Session::checkvar('user_id')) {
             Session::destroy();
 
             if (Request::isAjax()) {
                 Response::setStatus(401);
-                Request::shutDown();
+                Response::shutDown();
             }
 
-            Request::setHeader('Location: /login');
+            Router::response(false, '', ABS_PATH . 'login');
         }
     }
 
-    //--- Restore auth
+    // Restore auth
     public static function authRestore(): void
     {
-        if (!defined('CP_LOGIN') && (self::authSessions() === false) && (self::authCookie() === false)) {
-            //-- Clear Session Data
-            Session::delvar('user_id');
-            Session::delvar('user_password');
-            Session::delvar('permissions');
+
+        if (!self::authSessions() && !self::authCookie()) {
+            // Clear Session Data
+            Session::delvar('user_id', 'user_password', 'permissions');
+            define('UGROUP', 2);
         }
+
     }
 
-    //--- Auth by session
+    // Auth by session
     public static function authSessions(): bool
     {
         if (!Session::checkvar('user_id') || !Session::checkvar('user_password')) {
@@ -88,34 +83,38 @@ class Auth
             $referer = (trim($referer['host']) === $_SERVER['SERVER_NAME']);
         }
 
-        //--- Check user in DB if wrong referer or IP changed
+        // Check user in DB if wrong referer or IP changed
         if ($referer === false || Session::getvar('user_ip') !== IP::getIp()) {
             $sql = "
-					SELECT 1
+					SELECT COUNT(user_id)
 					FROM
-						" . PREFIX . "users
+						users
 					WHERE
-						user_id = '" . (int)Session::getvar('user_id') . "'
+						user_id = ?
 					AND
-						password = '" . Secure::sanitize(Session::getvar('user_password')) . "'
+						password = ?
 					LIMIT 1
 				";
 
-            $verified = DB::Query($sql)->numRows();
+            $verified = (bool)DB::cell($sql, (int)Session::getvar('user_id'), Session::getvar('user_password'));
 
             if (!$verified) {
                 return false;
             }
 
             Session::setvar('user_ip', IP::getIp());
+
         }
 
-        self::setConstants(Session::getvar('user_id'), Session::getvar('user_group'), Session::getvar('user_name'));
+        DB::update("users", ["last_activity" => date('Y-m-d H:i:s')], ["user_id" => (int)Session::getvar('user_id')]);
+        DB::update("users_session", ["last_activity" => date('Y-m-d H:i:s'), "ip" => IP::getIp()], ["user_id" => (int)Session::getvar('user_id')]);
+
+        self::setConstants(Session::getvar('user_id'), Session::getvar('user_group'), Session::getvar('tpl_dir'));
 
         return true;
     }
 
-    //--- Auth by cookie
+    // Auth by cookie
     public static function authCookie(): bool
     {
         if (empty(Cookie::get('auth'))) {
@@ -126,16 +125,16 @@ class Auth
 				SELECT
 					user_id
 				FROM
-					" . PREFIX . "users_session
+					users_session
 				WHERE
-					hash = '" . Secure::sanitize(Cookie::get('auth')) . "'
+					hash = ?
 				AND
-					agent = '" . Secure::sanitize($_SERVER['HTTP_USER_AGENT']) . "'
+					agent = ?
 			";
 
-        $user_id = DB::Query($sql)->getRow();
+        $user_id = (int)DB::cell($sql, Secure::sanitize(Cookie::get('auth')), Secure::sanitize($_SERVER['HTTP_USER_AGENT']));
 
-        if ((int)$user_id === 0) {
+        if ($user_id === 0) {
             Cookie::set('auth', '', 0, Core::$cookie_domain, ABS_PATH);
             return false;
         }
@@ -144,71 +143,47 @@ class Auth
 				SELECT
 				    usr.user_id,
 					usr.user_group_id,
-					usr.organization_id,
-					usr.name,
 					usr.password,
 					usr.firstname,
 					usr.lastname,
 					usr.email,
 					usr.active,
-					usrs.ip AS ip,
+					usrs.ip,
 					grp.permissions,
-					org.name AS org_name,
-					org.settings AS org_settings
+				    grp.template
 				FROM
-					" . PREFIX . "users AS usr
+					users AS usr
 				LEFT JOIN
-					" . PREFIX . "user_groups AS grp
+					user_groups AS grp
 					ON grp.user_group_id = usr.user_group_id
 				LEFT JOIN
-					" . PREFIX . "users_session AS usrs
+					users_session AS usrs
 					ON usr.user_id = usrs.user_id
-				LEFT JOIN
-				    " . PREFIX . "organizations AS org
-					ON org.organization_id = usr.organization_id
 				WHERE
-					usr.user_id = '" . (int)$user_id . "'
+					usr.user_id = ?
 				AND
-					usrs.hash = '" . Secure::sanitize(Cookie::get('auth')) . "'
+					usrs.hash = ?
 				LIMIT 1
 			";
 
-        $user = DB::Query($sql)->getObject();
-
-        if (empty($user))
+        if (!$user = Arrays::toObject(DB::row($sql, $user_id, Secure::sanitize(Cookie::get('auth'))))) {
             return false;
+        }
 
         if (LOGIN_USER_IP) {
-            if (($user->ip !== 0 && $user->ip !== long2ip(IP::getIp()))) {
-                $sql = "
-						DELETE FROM
-							" . PREFIX . "users_session
-						WHERE
-							hash = '" . Secure::sanitize(Cookie::get('auth')) . "'
-					";
-
-                DB::Query($sql);
+            if (($user->ip !== '' && $user->ip !== IP::getIp())) {
+                DB::delete("users_session", ["hash" => Secure::sanitize(Cookie::get('auth'))]);
             }
 
             Cookie::set('auth', '', 0, ABS_PATH, Core::$cookie_domain);
             return false;
         }
 
-        DB::Query("
-				UPDATE
-				    " . PREFIX . "users usr,
-					" . PREFIX . "users_session sess
-				SET
-				    usr.last_activity  = '" . time() . "',
-					sess.last_activity = '" . time() . "',
-					sess.ip            = '" . ip2long(IP::getIp()) . "'
-				WHERE
-				    usr.user_id        = '" . (int)$user_id . "' AND
-					sess.user_id       = '" . (int)$user_id . "'
-			");
+        DB::update("users", ["last_activity" => date('Y-m-d H:i:s')], ["user_id" => $user_id]);
+        DB::update("users_session", ["last_activity" => date('Y-m-d H:i:s'), "ip" => IP::getIp()], ["user_id" => $user_id]);
 
         self::setSessionVars($user);
-        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->name);
+        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->template);
 
         Permission::set($user->permissions);
 
@@ -216,7 +191,7 @@ class Auth
     }
 
 
-    //--- Check permissions
+    // Check permissions
     public static function authCheckPermission(): bool
     {
         if (!defined('UID') || !Permission::checkAccess('admin_panel')) {
@@ -228,54 +203,50 @@ class Auth
     }
 
 
-    //--- Logout
+    // Logout
     public static function userLogout(): void
     {
 
-        $sql = "DELETE
-                    " . PREFIX . "users_session,
-                    " . PREFIX . "sessions
-                FROM
-                    " . PREFIX . "users_session,
-                    " . PREFIX . "sessions
-                WHERE
-                    " . PREFIX . "users_session.user_id = '" . UID . "'
-                AND
-                    " . PREFIX . "sessions.user_id = '" . UID . "'";
-
-        DB::Query($sql);
+        DB::delete("users_session", ["user_id" => UID]);
+        DB::delete("sessions", ["user_id" => UID]);
 
         Cookie::set('auth', '', 0, Core::$cookie_domain, ABS_PATH);
 
         Session::destroy();
 
-        $_SESSION = array();
+        $_SESSION = [];
+
+        if (defined('UID') && UID) {
+            Log::log(Log::INFO, 'System\Auth', "User (" . UID . ") logged out");
+        }
     }
 
+    const LOGIN_SUCCESS = 0;
+    const EMPTY_LOGIN = 1;
+    const WRONG_PASS = 2;
+    const USER_INACTIVE = 3;
 
-    //--- Login
-    public static function userLogin(string $login, string $password, bool $attach_ip = false, bool $keep_in = false, int $sleep = 0): int
+    // Login
+    public static function userLogin(string $email, string $password, bool $attach_ip = false, bool $keep_in = false, int $sleep = 0): int
     {
-        $login = Secure::sanitize($login);
+        $email = Valid::normalizeEmail($email);
         $password = Secure::sanitize($password);
 
         sleep($sleep);
 
         if (Session::checkvar('user_id')) {
             session_unset();
-            $_SESSION = array();
+            $_SESSION = [];
         }
 
-        if (empty($login)) {
-            return 1;
+        if (empty($email)) {
+            return self::EMPTY_LOGIN;
         }
 
         $sql = "
 				SELECT
 					usr.user_id,
 					usr.user_group_id,
-					usr.organization_id,
-					usr.name,
 					usr.firstname,
 					usr.lastname,
 					usr.email,
@@ -284,114 +255,68 @@ class Auth
 					usr.salt,
 					usr.active,
 					usr.settings,
-					grp.permissions,
-					org.name AS org_name,
-					org.settings AS org_settings
+					grp.permissions, 
+				    grp.template				       
 				FROM
-					" . PREFIX . "users AS usr
+					users AS usr
 				INNER JOIN
-					" . PREFIX . "user_groups AS grp
+					user_groups AS grp
 					ON grp.user_group_id = usr.user_group_id
-				LEFT JOIN
-				    " . PREFIX . "organizations AS org
-					ON org.organization_id = usr.organization_id
 				WHERE
-					usr.email = '" . $login . "'
-				OR
-					usr.name = '" . $login . "'
-				OR
-					usr.phone = '" . normalizePhone($login) . "'
+					usr.email = ?
 				LIMIT 1
 			";
 
-        $user = DB::Query($sql)->getObject();
+        $user = Arrays::toObject((array)DB::row($sql, $email));
 
-        if (!$user || (!(isset($user->password) && $user->password === md5(md5($password . $user->salt))))) {
-            return 2; //--- Wrong password
+        if (!$user || !(isset($user->password) && password_verify(hash_hmac("sha256", $password, $user->salt . PWD_PEPPER), $user->password))) {
+            return self::WRONG_PASS;
         }
 
         if ((int)$user->active !== 1) {
-            return 3; //--- User inactive
+            return self::USER_INACTIVE;
         }
-
-        /* ToDo: Restrict user login from different devices at same time */
-
-        /*
-
-        $sql = "SELECT last_activity FROM " . PREFIX . "users_session WHERE user_id = '" . $user->user_id . "'";
-
-        $last_activity = DB::Query($sql)->getRow();
-
-        if (!isset($last_activity) OR (((int)$last_activity + 3600) < time())) {
-            $sql = "DELETE FROM " . PREFIX . "users_session WHERE user_id = '" . $user->user_id . "'";
-            DB::Query($sql);
-            $sql = "DELETE FROM " . PREFIX . "sessions WHERE user_id = '" . Session::getvar('user_id') . "'";
-            DB::Query($sql);
-        } else {
-            return 4; //--- Already logged in and active on other device
-        }
-
-        */
 
         $salt = randomString();
 
-        $password_hash = md5(md5($password . $salt));
+        $password_hash = password_hash(hash_hmac("sha256", $password, $salt . PWD_PEPPER), PASSWORD_ARGON2ID);
 
         $time = time();
 
-        $u_ip = ($attach_ip)
-            ? ip2long(IP::getIp())
-            : 0;
+        $user_ip = $attach_ip ? IP::getIp() : '';
 
-        DB::Query("
-				UPDATE
-					" . PREFIX . "users
-				SET
-					last_activity = '" . $time . "',
-					password      = '" . $password_hash . "',
-					salt          = '" . $salt . "',
-					ip            = '" . $u_ip . "'
-				WHERE
-					user_id       = '" . $user->user_id . "'
-			");
+        DB::update("users", [
+            "last_activity" => date('Y-m-d H:i:s', $time),
+            "password" => $password_hash,
+            "salt" => $salt,
+            "ip" => $user_ip,
+        ], ["user_id" => $user->user_id]);
 
         self::setSessionVars($user);
-        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->name);
+        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->template);
 
         Permission::set($user->permissions);
 
-        if ($keep_in) {
-            $expire = $time + COOKIE_LIFETIME;
+        $expire = $keep_in ? ($time + COOKIE_LIFETIME) : 0;
 
-            $auth = md5($_SERVER['HTTP_USER_AGENT'] . md5($user->user_id));
+        $auth = md5($_SERVER['HTTP_USER_AGENT'] . md5($user->user_id));
 
-            $sql = "
-					DELETE FROM
-						" . PREFIX . "users_session
-					WHERE
-						hash = '" . Secure::sanitize($auth) . "'
-				";
+        DB::delete('users_session', ['hash' => Secure::sanitize($auth)]);
 
-            DB::Query($sql);
+        DB::insert("users_session", [
+            "user_id" => (int)$user->user_id,
+            "hash" => Secure::sanitize($auth),
+            "ip" => $user_ip,
+            "agent" => Secure::sanitize($_SERVER['HTTP_USER_AGENT']),
+            "last_activity" => date('Y-m-d H:i:s', $time),
+        ]);
 
-            $sql = "
-					INSERT INTO
-						" . PREFIX . "users_session
-					SET
-						user_id        = '" . $user->user_id . "',
-						hash           = '" . Secure::sanitize($auth) . "',
-						ip             = '" . $u_ip . "',
-						agent          = '" . Secure::sanitize($_SERVER['HTTP_USER_AGENT']) . "',
-						last_activity  = '" . $time . "'
-				";
+        Cookie::set('auth', $auth, $expire, Core::$cookie_domain, ABS_PATH);
 
-            DB::Query($sql);
-
-            Cookie::set('auth', $auth, $expire, Core::$cookie_domain, ABS_PATH);
-        }
+        Log::log(Log::INFO, 'System\Auth', "User ($user->user_id) logged in");
 
         unset($user, $permissions, $sql);
 
-        return 0;
+        return self::LOGIN_SUCCESS;
     }
 }

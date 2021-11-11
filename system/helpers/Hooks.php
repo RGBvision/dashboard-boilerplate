@@ -1,26 +1,31 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    1.0
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Hooks
 {
     public static $instance;
     public static $hooks;
-    public static $current_hook;
+    public static string $current_hook = '';
     public static $run_hooks;
 
+    /**
+     * Инициализация инстанса класса
+     *
+     * @return Hooks
+     */
     public static function init(): Hooks
     {
         if (!self::$instance) {
@@ -30,34 +35,39 @@ class Hooks
         return self::$instance;
     }
 
-    //--- Add Hook
-    //--- ToDo: strictly typed
-    public static function add($name, $function, int $priority = 10): bool
+
+    /**
+     * Добавить функцию
+     *
+     * @param string $name имя хука
+     * @param string $function имя функции
+     * @param int $priority приоритет выполнения
+     * @return bool
+     */
+    public static function add(string $name, string $function, int $priority = 10): bool
     {
-        // If we have already registered this action return true
+        // Если хук с такой функцией уже зарегистрирован, то добавлять дубликат не нужно.
         if (isset(self::$hooks[$name][$priority][$function])) {
             return true;
         }
-        // Allows to iterate through multiple action hooks
-        if (is_array($name)) {
-            foreach ($name as $item) {
-                // Store the action hook in the $hooks array
-                self::$hooks[$item][$priority][$function] = array(
-                    'function' => $function
-                );
-            }
-        } else {
-            // Store the action hook in the $hooks array
-            self::$hooks[$name][$priority][$function] = array(
-                'function' => $function
-            );
-        }
+
+        // Добавляем хук функцию в массив $hooks
+        self::$hooks[$name][$priority][$function] = array(
+            'function' => $function
+        );
 
         return true;
     }
 
-    //--- Run Hook
-    public static function action($name, $arguments = '')
+
+    /**
+     * Выполнить хук функции
+     *
+     * @param string $name имя хука
+     * @param array|mixed|string $arguments параметры вызова функций
+     * @return mixed|string
+     */
+    public static function action(string $name, $arguments = '')
     {
 
         if (!isset(self::$hooks[$name])) {
@@ -72,9 +82,7 @@ class Hooks
         foreach (self::$hooks[$name] as $priority => $items) {
             if (is_array($items)) {
                 foreach ($items as $item) {
-                    $return = call_user_func_array($item['function'], array(
-                        &$arguments
-                    ));
+                    $return = call_user_func_array($item['function'], [&$arguments]);
 
                     if ($return) {
                         $arguments = $return;
@@ -90,8 +98,16 @@ class Hooks
         return $arguments;
     }
 
-    //--- Remove Hook
-    public static function remove(string $name, $function, int $priority = 10): bool
+
+    /**
+     * Удалить функцию из хуков
+     *
+     * @param string $name имя хука
+     * @param string $function имя функции
+     * @param int $priority приоритет
+     * @return bool
+     */
+    public static function remove(string $name, string $function, int $priority = 10): bool
     {
         if (!isset(self::$hooks[$name][$priority][$function])) {
             return false;
@@ -101,34 +117,45 @@ class Hooks
     }
 
 
-    //--- Get the currently running action hook
-    public static function getCurrent()
+    /**
+     * Получить текущий хук
+     *
+     * @return string
+     */
+    public static function getCurrent(): string
     {
         return self::$current_hook;
     }
 
 
-    //--- Check if hook was started
-    public static function has($hook, $priority = 10): bool
+    /**
+     * Проверить наличие хука с указанным именем и приоритетом
+     *
+     * @param string $name имя хука
+     * @param int $priority приоритет
+     * @return bool
+     */
+    public static function has(string $name, int $priority = 10): bool
     {
-        if (isset(self::$hooks[$hook][$priority])) {
-            return true;
-        }
-
-        return false;
+        return isset(self::$hooks[$name][$priority]);
     }
 
-    //--- Hook Exists
-    public static function exists($name): bool
-    {
-        if (isset(self::$hooks[$name])) {
-            return true;
-        }
 
-        return false;
+    /**
+     * Проверить наличие хука с указанным именем
+     *
+     * @param string $name имя хука
+     * @return bool
+     */
+    public static function exists(string $name): bool
+    {
+        return isset(self::$hooks[$name]);
     }
 
-    //--- Print information about all Hooks and actions
+
+    /**
+     * Вывести отладочную информацию о хуках
+     */
     public static function debug(): void
     {
         if (isset(self::$hooks)) {

@@ -1,23 +1,41 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.4
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 abstract class Controller
 {
-	public function __construct()
-	{
 
-	}
+    /**
+     * @var string Route ID
+     */
+    public static string $route_id;
+
+    /**
+     * @var Model Model class
+     */
+    protected static Model $model;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+
+        self::$route_id = Router::getId();
+        self::$model = Router::model();
+
+    }
+
 }

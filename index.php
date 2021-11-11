@@ -1,15 +1,15 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -17,112 +17,82 @@
 define('START_CP', microtime());
 define('START_MEMORY', memory_get_usage());
 
-//--- Initialization
+// System initialisation
 require_once __DIR__ . '/system/init.php';
 
-//--- Login / logout
-if (Request::getPath() === '/login') {
-    include CP_DIR . '/system/login.php';
-    exit;
+// Run hook after system initialised
+Hooks::action('system_after_init');
+
+// Template engine instance
+$Template = Template::getInstance();
+
+// Define default template directory if not set
+if (!defined('TPL_DIR')) {
+    define('TPL_DIR', 'default');
 }
 
-//--- Check user authorization
-Auth::authCheck();
+// Set template directory
+$Template->__set('template_dir', DASHBOARD_DIR . '/app/templates/' . TPL_DIR . '/');
 
-//--- Load user settings if authorized or redirect to Login page
-if (!Auth::authCheckPermission()) {
-    Request::redirect('/login');
-} else {
-    Settings::loadUserSettings();
-}
+// Global i18n
+$Template->_load(DASHBOARD_DIR . '/system/i18n/' . Session::getvar('current_language') . '.ini');
 
-//--- Execute hook after initialization
-Hooks::action('admin_after_init');
+// Execute router
+Router::execute(preg_replace('/[^a-zA-Z0-9_\/]/', '', Request::getPath()));
 
-//--- Set permissions
-$_permissions = array('admin_panel', 'admin_menu');
-Permission::add('admin', $_permissions, 'sli sli-lock-lock-shield', 0);
-
-//--- Smarty instance
-$Smarty = Tpl::getInstance();
-
-//--- Set Smarty template folder
-$Smarty->__set('template_dir', CP_DIR . '/system/view/');
-
-//--- i18n
-$Smarty->_load(CP_DIR . '/system/i18n/' . Session::getvar('current_language') . '.ini');
-
-//--- Set default page if request has no route
-if (Request::getPath() === '/') {
-    Request::redirect('/dashboard');
-}
-
-//--- Router initialization
-Router::init(Request::getPath());
-
-//--- Check user permissions to view the module
-Permission::checkAccess(Router::getId() . '_view');
-
-//--- Show "No permission" message if access denied
+// Display «No permission» page if user has no permission to access requested page
 if (defined('NO_PERMISSION')) {
-    Router::reinit('/errors/denied');
+    Request::redirect('/errors/denied');
 }
 
-//--- Search for requested module
-Router::execute();
+// Disable browser caching
+Response::setHeader('Cache-Control: no-store, no-cache, must-revalidate');
+Response::setHeader('Expires: ' . gmdate('r'));
 
-//--- Disable caching
-Request::setHeaders('Cache-Control: no-store, no-cache, must-revalidate');
-Request::setHeaders('Expires: ' . date('r'));
-
-//--- Enable GZIP compression
+// Use GZIP compression if accepted
 if (GZIP_COMPRESSION && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) {
     ob_start('ob_gzhandler');
 } else {
     ob_start();
 }
 
-//--- Execute hook before render
-Hooks::action('admin_pre_render');
+// Run hook before render
+Hooks::action('system_pre_render');
 
-//--- Choose template
-$Tpl_out = (Request::request('only') && (int)Request::request('only') === 1)
-    ? 'only.tpl'
-    : 'index.tpl';
+// Set base template file
+$base_template = (Request::request('only') && (int)Request::request('only') === 1) ? 'only.tpl' : 'index.tpl';
 
-//--- Applying dependencies
-$dependencies = Dependencies::get();
+// Push all data to template engine
+$Template
 
-//--- Pass variables to template engine
-$Smarty
+    ->assign('APP_BUILD', APP_BUILD)
+
     ->assign('ABS_PATH', ABS_PATH)
-    ->assign('show_navigation', Permission::check('admin_menu'))
     ->assign('_is_ajax', Request::isAjax())
-    ->assign('dependencies', $dependencies)
-    ->assign('left_headers', Navigation::$left_headers)
-    ->assign('left_menu_items', Navigation::show(1))
-    ->assign('header_tpl', $Smarty->fetch('header.tpl'))
-    ->assign('user_tpl', $Smarty->fetch('user.tpl'))
-    ->assign('right_header_tpl', $Smarty->fetch('right_header.tpl'))
-    ->assign('breadcrumb_tpl', $Smarty->fetch('breadcrumbs.tpl'))
-    ->assign('loading_tpl', $Smarty->fetch('loading.tpl'))
-    ->assign('left_menu_tpl', $Smarty->fetch('left_menu.tpl'))
-    ->assign('scripts_tpl', $Smarty->fetch('scripts.tpl'))
-    ->assign('footer_tpl', $Smarty->fetch('footer.tpl'))
-    ->assign('debug_data', true)
-    ->assign('debugs', $Smarty->fetch('debugs.tpl'));
 
-//--- Render template
-$Smarty->display($Tpl_out);
+    ->assign('dependencies', Dependencies::get())
+    ->assign('injections', Injections::get())
+
+    ->assign('accept_lang', Session::getvar('accept_langs'))
+    ->assign('current_language', Session::getvar('current_language'))
+    ->assign('sidebar_headers', Navigation::$sidebar_headers)
+    ->assign('sidebar_menu_items', Navigation::get(Navigation::SIDEBAR))
+
+    ->assign('styles_tpl', $Template->fetch('styles.tpl'))
+    ->assign('sidebar_tpl', $Template->fetch('sidebar.tpl'))
+    ->assign('user_tpl', $Template->fetch('user.tpl'))
+    ->assign('header_tpl', $Template->fetch('header.tpl'))
+    ->assign('header_addons_tpl', $Template->fetch('header_addons.tpl'))
+    ->assign('breadcrumb_tpl', $Template->fetch('breadcrumbs.tpl'))
+    ->assign('footer_tpl', $Template->fetch('footer.tpl'))
+    ->assign('scripts_tpl', $Template->fetch('scripts.tpl'));
+
+// Render
+$Template->display($base_template);
 $render = ob_get_clean();
 
-//--- Debug information
-if (defined('PROFILING') && (PROFILING === true)) {
-    $render .= Debug::getStats(1, 1, 1);
-}
+// Run hook after render
+Hooks::action('system_post_render');
 
-//--- Execute hook after render
-Hooks::action('admin_post_render');
-
-//--- Output result
+// Display result
 echo Html::output($render);

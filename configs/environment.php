@@ -1,100 +1,65 @@
 <?php
 
-	//--- Режим работы системы
-	define('TIMEZONE', 'Europe/Moscow');
+define('TIMEZONE', 'Europe/Moscow');
 
-	//--- Режим работы системы
-	define('CP_ENVIRONMENT', 'development');
+define('CP_ENVIRONMENT', 'public');
 
-	//--- Использовать IP для автоматического входа на сайте
-	define('LOGIN_USER_IP', false);
+define('DARK_THEME', true);
 
-	//--- Пытаться очистить память если выходит за пределы (-1 выключенно) в мегабайтах (увеличивается нагрузка на MySQL)
-	define('MEMORY_LIMIT_PANIC', -1);
+define('LOGIN_USER_IP', false);
 
-	//--- Директория для временных файлов
-	define('TEMP_DIR', '/tmp');
+define('MEMORY_LIMIT_PANIC', -1);
 
-	//--- Директория для хранения вложений
-	define('ATTACH_DIR', '/tmp/attachments');
+define('PWD_PEPPER', 'uI50XZoFT7sajhwa');
 
-	//--- Директория для хранения файлов
-	define('UPLOAD_DIR', '/uploads');
+define('TEMP_DIR', '/tmp');
 
-	//--- Папка для хранения сессий
-	define('SESSION_DIR', '/tmp/sessions');
+define('ATTACH_DIR', '/tmp/attachments');
 
-	//--- Хранить сессии в БД
-	define('SESSION_SAVE_HANDLER', 'db');
+define('UPLOAD_DIR', '/uploads');
 
-	//--- Время жизни сессии (60*60*24 - 24 часа)
-	define('SESSION_LIFETIME', 1209600);
+define('SESSION_DIR', '/tmp/sessions');
 
-	//--- Домен для cookie. По умолчанию пусто
-	define('COOKIE_DOMAIN', '');
+define('SESSION_SAVE_HANDLER', 'db');
 
-	//--- Время жизни cookie (60*60*24*14 - 2 недели)
-	define('COOKIE_LIFETIME', 1209600);
+define('SESSION_LIFETIME', 86400);
 
-	//--- Контролировать изменения tpl файлов После настройки сайта установить - false
-	define('SMARTY_COMPILE_CHECK', true);
+define('COOKIE_DOMAIN', '');
 
-	//--- Создание папок для кэширования Установите это в false если ваше окружение PHP не разрешает создание директорий от имени Smarty. Поддиректории более эффективны, так что используйте их, если можете
-	define('SMARTY_USE_SUB_DIRS', true);
+define('COOKIE_LIFETIME', 1209600);
 
-	//--- Кэширование скомпилированных шаблонов документов
-	define('CACHE_DOC_TPL', false);
+define('SMARTY_COMPILE_CHECK', true);
 
-	//--- Время жизни кеша
-	define('CACHE_LIFETIME', 3600);
+define('SMARTY_USE_SUB_DIRS', true);
 
-	//--- Время жизни кеша системных запросов
-	define('SYSTEM_CACHE_LIFETIME', 300);
+define('CACHE_DOC_TPL', false);
 
-	//--- Включить стандартную обработку ошибок PHP
-	define('PHP_DEBUGGING', true);
+define('CACHE_LIFETIME', 3600);
 
-	//--- Включить обработку ошибок PHP через обработчик cms
-	define('SELF_ERROR', true);
+define('SYSTEM_CACHE_LIFETIME', 300);
 
-	//--- Консоль отладки Smarty
-	define('SMARTY_DEBUGGING', false);
+define('PHP_DEBUGGING', false);
 
-	//--- Включить вывод статистики запросов
-	define('SQL_DEBUGGING', false);
+define('SELF_ERROR', true);
 
-	//--- Останавливать систему, если произошла ошибка в MySQL запросе
-	define('SQL_ERRORS_STOP', false);
+define('SMARTY_DEBUGGING', false);
 
-	//--- Отправка писем с ошибками MySQL
-	define('SEND_SQL_ERROR', false);
+define('SQL_DEBUGGING', false);
 
-	//--- Вывод статистики выполненых запросов
-	define('SQL_PROFILING', false);
+define('SQL_ERRORS_STOP', false);
 
-	//--- Вывод статистики
-	define('PROFILING', false);
+define('SEND_SQL_ERROR', false);
 
-	//--- Включить html компрессию
-	define('HTML_COMPRESSION', true);
+define('SQL_PROFILING', false);
 
-	//--- Включить gzip компрессию
-	define('GZIP_COMPRESSION', true);
+define('PROFILING', false);
 
-	//--- Отдавать заголовок на кеширование страницы
-	define('OUTPUT_EXPIRE', false);
+define('HTML_COMPRESSION', false);
 
-	//--- Время жизни кеширования страницы (60*60 - 1 час)
-	define('OUTPUT_EXPIRE_OFFSET', 3600);
+define('GZIP_COMPRESSION', true);
 
-	//--- Адрес Memcached сервера
-	define('USE_MEMCACHED', false);
+define('OUTPUT_EXPIRE', false);
 
-	//--- Адрес Memcached сервера
-	define('MEMCACHED_SERVER', 'localhost');
+define('OUTPUT_EXPIRE_OFFSET', 3600);
 
-	//--- Порт Memcached сервера
-	define('MEMCACHED_PORT', '11211');
-
-	//--- Проверка наличия новых версий системы
-	define('CHECK_VERSION', false);
+define('CHECK_VERSION', false);

@@ -1,116 +1,94 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.1
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Session
 {
-	public static function init(): void
+    public static function init(): void
     {
-		self::storage();
-		self::start();
-	}
+        self::storage();
+        self::start();
+    }
 
-	public static function storage(): void
+    public static function storage(): void
     {
-		require_once CP_DIR . '/system/engine/sessions/' . SESSION_SAVE_HANDLER . '.php';
-		Sessions::init();
-	}
+        require_once DASHBOARD_DIR . '/system/engine/sessions/' . SESSION_SAVE_HANDLER . '.php';
+        Sessions::init();
+    }
 
-	public static function start(): bool
+    public static function start(): bool
     {
-		if (!session_id()) {
-			Sessions::init();
-			session_start();
-		}
+        if (!session_id()) {
+            Sessions::init();
+            session_start();
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public static function destroy(): void
+    public static function destroy(): void
     {
-		if (session_id()) {
-			session_unset();
+        if (session_id()) {
+            session_unset();
 
-			session_destroy();
+            session_destroy();
 
-			$_SESSION = array();
-		}
-	}
+            $_SESSION = [];
+        }
+    }
 
-	public static function getid(): string
+    public static function getid(): string
     {
-		if (!session_id()) {
+        if (!session_id()) {
             self::start();
         }
 
-		return session_id();
-	}
+        return session_id();
+    }
 
-	public static function getvar(string $key)
-	{
-		if (!session_id()) {
+    public static function getvar(string $path)
+    {
+        if (!session_id()) {
             self::start();
         }
 
-		if (self::checkvar($key)) {
-            return $_SESSION[$key];
-        }
+        return Arrays::get($_SESSION, $path);
+    }
 
-		return null;
-	}
-
-    public static function setvar(string $key, $value): void
+    public static function setvar(string $path, $value): void
     {
-		if (!session_id()) {
+        if (!session_id()) {
             self::start();
         }
 
-		$_SESSION[$key] = $value;
-	}
+        Arrays::set($_SESSION, $path, $value);
+    }
 
-    public static function checkvar(): bool
+    public static function checkvar(string $path): bool
     {
-		if (!session_id()) {
+        if (!session_id()) {
             self::start();
         }
 
-		foreach (func_get_args() as $argument) {
-			if (is_array($argument)) {
-				foreach ($argument as $key) {
-					if (!isset($_SESSION[(string)$key])) {
-                        return false;
-                    }
-				}
-			} else if (!isset($_SESSION[(string)$argument])) {
-                    return false;
-			}
-		}
+        return (Arrays::get($_SESSION, $path) !== null);
+    }
 
-		return true;
-	}
-
-	public static function delvar(): void
+    public static function delvar(...$arguments): void
     {
-		foreach (func_get_args() as $argument) {
-			if (is_array($argument)) {
-				foreach ($argument as $key) {
-					unset($_SESSION[(string)$key]);
-				}
-			} else {
-				unset($_SESSION[(string)$argument]);
-			}
-		}
-	}
+        foreach ($arguments as $argument) {
+            Arrays::delete($_SESSION, $argument);
+        }
+    }
 }

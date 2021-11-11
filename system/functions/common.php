@@ -1,13 +1,13 @@
 <?php
 
-//--- Check if request via AJAX
+// Check if request via AJAX
 // ToDO: move to request class
 function isAjax()
 {
     return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && (strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));
 }
 
-//--- Get user IP
+// Get user IP
 function getIp()
 {
     if (isset($_SERVER['HTTP_CLIENT_IP'])) {
@@ -29,7 +29,7 @@ function getIp()
     return $ip_address;
 }
 
-//--- get random token
+// get random token
 // ToDO: move to secure class
 function token($length = 32)
 {
@@ -50,7 +50,7 @@ function token($length = 32)
     return $token;
 }
 
-//--- get random string
+// get random string
 // ToDO: move to secure class
 function randomString($length = 16, $chars = '')
 {
@@ -79,7 +79,7 @@ function randomString($length = 16, $chars = '')
 // ToDO: move to locale / i18n class
 function pretty_date($string, $language = '')
 {
-    //--- trying solve encoding problems on Windows
+    // trying solve encoding problems on Windows
     if (!mb_check_encoding($string, 'UTF-8')) {
         $string = iconv('Windows-1251', 'UTF-8', $string);
     }
@@ -186,32 +186,38 @@ function translate_date($data)
     return $data;
 }
 
-//--- normalize russian phone number
-// ToDO: move to validator class
+// normalize phone number
 function normalizePhone($phone, $gaps = false)
 {
-    //--- we need only digits
-    $phone = trim(preg_replace("/\D+/", '', $phone));
-    if (!empty($phone) AND (mb_strlen($phone) > 9)) {
-        //--- format phone number
-        if (mb_strlen($phone) === 10) {
-            return preg_replace("/([\d]{3})([\d]{3})([\d]{2})([\d]{2})/", ($gaps) ? '+7 $1 $2 $3 $4' : '+7$1$2$3$4', $phone);
-        }
-        if (mb_strlen($phone) === 11 && (((int)$phone[0] === 8) || ((int)$phone[0] === 7))) {
-            return preg_replace("/([\d])([\d]{3})([\d]{3})([\d]{2})([\d]{2})/", ($gaps) ? '+7 $2 $3 $4 $5' : '+7$2$3$4$5', $phone);
-        }
-    }
-    return '';
+    return '+' . trim(preg_replace("/\D+/", '', $phone));
 }
 
-// ToDO: move to validator class
+// normalize email address
 function normalizeEmail($email)
 {
+
+    $_email = mb_strtolower($email);
+
     $regex_email = '/^(?!(?:(?:\x22?\x5C[\x00-\x7E]\x22?)|(?:\x22?[^\x5C\x22]\x22?)){255,})(?!(?:(?:\x22?\x5C[\x00-\x7E]\x22?)|(?:\x22?[^\x5C\x22]\x22?)){65,}@)(?:(?:[\x21\x23-\x27\x2A\x2B\x2D\x2F-\x39\x3D\x3F\x5E-\x7E]+)|(?:\x22(?:[\x01-\x08\x0B\x0C\x0E-\x1F\x21\x23-\x5B\x5D-\x7F]|(?:\x5C[\x00-\x7F]))*\x22))(?:\.(?:(?:[\x21\x23-\x27\x2A\x2B\x2D\x2F-\x39\x3D\x3F\x5E-\x7E]+)|(?:\x22(?:[\x01-\x08\x0B\x0C\x0E-\x1F\x21\x23-\x5B\x5D-\x7F]|(?:\x5C[\x00-\x7F]))*\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-[a-z0-9]+)*\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-[a-z0-9]+)*)|(?:\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\]))$/iD';
 
-    if (!preg_match($regex_email, $email)) {
+    if (!preg_match($regex_email, $_email)) {
         return '';
     }
 
-    return mb_strtolower($email);
+    return $_email;
+}
+
+function formatSize(int $size): string
+{
+    if ($size >= 1073741824) {
+        $result = round($size / 1073741824 * 100) / 100 . ' Gb';
+    } elseif ($size >= 1048576) {
+        $result = round($size / 1048576 * 100) / 100 . ' Mb';
+    } elseif ($size >= 1024) {
+        $result = round($size / 1024 * 100) / 100 . ' Kb';
+    } else {
+        $result = $size . ' b';
+    }
+
+    return $result;
 }

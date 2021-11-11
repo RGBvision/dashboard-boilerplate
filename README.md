@@ -1,1 +1,3 @@
-# RGBdashboard
+# Dashboard boilerplate
+
+## Documentation and Demo: Soon™

@@ -1,19 +1,18 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    1.1
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
-
 
 class Sessions
 {
@@ -26,7 +25,7 @@ class Sessions
 
 	private function __construct()
 	{
-		ini_set('session.save_handler', 'user');
+		//ini_set('session.save_handler', 'user');
 
 		self::$sessLifeTime = (defined('SESSION_LIFETIME') && is_numeric(SESSION_LIFETIME))
 			? SESSION_LIFETIME
@@ -55,7 +54,7 @@ class Sessions
 
 	public static function _open($savePath, $sessionName): bool
     {
-		self::$savePath = CP_DIR . SESSION_DIR;
+		self::$savePath = DASHBOARD_DIR . SESSION_DIR;
 		self::$sessionName = $sessionName;
 
 		return true;
@@ -114,7 +113,7 @@ class Sessions
 
 	public static function _gc($maxLifeTime): bool
     {
-		self::_clear(CP_DIR . SESSION_DIR, 'sess', $maxLifeTime);
+		self::_clear(DASHBOARD_DIR . SESSION_DIR, 'sess', $maxLifeTime);
 
 		return true;
 	}

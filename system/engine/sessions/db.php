@@ -1,47 +1,43 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.8
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
+
+use ParagonIE\EasyDB\EasyStatement;
 
 class Sessions
 {
     static public $sessLifetime;
 
-    static private $instance = null;
+    private static ?Sessions $instance = null;
 
     private function __construct()
     {
         register_shutdown_function('session_write_close');
-
-        self::$sessLifetime = (defined('SESSION_LIFETIME') && is_numeric(SESSION_LIFETIME))
-            ? SESSION_LIFETIME
-            : (ini_get('session.gc_maxlifetime') < 1440
-                ? 1440
-                : ini_get('session.gc_maxlifetime'));
-
+        self::$sessLifetime = (defined('SESSION_LIFETIME') && is_numeric(SESSION_LIFETIME)) ? SESSION_LIFETIME : max(1440, (int)ini_get('session.gc_maxlifetime'));
         self::setHandler();
     }
 
     public static function setHandler()
     {
         session_set_save_handler(
-            array('Sessions', '_open'),
-            array('Sessions', '_close'),
-            array('Sessions', '_read'),
-            array('Sessions', '_write'),
-            array('Sessions', '_destroy'),
-            array('Sessions', '_gc')
+            ['Sessions', '_open'],
+            ['Sessions', '_close'],
+            ['Sessions', '_read'],
+            ['Sessions', '_write'],
+            ['Sessions', '_destroy'],
+            ['Sessions', '_gc']
         );
     }
 
@@ -71,18 +67,18 @@ class Sessions
 
     public static function _read($sessionId)
     {
-        $qid = DB::Query("
+        $qid = DB::row("
 				SELECT
-					value, Ip
+					value, ip
 				FROM
-					" . PREFIX . "sessions
+					sessions
 				WHERE
-					sesskey = '" . $sessionId . "'
+					sesskey = ?
 				AND
-					expire > '" . time() . "'
-			");
+					expire > ?
+			", $sessionId, date('Y-m-d H:i:s'));
 
-        if ((list($value, $ip) = $qid->getArray()) && $ip === IP::getIp()) {
+        if (($value = $qid['value']) && ($ip = $qid['ip']) && ($ip === IP::getIp())) {
             return $value;
         }
 
@@ -92,20 +88,27 @@ class Sessions
     public static function _write($sessionId, $data)
     {
         if (self::_check($sessionId)) {
-            DB::Query("
+            DB::query("
 					UPDATE
-						" . PREFIX . "sessions
+						sessions
 					SET
-						expire 			= " . (time() + self::$sessLifetime) . ",
-						expire_date 	= FROM_UNIXTIME(expire,'%d.%m.%Y, %H:%i:%s'),
-						value 			= '" . addslashes($data) . "',
-						Ip 				= '" . IP::getIp() . "',
-					    user_id         = '" . (defined('UID') ? UID : 0) . "'
+						expire 			= ?,
+						value 			= ?,
+						ip 				= ?,
+					    user_id         = ?
 					WHERE
-						sesskey 		= '" . $sessionId . "'
+						sesskey 		= ?
 					AND
-						expire 			> '" . time() . "'
-				");
+						expire 			> ?
+				",
+                date('Y-m-d H:i:s', (time() + self::$sessLifetime)),
+                $data,
+                IP::getIp(),
+                (defined('UID') ? UID : 0),
+                $sessionId,
+                date('Y-m-d H:i:s')
+            );
+
         } else {
             self::_insert($sessionId, $data);
         }
@@ -115,14 +118,14 @@ class Sessions
 
     public static function _check($sessionId)
     {
-        $qid = DB::Query("
+        $qid = DB::cell("
 				SELECT
 					COUNT(*)
 				FROM
-					" . PREFIX . "sessions
+					sessions
 				WHERE
 					sesskey = '" . $sessionId . "'
-			")->getRow();
+			");
 
         if ($qid) {
             return true;
@@ -133,40 +136,27 @@ class Sessions
 
     public static function _insert($sessionId, $data)
     {
-        $sql = "
-				INSERT INTO
-					" . PREFIX . "sessions
-				SET
-					token			= '" . token() . "',
-					sesskey			= '" . $sessionId . "',
-					expire			= '" . (time() + self::$sessLifetime) . "',
-					expire_date		= FROM_UNIXTIME(expire, '%d.%m.%Y, %H:%i:%s'),
-					value			= '" . addslashes($data) . "',
-					ip				= '" . IP::getIp() . "',
-					user_id         = '" . (defined('UID') ? UID : 0) . "'
-			";
+        DB::insert("sessions", [
+            "token" => token(),
+            "sesskey" => $sessionId,
+            "expire" => date('Y-m-d H:i:s', (time() + self::$sessLifetime)),
+            "value" => $data,
+            "ip" => IP::getIp(),
+            "user_id" => (defined('UID') ? UID : 0)
+        ]);
 
-        return DB::Query($sql);
+        return true;
     }
 
-    public static function _destroy($ses_id)
+    public static function _destroy($sessionId)
     {
-        return DB::Query("
-				DELETE FROM
-					" . PREFIX . "sessions
-				WHERE
-					sesskey = '" . $ses_id . "'
-			");
+        return DB::delete("sessions", ["sesskey" => $sessionId]);
     }
 
     public static function _gc($maxlifetime)
     {
-        $session_res = DB::Query("
-				DELETE FROM
-					" . PREFIX . "sessions
-				WHERE
-					expire < (UNIX_TIMESTAMP(NOW()) - " . (int)$maxlifetime . ")
-			");
+        $statement = EasyStatement::open()->with("expire < " . date('Y-m-d H:i:s', (time() - (int)$maxlifetime)));
+        $session_res = DB::delete("sessions", $statement->values());
 
         if (!$session_res) {
             return false;

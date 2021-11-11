@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.0
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class i18n
@@ -20,10 +20,10 @@ class i18n
     private static $_path = null;
     private static $_language = null;
     private static $_fallbackLanguage = 'ru';
-    private static $_translation = array();
-    private static $_missingTranslation = array(); // ToDo: Log missing translations
+    private static $_translation = [];
+    private static $_missingTranslation = []; // ToDo: Log missing translations
 
-    //--- Init i18n static class
+    // Init i18n static class
     public static function init($path = null, $language = 'ru'): void
     {
         self::$_language = $language;
@@ -32,7 +32,7 @@ class i18n
         self::loadTranslation();
     }
 
-    //--- Change default language and fallback language
+    // Change default language and fallback language
     public static function setLanguage($language, $fallback = null): void
     {
         self::$_language = $language;
@@ -44,13 +44,13 @@ class i18n
         self::loadTranslation();
     }
 
-    //--- Get list of missing translations
+    // Get list of missing translations
     public static function getMissingTranslations(): array
     {
         return self::$_missingTranslation;
     }
 
-    //--- Check if translated string is available
+    // Check if translated string is available
     public static function exist($key)
     {
         $return = self::_getKey($key);
@@ -62,36 +62,36 @@ class i18n
         return $return;
     }
 
-    //--- Get translation for given key
+    // Get translation for given key
     public static function _(string $key): string
     {
         $return = self::_getKey($key);
 
         if (!$return) {
-            self::$_missingTranslation[] = array('language' => self::$_language, 'key' => $key);
+            self::$_missingTranslation[] = ['language' => self::$_language, 'key' => $key];
             $return = $key;
         }
 
         return $return;
     }
 
-    //--- Loads translation(s)
+    // Loads translation(s)
     private static function loadTranslation(): void
     {
 
         $_translation_files = self::$_path . '*.' . self::$_language . '.lang.json';
         $_fallback_files = self::$_path . '*.' . self::$_fallbackLanguage . '.lang.json';
 
-        $dir = glob(CP_DIR . $_translation_files);
+        $dir = glob($_translation_files);
 
         if (count($dir) === 0) {
-            $dir = glob(CP_DIR . $_fallback_files);
+            $dir = glob($_fallback_files);
             if (count($dir) === 0) {
                 throw new \RuntimeException('Translation file not found');
             }
         }
 
-        $translations =array();
+        $translations = [];
 
         foreach ($dir as $file) {
             $translation = file_get_contents($file);
@@ -109,7 +109,7 @@ class i18n
 
     }
 
-    //--- Get translation for given key
+    // Get translation for given key
     private static function _getKey(string $key)
     {
         return Arrays::get(self::$_translation, $key);

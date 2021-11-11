@@ -1,11 +1,11 @@
 <?php
 
-$config = array(
-	'dbhost' => "localhost",
-	'dbuser' => "root",
-	'dbpass' => "",
-	'dbname' => "crm",
-	'dbpref' => "crm_",
-	'dbport' => null,
-	'dbsock' => null
-);
+$config = [
+    'dbengine' => "mysql",
+    'dbhost' => "localhost",
+    'dbuser' => "",
+    'dbpass' => "",
+    'dbname' => "dashboard",
+    'dbport' => null,
+    'dbsock' => null,
+];

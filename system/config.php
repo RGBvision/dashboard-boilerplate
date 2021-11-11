@@ -1,257 +1,264 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
-define('APP_NAME', 'RGB.dashboard');
-define('APP_VERSION', '1.7');
-define('APP_BUILD', '1.7.4712');
-define('APP_INFO', APP_NAME. ' ' . APP_VERSION . ' &copy; 2017-' . date('Y'));
+const APP_NAME = 'RGB.admin';
+const APP_VERSION = '3.0';
+const APP_BUILD = '3.0-rc.1';
 
-define('DS', DIRECTORY_SEPARATOR);
+define('APP_INFO', APP_NAME . ' ' . APP_VERSION . ' &copy; <a href="https://rgbvision.net">RGBvision</a> ' . date('Y'));
 
-$config_defaults = array();
+const DS = DIRECTORY_SEPARATOR;
+
+$config_defaults = [];
+
 
 // ---------------------------------------------------------------
 // Environment
 // ---------------------------------------------------------------
-$config_defaults['CP_ENVIRONMENT'] = array(
-	'DEFAULT' => 'public',
-	'TYPE' => 'dropdown',
-	'VARIANT' => 'development,demo,public'
-);
+$config_defaults['CP_ENVIRONMENT'] = [
+    'DEFAULT' => 'public',
+    'TYPE' => 'dropdown',
+    'VARIANT' => 'development,demo,public',
+];
 
-$config_defaults['LOGIN_USER_IP'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
+$config_defaults['DARK_THEME'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-$config_defaults['MEMORY_LIMIT_PANIC'] = array(
-	'DEFAULT' => -1,
-	'TYPE' => 'integer',
-	'VARIANT' => ''
-);
+$config_defaults['LOGIN_USER_IP'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['MEMORY_LIMIT_PANIC'] = [
+    'DEFAULT' => -1,
+    'TYPE' => 'integer',
+    'VARIANT' => '',
+];
+
+
+// ---------------------------------------------------------------
+// Security
+// ---------------------------------------------------------------
+$config_defaults['PWD_PEPPER'] = [
+    'DEFAULT' => '',
+    'TYPE' => 'string',
+    'VARIANT' => '',
+];
+
 
 // ---------------------------------------------------------------
 // Temporary directory
 // ---------------------------------------------------------------
-$config_defaults['TEMP_DIR'] = array(
-	'DEFAULT' => '/tmp',
-	'TYPE' => 'folder',
-	'VARIANT' => ''
-);
+$config_defaults['TEMP_DIR'] = [
+    'DEFAULT' => '/tmp',
+    'TYPE' => 'folder',
+    'VARIANT' => '',
+];
 
 // ---------------------------------------------------------------
 // Attachments directory
 // ---------------------------------------------------------------
-$config_defaults['ATTACH_DIR'] = array(
-	'DEFAULT' => '/tmp/attachments',
-	'TYPE' => 'folder',
-	'VARIANT' => ''
-);
+$config_defaults['ATTACH_DIR'] = [
+    'DEFAULT' => '/tmp/attachments',
+    'TYPE' => 'folder',
+    'VARIANT' => '',
+];
 
 // ---------------------------------------------------------------
 // Uploads directory
 // ---------------------------------------------------------------
-$config_defaults['UPLOAD_DIR'] = array(
-	'DEFAULT' => '/uploads',
-	'TYPE' => 'folder',
-	'VARIANT' => ''
-);
+$config_defaults['UPLOAD_DIR'] = [
+    'DEFAULT' => '/uploads',
+    'TYPE' => 'folder',
+    'VARIANT' => '',
+];
 
 // ---------------------------------------------------------------
 // Sessions
 // ---------------------------------------------------------------
-$config_defaults['SESSION_DIR'] = array(
-	'DEFAULT' => '/tmp/sessions',
-	'TYPE' => 'folder',
-	'VARIANT' => ''
-);
+$config_defaults['SESSION_DIR'] = [
+    'DEFAULT' => '/tmp/sessions',
+    'TYPE' => 'folder',
+    'VARIANT' => '',
+];
 
-$config_defaults['SESSION_SAVE_HANDLER'] = array(
-	'DEFAULT' => 'db',
-	'TYPE' => 'dropdown',
-	'VARIANT' => 'db,files,memcached,memcache,redis,native'
-);
+$config_defaults['SESSION_SAVE_HANDLER'] = [
+    'DEFAULT' => 'db',
+    'TYPE' => 'dropdown',
+    'VARIANT' => 'db,files,memcached,memcache,redis,native',
+];
 
-$config_defaults['SESSION_LIFETIME'] = array(
-	'DEFAULT' => 60 * 60 * 24 * 14,
-	'TYPE' => 'integer',
-	'VARIANT' => ''
-);
+$config_defaults['SESSION_LIFETIME'] = [
+    'DEFAULT' => 60 * 60 * 24 * 14,
+    'TYPE' => 'integer',
+    'VARIANT' => '',
+];
 
 
 // ---------------------------------------------------------------
 // Cookie
 // ---------------------------------------------------------------
-$config_defaults['COOKIE_DOMAIN'] = array(
-	'DEFAULT' => '',
-	'TYPE' => 'string',
-	'VARIANT' => ''
-);
+$config_defaults['COOKIE_DOMAIN'] = [
+    'DEFAULT' => '',
+    'TYPE' => 'string',
+    'VARIANT' => '',
+];
 
-$config_defaults['COOKIE_LIFETIME'] = array(
-	'DEFAULT' => 60 * 60 * 24 * 14,
-	'TYPE' => 'integer',
-	'VARIANT' => ''
-);
+$config_defaults['COOKIE_LIFETIME'] = [
+    'DEFAULT' => 60 * 60 * 24 * 14,
+    'TYPE' => 'integer',
+    'VARIANT' => '',
+];
 
 // ---------------------------------------------------------------
 // Smarty
 // ---------------------------------------------------------------
-$config_defaults['SMARTY_COMPILE_CHECK'] = array(
-	'DEFAULT' => true,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
+$config_defaults['SMARTY_COMPILE_CHECK'] = [
+    'DEFAULT' => true,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-$config_defaults['SMARTY_USE_SUB_DIRS'] = array(
-	'DEFAULT' => true,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
+$config_defaults['SMARTY_USE_SUB_DIRS'] = [
+    'DEFAULT' => true,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-$config_defaults['CACHE_DOC_TPL'] = array(
-	'DEFAULT' => true,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
+$config_defaults['CACHE_DOC_TPL'] = [
+    'DEFAULT' => true,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-$config_defaults['CACHE_LIFETIME'] = array(
-	'DEFAULT' => 60 * 60 * 24 * 14,
-	'TYPE' => 'integer',
-	'VARIANT' => ''
-);
+$config_defaults['CACHE_LIFETIME'] = [
+    'DEFAULT' => 60 * 60 * 24 * 14,
+    'TYPE' => 'integer',
+    'VARIANT' => '',
+];
 
-$config_defaults['SYSTEM_CACHE_LIFETIME'] = array(
-	'DEFAULT' => 0,
-	'TYPE' => 'integer',
-	'VARIANT' => ''
-);
+$config_defaults['SYSTEM_CACHE_LIFETIME'] = [
+    'DEFAULT' => 0,
+    'TYPE' => 'integer',
+    'VARIANT' => '',
+];
 
 // ---------------------------------------------------------------
 // Debugging
 // ---------------------------------------------------------------
-$config_defaults['PHP_DEBUGGING'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['SELF_ERROR'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['SMARTY_DEBUGGING'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['SQL_DEBUGGING'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['SQL_ERRORS_STOP'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['SEND_SQL_ERROR'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['SQL_PROFILING'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['PROFILING'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-
-// ---------------------------------------------------------------
-// Compress
-// ---------------------------------------------------------------
-$config_defaults['HTML_COMPRESSION'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['GZIP_COMPRESSION'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['OUTPUT_EXPIRE'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
-
-$config_defaults['OUTPUT_EXPIRE_OFFSET'] = array(
-	'DEFAULT' => 60 * 60,
-	'TYPE' => 'integer',
-	'VARIANT' => ''
-);
-
-$config_defaults['USE_MEMCACHED'] = array(
+$config_defaults['PHP_DEBUGGING'] = [
     'DEFAULT' => false,
     'TYPE' => 'bool',
-    'VARIANT' => ''
-);
+    'VARIANT' => '',
+];
 
-$config_defaults['MEMCACHED_SERVER'] = array(
-	'DEFAULT' => 'localhost',
-	'TYPE' => 'string',
-	'VARIANT' => ''
-);
+$config_defaults['SELF_ERROR'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-$config_defaults['MEMCACHED_PORT'] = array(
-	'DEFAULT' => '11211',
-	'TYPE' => 'string',
-	'VARIANT' => ''
-);
+$config_defaults['SMARTY_DEBUGGING'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-$config_defaults['CHECK_VERSION'] = array(
-	'DEFAULT' => false,
-	'TYPE' => 'bool',
-	'VARIANT' => ''
-);
+$config_defaults['SQL_DEBUGGING'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-define('CP_CONFIG_DEFAULTS', $config_defaults);
+$config_defaults['SQL_ERRORS_STOP'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
 
-if (file_exists(CP_DIR . '/configs/environment.php')) {
-    include(CP_DIR . '/configs/environment.php');
+$config_defaults['SEND_SQL_ERROR'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['SQL_PROFILING'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['PROFILING'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+
+// ---------------------------------------------------------------
+// Output
+// ---------------------------------------------------------------
+$config_defaults['HTML_COMPRESSION'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['GZIP_COMPRESSION'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['OUTPUT_EXPIRE'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['OUTPUT_EXPIRE_OFFSET'] = [
+    'DEFAULT' => 60 * 60,
+    'TYPE' => 'integer',
+    'VARIANT' => '',
+];
+
+
+// ---------------------------------------------------------------
+// Updates
+// ---------------------------------------------------------------
+$config_defaults['CHECK_VERSION'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+
+// ---------------------------------------------------------------
+define('DASHBOARD_CONFIG_DEFAULTS', $config_defaults);
+
+if (file_exists(DASHBOARD_DIR . '/configs/environment.php')) {
+    include(DASHBOARD_DIR . '/configs/environment.php');
 }
 
 foreach ($config_defaults as $key => $value) {
-	if (!defined($key)) {
+    if (!defined($key)) {
         define($key, $value['DEFAULT']);
     }
 }
@@ -261,6 +268,7 @@ unset($config_defaults);
 if (!defined('TIMEZONE')) {
     define('TIMEZONE', 'Europe/Moscow');
 }
+
 @date_default_timezone_set(TIMEZONE);
 
 ini_set('arg_separator.output', '&amp;');

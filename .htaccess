@@ -165,10 +165,10 @@ Options -Indexes +FollowSymLinks
 	RewriteCond %{HTTP_HOST} ^www\.(.+) [NC]
 	RewriteRule (.*) https://%1/$1 [R=permanent,L]
 
-  # HTTPS
-  RewriteCond %{HTTPS} off
-  RewriteCond %{HTTP:X-Forwarded-Proto} !https
-  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 	# If-Modified-Since
 	RewriteRule .* - [E=HTTP_IF_MODIFIED_SINCE:%{HTTP:If-Modified-Since}]

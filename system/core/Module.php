@@ -1,27 +1,43 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.0
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 abstract class Module
 {
-	public static $version = NULL;
-	public static $date = NULL;
-	public static $_moduleName = NULL;
 
-	protected function __construct()
-	{
-		//--
-	}
+    /**
+     * @var string Module version
+     */
+    public static $version;
+
+    /**
+     * @var string Module release date
+     */
+    public static $date;
+
+    /**
+     * @var string Module system name
+     */
+    public static $moduleName;
+
+    /**
+     * Constructor
+     */
+    protected function __construct()
+    {
+
+    }
+
 }

@@ -1,0 +1,12 @@
+{
+  "router": {
+    "error": {
+      "runtime": "Runtime exception: %s",
+      "controller": "API controller not found.",
+      "magic_method": "Calls to “magic” methods are not allowed.",
+      "method": "Wrong request.",
+      "required_parameter": "Missing required parameter “%s”.",
+      "parameter_type": "Wrong parameter type “%s”. Should be “%s”."
+    }
+  }
+}

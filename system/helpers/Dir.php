@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.1
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Dir
@@ -21,25 +21,52 @@ class Dir
 		//--
 	}
 
-	public static function create(string $dir, $chmod = 0775): bool
+
+    /**
+     * Create new directory if not exists
+     *
+     * @param string $dir path
+     * @param int $chmod permissions
+     * @return bool
+     */
+    public static function create(string $dir, int $chmod = 0775): bool
     {
 		return (!self::exists($dir))
 			? @mkdir($dir, $chmod, true)
 			: true;
 	}
 
-	public static function exists(string $dir): bool
+
+    /**
+     * Check if directory exists
+     *
+     * @param string $dir path
+     * @return bool
+     */
+    public static function exists(string $dir): bool
     {
 		return (file_exists($dir) && is_dir($dir));
 	}
 
-	public static function checkPerm(string $dir): int
+
+	/**
+     * Get access permissions
+     *
+     * @param string $dir path
+     * @return int
+     */
+    public static function checkPerm(string $dir): int
 	{
 		clearstatcache();
 		return (int)substr(sprintf('%o', fileperms($dir)), -4);
 	}
 
-	public static function delete(string $dir): void
+    /**
+     * Delete directory contents
+     *
+     * @param string $dir path
+     */
+    public static function delete_contents(string $dir): void
     {
 
 		if (is_dir($dir)) {
@@ -57,14 +84,30 @@ class Dir
 		}
 
 		reset($elements);
+	}
+
+    /**
+     * Delete directory and all contents
+     *
+     * @param string $dir path
+     */
+    public static function delete(string $dir): void
+    {
+        self::delete_contents($dir);
 		rmdir($dir);
 	}
 
-	public static function scan(string $dir): array
+    /**
+     * Get directory contents
+     *
+     * @param string $dir path
+     * @return array
+     */
+    public static function scan(string $dir): array
     {
 
 		if (is_dir($dir) && $handle = opendir($dir)) {
-			$files = array();
+			$files = [];
 
 			while ($element = readdir($handle)) {
 				if ($element !== '.' && $element !== '..' && is_dir($dir . DS . $element)) {
@@ -78,9 +121,14 @@ class Dir
 		return [];
 	}
 
-	public static function writable($path): bool
+    /**
+     * Check if directory writable
+     *
+     * @param string $path path
+     * @return bool
+     */
+    public static function writable(string $path): bool
     {
-		$path = (string)$path;
 
 		$file = tempnam($path, 'writable');
 
@@ -93,7 +141,13 @@ class Dir
 		return false;
 	}
 
-	public static function size(string $path): int
+    /**
+     * Get directory size
+     *
+     * @param string $path path
+     * @return int
+     */
+    public static function size(string $path): int
 	{
 
 		$total_size = 0;
@@ -115,7 +169,13 @@ class Dir
 		return $total_size;
 	}
 
-	public static function copy($src, $dst): void
+    /**
+     * Copy (clone) directory
+     *
+     * @param string $src source path
+     * @param string $dst destination path
+     */
+    public static function copy(string $src, string $dst): void
     {
 		$dir = opendir($src);
 

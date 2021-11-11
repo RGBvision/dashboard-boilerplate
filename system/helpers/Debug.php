@@ -1,35 +1,30 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    1.0
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
+// ToDo: this class needs to be completely refactored
 class Debug
 {
-    protected static $time = array();
-    protected static $memory = array();
+    protected static $time = [];
+    protected static $memory = [];
 
     protected function __construct()
     {
         //
     }
 
-    /**
-     * Функция для вывода переменной (для отладки)
-     *
-     * @param mixed $var любая переменная
-     * @param bool $exit
-     */
     public static function _echo($var, $exit = false)
     {
         $backtrace = debug_backtrace();
@@ -74,10 +69,10 @@ class Debug
         $var_dump = '<div style="border: 2px solid #3078bf; margin: 15px auto; max-width: 1140px; font-size: 12px; font-family: Lucida Console, Courier, monospace; box-shadow: 0 3px 7px rgba(0,0,0,.25)">
 <div style="background:#3078bf; color: #fff; margin: 0; padding: 5px 15px;">
 var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
-'</div>
+            '</div>
 <pre style="background:#fff; color: #000; margin: 0; padding: 15px; white-space: pre-wrap;">'
-. $var_dump .
-'</pre>
+            . $var_dump .
+            '</pre>
 </div>';
 
         echo $var_dump;
@@ -87,13 +82,6 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
         }
     }
 
-
-    /**
-     * Функция для вывода переменной (для отладки)
-     *
-     * @param mixed $var любая переменная
-     * @param bool $exit
-     */
     public static function _print($var, $exit = false)
     {
         $backtrace = debug_backtrace();
@@ -148,13 +136,6 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
         }
     }
 
-
-    /**
-     * Функция для вывода переменной (для экспорта)
-     *
-     * @param mixed $var любая переменная
-     * @param bool $exit
-     */
     public static function _exp($var, $exit = false)
     {
         $backtrace = debug_backtrace();
@@ -209,13 +190,6 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
             exit;
     }
 
-
-    /**
-     * Функция для вывода переменной (для отладки)
-     *
-     * @param mixed $var любая переменная
-     * @param bool $exit true - остановливает дальнейшее выполнение скрипта, false - продолжает выполнять скрипт
-     */
     public static function _html($var, $exit = false)
     {
         $backtrace = debug_backtrace();
@@ -266,14 +240,6 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
             exit;
     }
 
-
-    /**
-     * Функция для записи переменной в файл (для отладки)
-     *
-     * @param mixed $var любая переменная
-     * @param bool $append
-     * @param bool $exit true - остановливает дальнейшее выполнение скрипта, false - продолжает выполнять скрипт
-     */
     public static function _dump($var, $append = true, $exit = false)
     {
         $backtrace = debug_backtrace();
@@ -327,9 +293,9 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
 			';
 
         if ($append) {
-            file_put_contents(CP_DIR . '/debug.html', $var_dump, FILE_APPEND);
+            file_put_contents(DASHBOARD_DIR . '/debug.html', $var_dump, FILE_APPEND);
         } else {
-            file_put_contents(CP_DIR . '/debug.html', $var_dump);
+            file_put_contents(DASHBOARD_DIR . '/debug.html', $var_dump);
         }
 
         if ($exit) {
@@ -337,13 +303,6 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
         }
     }
 
-
-    /**
-     * Функция для трейсинга дебаггера
-     *
-     * @param
-     * @return string
-     */
     public static function _trace()
     {
         $bt = debug_backtrace();
@@ -374,7 +333,7 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
     }
 
 
-    public static function _errorSql(string $header, string $body, string $caller, bool $exit = false): void
+    public static function _errorSql(?string $header, ?string $body, array $caller, bool $exit = false): void
     {
 
         self::_echo(preg_replace('/(\s)+/s', ' ', $header));
@@ -387,24 +346,11 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
         }
     }
 
-
-    /**
-     * Функция отвечает за начало таймера
-     *
-     * @param string $name любая переменная (ключ массива)
-     */
     public static function startTime($name = '')
     {
         self::$time[$name] = microtime(true);
     }
 
-
-    /**
-     * Функция отвечает за окончание таймера
-     *
-     * @param string $name любая переменная (ключ массива)
-     * @return string
-     */
     public static function endTime($name = '')
     {
         if (isset(Debug::$time[$name])) {
@@ -412,24 +358,11 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
         }
     }
 
-
-    /**
-     * Функция отвечает за начало подсчета используеой памяти
-     *
-     * @param string $name любая переменная (ключ массива)
-     */
     public static function startMemory($name = '')
     {
         Debug::$memory[$name] = memory_get_usage();
     }
 
-
-    /**
-     * Функция отвечает за окончание подсчета используемой памяти
-     *
-     * @param string $name любая переменная (ключ массива)
-     * @return string
-     */
     public static function endMemory($name = '')
     {
         if (isset(Debug::$memory[$name])) {
@@ -437,62 +370,53 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
         }
     }
 
-
-    /**
-     * Вывод статистики
-     *
-     * @param bool $t
-     * @param bool $m
-     * @param bool $q
-     * @return string
-     */
     public static function getStats($t = false, $m = false, $q = false)
     {
         $stat = '<div class="alert alert-info bg-dark alert-dismissible mb-0 rounded-0 fixed-bottom w-100 small fade show" role="alert">';
         $stat .= '<div class="row justify-content-between text-center">';
 
         if ($t) {
-            $search = array(
+            $search = [
                 '[msg1]',
                 '[data]',
-                '[msg2]'
-            );
+                '[msg2]',
+            ];
 
-            $replace = array(
+            $replace = [
                 i18n::_('statistics.time_generate'),
                 Number::numFormat(Number::microtimeDiff(START_CP, microtime()), 6, ',', ' '),
-                i18n::_('statistics.seconds')
-            );
+                i18n::_('statistics.seconds'),
+            ];
 
             $stat .= str_replace($search, $replace, '<div class="col"><i class="sli small sli-time-timer-full-2"></i> [msg1] [data] [msg2]</div>');
         }
 
         if ($m) {
-            $search = array(
+            $search = [
                 '[msg1]',
                 '[data1]',
                 '[msg2]',
-                '[data2]'
-            );
+                '[data2]',
+            ];
 
-            $replace = array(
+            $replace = [
                 i18n::_('statistics.memory_usage'),
                 Number::formatSize(memory_get_usage() - START_MEMORY),
                 i18n::_('statistics.memory_peak'),
-                Number::formatSize(memory_get_peak_usage())
-            );
+                Number::formatSize(memory_get_peak_usage()),
+            ];
 
             $stat .= str_replace($search, $replace, '<div class="col"><i class="sli small sli-computers-computer-chip"></i> [msg1] [data1] | [msg2] [data2]</div>');
         }
 
         if ($q && SQL_PROFILING) {
-            $search = array(
+            $search = [
                 '[msg1]',
                 '[msg2]',
                 '[msg3]',
                 '[data1]',
-                '[data2]'
-            );
+                '[data2]',
+            ];
 
             $q_list = DB::getStatistics('list');
             $q_pretty = '';
@@ -501,13 +425,13 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
                 $q_pretty .= '<small>' . $_q['time'] . '</small>' . $_q['query'];
             }
 
-            $replace = array(
+            $replace = [
                 i18n::_('statistics.count_queries'),
                 i18n::_('statistics.count_time'),
                 i18n::_('statistics.seconds'),
                 DB::getStatistics('count') / 2,
-                DB::getStatistics('time')
-            );
+                DB::getStatistics('time'),
+            ];
 
             $stat .= str_replace($search, $replace, '<div class="col"><i class="sli small sli-server-server-3"></i> [msg1] [data1] [msg2] [data2] [msg3]
 <button class="btn btn-primary btn-xs ml-3" type="button" data-toggle="modal" data-target="#sqlDataModal"><i class="sli small sli-server-server-view-1"></i></button></div>');

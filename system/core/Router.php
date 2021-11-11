@@ -1,157 +1,203 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.18
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Router
 {
-	static private $id;
-	static private $route;
-	static private $method = 'index';
-	protected static $instance = null;
+    static private string $id;
+    static private string $route;
+    static private string $method;
+    static private array $aliases = [];
+    protected static ?Router $instance = null;
 
-	public static function init($route): ?Router
+    /**
+     * Initialization
+     *
+     * @return Router|null
+     */
+    public static function init(): ?Router
     {
-		if (!isset(self::$instance)) {
-            self::$instance = new Router($route);
+        if (!isset(self::$instance)) {
+            self::$instance = new Router();
         }
 
-		return self::$instance;
-	}
+        return self::$instance;
+    }
 
-	public static function reinit($route): Router
+    /**
+     * Constructor
+     */
+    protected function __construct()
     {
-		self::$instance = null;
 
-		return new self($route);
-	}
+    }
 
-	public function __construct(string $route)
-	{
-		$parts = explode('/', preg_replace('#[^a-zA-Z0-9_/]#', '', $route));
+    /**
+     * Get route ID
+     *
+     * @return string
+     */
+    public static function getId(): string
+    {
+        return self::$id;
+    }
 
-		while ($parts) {
-			$file = CP_DIR . '/modules/' . implode('/', $parts) . '/controller/Controller.php';
+    public static function addAlias(string $regex, ?string $module, string $function): void
+    {
+        self::$aliases[$regex] = [
+            'module' => $module,
+            'function' => $function,
+        ];
+    }
 
-			if (is_file($file)) {
-				self::$id = implode('', $parts);
-				self::$route = implode('/', $parts);
-				break;
-			}
-            self::$method = array_pop($parts);
+    /**
+     * Execute router
+     *
+     * ToDo:: refactor
+     *
+     * @param string $route
+     * @return bool|Exception|mixed
+     */
+    public static function execute(string $route)
+    {
+
+        foreach (self::$aliases as $regex => $callback) {
+            if ((preg_match('/^' . str_replace('/', '\/', $regex) . '$/', $route, $matches) === 1)) {
+
+                if ($callback['module']) {
+
+                    self::$id = $callback['module'];
+
+                    if (!$controller = Loader::loadModule($callback['module'])) {
+                        Request::redirect('/errors/controller?controller=' . $callback['module']);
+                        return false;
+                    }
+
+                    new $controller();
+
+                    $function = $controller . '::' . $callback['function'];
+
+                } else {
+
+                    $function = $callback['function'];
+
+                }
+
+                if (is_callable($function)) {
+                    unset($matches[0]);
+                    return call_user_func_array($function, $matches);
+                }
+
+                Request::redirect('/errors/method?method=' . $function);
+                return false;
+            }
         }
-	}
 
-	public static function getId(): string
-    {
-		return self::$id;
-	}
+        $parts = explode('/', preg_replace('#[^a-zA-Z0-9_/]#', '', trim($route, '/')));
 
-	public static function execute(array $args = array())
-	{
-		if (strpos(self::$method, '__') === 0) {
+        if (count($parts)) {
+
+            $_module = array_shift($parts);
+
+            $file = DASHBOARD_DIR . '/app/modules/' . $_module . '/controller/Controller.php';
+
+            if (is_file($file)) {
+                self::$id = $_module;
+                self::$route = $_module;
+            }
+
+            // Default method: index()
+            self::$method = array_shift($parts) ?? 'index';
+
+        }
+
+        if (!isset(self::$route)) {
+            Request::redirect('/errors/controller?controller=' . trim($route, '/'));
+            return false;
+        }
+
+        if (strpos(self::$method, '__') === 0) {
             return new \Exception('Error: Calls to magic methods are not allowed!');
         }
 
-		//--- Model
+        if (!$controller = Loader::loadModule(preg_replace('/[^a-zA-Z0-9]/', '', self::$route))) {
+            Request::redirect('/errors/controller?controller=' . self::$route);
+            return false;
+        }
 
-		$file = CP_DIR . '/modules/' . self::$route . '/model/Model.php';
-		$model = 'Model' . preg_replace('/[^a-zA-Z0-9]/', '', self::$route);
+        $_controller = new $controller();
 
-		if (is_file($file)) {
-			Load::addClass($model, $file);
-		} else {
-			Request::redirect('/errors/model?model=' . self::$method);
-		}
+        try {
+            $reflection = new ReflectionClass($_controller);
 
-		//--- Controller
+            if ($reflection->hasMethod(self::$method) && $reflection->getMethod(self::$method)->getNumberOfRequiredParameters() <= count($parts)) {
+                // ToDo: add parameter type check
+                return call_user_func_array([$_controller, self::$method], $parts);
+            }
 
-		$file = CP_DIR . '/modules/' . self::$route . '/controller/Controller.php';
-		$controller = 'Controller' . preg_replace('/[^a-zA-Z0-9]/', '', self::$route);
-
-		if (is_file($file)) {
-			Load::addClass($controller, $file);
-			$controller = new $controller();
-		} else {
-			Request::redirect('/errors/controller?controller=' . self::$route);
-		}
-
-		$reflection = new ReflectionClass($controller);
-
-		if ($reflection->hasMethod(self::$method) && $reflection->getMethod(self::$method)->getNumberOfRequiredParameters() <= count($args)) {
-			return call_user_func_array(array($controller, self::$method), $args);
-		}
+        } catch (ReflectionException $e) {
+            Request::redirect('/errors/controller?controller=' . self::$route);
+        }
 
         Request::redirect('/errors/method?method=' . self::$route . '/' . self::$method);
 
         return false;
-	}
+    }
 
-	public static function model()
-	{
-		$id = self::$id;
-		$model = 'Model' . $id;
-		return new $model();
-	}
-
-	public static function response($type, $message, $url = '', $arg = array()): void
+    /**
+     * Get model
+     *
+     * @return Model
+     */
+    public static function model(): Model
     {
-		$Smarty = Tpl::getInstance();
+        $id = str_replace('_', '', self::$id);
+        $model = 'Model' . $id;
+        return new $model();
+    }
 
-		$array = array(
-			'success' => $type === 'success',
-			'header' => $Smarty->_get('message_header_' . $type),
-			'message' => $message,
-			'theme' => $type
-		);
+    /**
+     * Display message and stop execution
+     *
+     * @param bool $success
+     * @param string $message
+     * @param string $url redirect URL
+     * @param array $arg
+     */
+    public static function response(bool $success, string $message, string $url = '', array $arg = []): void
+    {
 
-		if (!empty($arg)) {
+        $array = [
+            'success' => $success,
+            'message' => $message,
+        ];
+
+        if (!empty($arg)) {
             $array = array_merge($array, $arg);
         }
 
-		if (Request::isAjax()) {
+        if (Request::isAjax()) {
+            if (!$success) {
+                Response::setStatus(400);
+            }
             Json::show($array, true);
         } else {
-            Request::setHeader('Location: ' . $url);
+            Request::redirect($url);
         }
-		Request::shutDown();
-	}
 
-	//--- demo
-	public static function demo(): void
-    {
-		if (Core::$environment === 'demo') {
-			$permission = Permission::perm('all_permissions');
+        Response::shutDown();
+    }
 
-			if (!$permission) {
-				$Smarty = Tpl::getInstance();
-
-				$json = array(
-					'header' => $Smarty->_get('demonstration_header'),
-					'message' => $Smarty->_get('demonstration_message'),
-					'theme' => 'warning',
-					'success' => false
-				);
-
-				if (Request::isAjax()) {
-                    Json::show($json, true);
-                } else {
-                    Request::setHeader('Location: ./' . self::getId());
-                }
-				Request::shutDown();
-			}
-		}
-
-	}
 }

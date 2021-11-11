@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.1
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class IP
@@ -33,11 +33,16 @@ class IP
         }
 	}
 
-	//--- Get ip address from $_SERVER by priority
-	public static function getIp(): string
+
+    /**
+     * Get user IP address
+     *
+     * @return string
+     */
+    public static function getIp(): string
     {
 		$ip = '';
-		$ip_array = array();
+		$ip_array = [];
 
 		if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip_array[] = trim(strtok($_SERVER['HTTP_X_FORWARDED_FOR'], ','));
@@ -65,9 +70,15 @@ class IP
 		return $ip;
 	}
 
-	//--- Validate IP address
-	public static function isValid($ip = null): bool
+
+    /**
+     * Check if valid IP
+     *
+     * @param mixed $ip
+     * @return bool
+     */
+    public static function isValid($ip = null): bool
     {
-        return ($ip === '::1') || preg_match("#^([\d]{1,3})\.([\d]{1,3})\.([\d]{1,3})\.([\d]{1,3})$#", $ip);
+        return (bool)filter_var($ip, FILTER_VALIDATE_IP);
     }
 }

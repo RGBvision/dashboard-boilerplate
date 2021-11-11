@@ -1,78 +1,97 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.2
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class DB
 {
-    //--- Instance
-    static private $instance = null;
-    //--- DB host
+    // Instance
+    private static ?DB $instance = null;
+    // DB engine
+    static public string $db_engine = 'mysql'; // default
+    // DB host
     static protected $db_host;
-    //--- DB user
+    // DB user
     static protected $db_user;
-    //--- DB password
+    // DB password
     static protected $db_pass;
-    //--- DB port
+    // DB port
     static protected $db_port;
-    //--- DB socket
+    // DB socket
     static protected $db_socket;
-    //--- DB name
+    // DB name
     static protected $db_name;
-    //--- DB prefix
-    static public $db_pref;
-    //--- This connect
+    // This connect
     static public $connect;
-    //--- List all queries
-    static public $_query_list = array();
-    //--- Last query
-    static public $_last_query = '';
+    // driver (EasyDB)
+    static public $driver = null;
 
-    //--- Constructor
+    const TTL = 0;
+
+    // Constructor
     private function __construct(array $config)
     {
+        self::$db_engine = $config['dbengine'];
         self::$db_host = $config['dbhost'];
         self::$db_user = $config['dbuser'];
         self::$db_pass = $config['dbpass'];
         self::$db_name = $config['dbname'];
-        self::$db_pref = $config['dbpref'];
+
+        if (!isset($config['dbengine'])) {
+            self::$db_engine = 'mysql';
+        } else {
+            self::$db_engine = ($config['dbengine'] ?? 'mysql');
+        }
 
         if (!isset($config['dbport'])) {
-            self::$db_port = ini_get('mysqli.default_port');
+            self::$db_port = null;
         } else {
             self::$db_port = ($config['dbport'] ?? null);
         }
 
         if (!isset($config['dbsock'])) {
-            self::$db_socket = ini_get('mysqli.default_socket');
+            self::$db_socket = null;
         } else {
             self::$db_port = ($config['dbsock'] ?? null);
         }
 
-        if (!is_object(self::$connect) || !self::$connect instanceof mysqli) {
-            self::$connect = @new mysqli(self::$db_host, self::$db_user, self::$db_pass, null, self::$db_port, self::$db_socket);
-            if (self::$connect->connect_error) {
-                self::shutDown(__METHOD__ . ': ' . self::$connect->connect_error);
-            }
-        }
+        if (!is_object(self::$connect) || !self::$connect instanceof PDO) {
 
-        if (defined('SQL_PROFILING') && SQL_PROFILING && mysqli_query(self::$connect, "SET PROFILING_HISTORY_SIZE = 500")) {
-            mysqli_query(self::$connect, "SET PROFILING = 1");
+            $connection_string = sprintf("%s:host=%s;port=%d;dbname=%s;user=%s;password=%s;charset=utf8;",
+                (self::$db_engine === 'postgresql') ? 'pgsql' : 'mysql',
+                self::$db_host,
+                self::$db_port,
+                self::$db_name,
+                self::$db_user,
+                self::$db_pass);
+
+            try {
+                self::$connect = @new PDO($connection_string);
+                self::$driver = new ParagonIE\EasyDB\EasyDB(self::$connect, self::$db_engine);
+            } catch (PDOException $pe) {
+                self::shutDown(__METHOD__ . ': ' . $pe->getMessage());
+            }
         }
     }
 
-    //--- Make instance
+
+    /**
+     * Get class instance
+     *
+     * @param array $config DB connection parameters
+     * @return DB|null
+     */
     public static function getInstance(array $config): ?DB
     {
         if (self::$instance === null) {
@@ -81,339 +100,23 @@ class DB
         return self::$instance;
     }
 
-    //--- Initialization
+
+    /**
+     * Initialize
+     *
+     * @param array $config DB connection parameters
+     */
     public static function init(array $config): void
     {
         self::getInstance($config);
-        self::setDatabaseName();
-        self::setCharset('utf8');
     }
 
-    //--- Set default charset
-    public static function setCharset(string $charset): void
-    {
-        if (!self::$connect->set_charset($charset)) {
-            self::shutDown(__METHOD__ . ': ' . self::$connect->error);
-        }
-    }
 
-    //--- DB name setter
-    public static function setDatabaseName(): void
-    {
-        if (!self::$connect->select_db(self::$db_name)) {
-            self::shutDown(__METHOD__ . ': ' . self::$connect->error);
-        }
-
-        if (!defined('PREFIX')) {
-            define('PREFIX', self::$db_pref);
-        }
-    }
-
-    //--- Returns the number of rows affected by last query.
-    public static function getAffectedRows(): int
-    {
-        return self::$connect->affected_rows;
-    }
-
-    //--- Returns the last executed MySQL query.
-    public static function getLastQuery(): string
-    {
-        return self::$_last_query;
-    }
-
-    //--- Returns an array with all executed SQL queries within the current object.
-    public static function getQueries(): array
-    {
-        return array_map('self::queryList', self::$_query_list);
-    }
-
-    //--- Format queries ToDo: make beautifier
-    public static function queryList($string): string
-    {
-        $search = array(
-            "/[\t]/",
-            '/(\s)+/s',
-            '/(FROM |WHERE |LEFT JOIN|INNER JOIN|RIGHT JOIN|JOIN|ON |AND )/s'
-
-        );
-
-        $replace = array(
-            ' ',
-            '\\1',
-            "\r\n$1"
-        );
-
-        return trim(preg_replace($search, $replace, $string));
-    }
-
-    //--- Returns ID generated by the previous INSERT operation.
-    public static function getInsertId(): int
-    {
-        return (int)self::$connect->insert_id;
-    }
-
-    //--- Returns ID generated by the previous INSERT operation.
-    public static function insertId(): int
-    {
-        return (int)mysqli_insert_id(self::$connect);
-    }
-
-    //--- Get the function which generate request error
-    public static function getCaller()
-    {
-        if (!function_exists('debug_backtrace')) {
-            return '';
-        }
-
-        $stack = debug_backtrace();
-        $stack = array_reverse($stack);
-
-        $caller = array();
-
-        foreach ($stack as $call) {
-            $function = $call['function'];
-            if (isset($call['class'])) {
-                $function = $call['class'] . "->$function";
-            }
-            $caller[] = (array(
-                'call_file' => ($call['file'] ?? 'Unknown'),
-                'call_func' => $function,
-                'call_line' => ($call['line'] ?? 'Unknown')
-            ));
-        }
-
-        return $caller;
-    }
-
-    //--- Get tables list
-    public function getTables($condition = null): array
-    {
-        $query = ($condition === null)
-            ? 'SHOW TABLES'
-            : 'SHOW TABLES LIKE ' . $this->quote($condition);
-
-        $result = @mysqli_query(self::$connect, $query);
-
-        $return = array();
-
-        while ($row = @mysqli_fetch_row($result)) {
-            $return[] = $row[0];
-        }
-
-        return $return;
-    }
-
-    //--- Perform a query
-    public static function realQuery(string $query, bool $log = true)
-    {
-        $result = @mysqli_query(self::$connect, $query);
-
-        self::$_last_query = $query;
-
-        if (SQL_PROFILING) {
-            self::$_query_list[] = $query;
-        }
-
-        if (!$result && $log) {
-            self::error('query', $query);
-        }
-
-        if (is_object($result) && $result instanceof mysqli_result) {
-            return new DB_Result($result);
-        }
-
-        return $result;
-    }
-
-    //--- Perform a query with caching support
-    //--- ToDo: memcached & Redis caching support
-    public static function query($query, $TTL = null, $cache_id = '', $log = true)
-    {
-        if (empty(trim($query))) {
-            self::error('query', 'Empty query');
-            return false;
-        }
-
-        $TTL = stripos(trim($query), 'SELECT') === 0 ? $TTL : null;
-
-        if ($TTL && $TTL !== 'nocache') {
-            $result = array();
-            $cache_file = md5($query);
-            $cache_dir = CP_DIR . '/tmp/cache/sql/' . (trim($cache_id) > ''
-                    ? trim($cache_id) . '/'
-                    : substr($cache_file, 0, 2) . '/' . substr($cache_file, 2, 2) . '/' . substr($cache_file, 4, 2) . '/');
-
-            if (!file_exists($cache_dir) && !mkdir($cache_dir, 0777, true) && !is_dir($cache_dir)) {
-                self::error('cache', sprintf('Directory "%s" was not created', $cache_dir));
-                return false;
-            }
-
-            if (!(file_exists($cache_dir . $cache_file) && ($TTL === -1 ? true : @time() - @filemtime($cache_dir . $cache_file) < $TTL))) {
-                $res = self::realQuery($query, $log);
-                while ($a = $res->getAssoc()) {
-                    $result[] = $a;
-                }
-                file_put_contents($cache_dir . $cache_file, base64_encode(serialize($result)));
-            } else {
-                $result = unserialize(base64_decode(file_get_contents($cache_dir . $cache_file)), ['allowed_classes' => false]);
-            }
-
-            return new DB_Result($result);
-        }
-
-        return self::realQuery($query, $log);
-    }
-
-    //--- Converts and escapes data for SQL query
-    public function quote($value)
-    {
-        // escape and add quote just for string value
-        if (is_string($value)) {
-            return self::escape($value);
-        }
-        // bool true -> 1
-        if ($value === TRUE) {
-            return "'1'";
-        }
-        // bool false -> 0
-        if ($value === FALSE) {
-            return "'0'";
-        }
-        // NULL -> 'NULL'
-        if ($value === null) {
-            return 'NULL';
-        }
-        // integer
-        if (is_int($value)) {
-            return (int)$value;
-        }
-        // float
-        if (is_float($value)) {
-            return sprintf('%F', $value);
-        }
-        // array
-        if (is_array($value)) {
-            $val = array();
-            foreach ($value as $key => $val) {
-                $val[$key] = self::quote($val);
-            }
-            return '(' . implode(',', $val) . ')';
-        }
-
-        throw new \RuntimeException("Wrong argument type '%type' (expected string) for quote()", array(
-            '%type' => gettype($value)
-        ));
-    }
-
-    //--- Escaping special characters in strings for use in SQL expressions
-    public static function escape($value): string
-    {
-        if (!is_numeric($value)) {
-            $value = mysqli_real_escape_string(self::$connect, $value);
-        }
-        return $value;
-    }
-
-    //--- Extended escaping special characters in strings for use in SQL expressions
-    public function clear($value)
-    {
-        $value = htmlspecialchars($value);
-
-        $value = strtr($value, array(
-            '{' => '&#123;',
-            '}' => '&#125;',
-            '$' => '&#36;',
-            '&amp;gt;' => '&gt;',
-            "'" => "&#39;"
-        ));
-
-        if (!is_array($value)) {
-            $value = self::$connect->real_escape_string($value);
-        } else {
-            $value = array_map(array($this, 'escape'), $value);
-        }
-
-        return $value;
-    }
-
-    //--- Return the number of all records found after the request
-    public static function getFoundRows(): int
-    {
-        $result = self::query('SELECT FOUND_ROWS();');
-        $strRow = $result->getArray();
-        return (int)$strRow[0];
-    }
-
-    //--- Generate statistics of SQL queries
-    public static function getStatistics(string $type = '')
-    {
-        static $result, $list = array(), $time = 0, $count = 0;
-
-        if (!defined('SQL_PROFILING') OR !SQL_PROFILING) {
-            return false;
-        }
-
-        require_once(CP_DIR . '/system/libraries/SqlFormatter/SqlFormatter.php');
-
-        $result = self::realQuery("SHOW PROFILES", false);
-
-        while (list($qid, $qtime, $qstring) = $result->getArray()) {
-
-            if (is_numeric($qtime)) {
-                $time += (float)$qtime;
-            }
-
-            $list[$qid]['query'] = SqlFormatter::format($qstring);
-            $list[$qid]['time'] = Number::numFormat($qtime * 1, 6, '.', '\'');
-
-            $states = self::realQuery("
-						SELECT
-							STATE,
-							FORMAT(DURATION, 6) AS DURATION
-						FROM
-							INFORMATION_SCHEMA.PROFILING
-						WHERE
-							QUERY_ID = " . $qid
-                , false);
-
-            $ii = 0;
-
-            while (list($state, $duration) = $states->getArray()) {
-                $list[$qid]['states'][$ii]['state'] = $state;
-                $list[$qid]['states'][$ii]['time'] = Number::numFormat($duration * 1, 6, '.', '\'');
-                $ii++;
-            }
-        }
-
-        $time = Number::numFormat($time * 1, 6, '.', '\'');
-        $count = $result->numRows();
-
-        switch ($type) {
-            case 'list':
-                return $list;
-                break;
-
-            case 'time':
-                return $time;
-                break;
-
-            case 'count':
-                return $count;
-                break;
-        }
-
-        return false;
-    }
-
-    //--- Close MySQL connection.
-    private static function close(): void
-    {
-        if (is_object(self::$connect) && self::$connect instanceof mysqli) {
-            @self::$connect->close();
-        }
-    }
-
-    //--- Error if MySQL is not available
+    /**
+     * Shut down and display message if there is an error connecting to the database
+     *
+     * @param string $error
+     */
     public static function shutDown(string $error = ''): void
     {
         ob_start();
@@ -424,59 +127,164 @@ class DB
         die ($error);
     }
 
-    //--- Error handler
-    public static function error(string $type, string $query = ''): ?bool
+    /**
+     * Perform a Query (alias of EasyDB->run)
+     *
+     * @param string $statement
+     * @param mixed ...$params
+     * @return array|bool|int|mixed|object
+     */
+    public static function query(string $statement, ...$params)
     {
-        if ($type !== 'query') {
-            Debug::_echo('Error ' . $type . ' MySQL database.', SQL_ERRORS_STOP);
-        } else {
-            $_error = @mysqli_error(self::$connect);
 
-            Debug::_errorSql($_error, $query, self::getCaller(), SQL_ERRORS_STOP);
+        if ((self::TTL > 0) && (strtoupper(substr(trim($statement), 0, 6)) === 'SELECT')) {
 
-            $log = array(
-                'sql_error' => $_error,
-                'sql_query' => htmlentities(stripslashes($query), ENT_QUOTES),
-                'caller' => self::getCaller(),
-                'url' => HOST . $_SERVER['SCRIPT_NAME'] . ((isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] !== '')
-                        ? '?' . $_SERVER['QUERY_STRING']
-                        : '')
-            );
+            $cache_file = md5($statement) . md5(print_r([...$params], true));
+            $cache_dir = DASHBOARD_DIR . TEMP_DIR . '/cache/sql/' . substr($cache_file, 0, 2) . '/' . substr($cache_file, 2, 2) . '/' . substr($cache_file, 4, 2) . '/';
 
-            //-- ToDo: display SQL debug info
-            if (SQL_DEBUGGING) {
-                $msg = '';
-                echo $msg;
+            Dir::create($cache_dir);
+
+            if (!(file_exists($cache_dir . $cache_file) && (@time() - @filemtime($cache_dir . $cache_file) < self::TTL))) {
+                $result = self::$driver->run($statement, ...$params);
+                file_put_contents($cache_dir . $cache_file, serialize($result));
+            } else {
+                $result = unserialize(file_get_contents($cache_dir . $cache_file));
             }
 
-            //-- ToDo: log SQL
+            return $result;
 
-            //-- ToDo: send mail if SQL error
-            if (SEND_SQL_ERROR) {
-                return false;
+        }
+
+        return self::$driver->run($statement, ...$params);
+    }
+
+    /**
+     * Wrap EasyDB methods
+     *
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        return call_user_func_array([self::$driver, $name], $arguments);
+    }
+
+    public static function getSize(): int
+    {
+
+        $db_size = 0;
+
+        if (self::$db_engine === 'mysql') {
+            $q = self::query('SHOW TABLE STATUS');
+            foreach ($q as $row) {
+                $db_size += $row['Data_length'] + $row['Index_length'];
             }
         }
+
+        if (self::$db_engine === 'postgresql') {
+            $db_size = (int)DB::cell('SELECT pg_database_size(?)', self::$db_name);
+        }
+
+        return $db_size;
     }
 
-    //--- Retrieve MySQL server information
-    public static function version(): string
+    // ToDo: refactor
+    public static function backup(): bool
     {
-        return @mysqli_get_server_info(self::$connect);
+
+        $file = DASHBOARD_DIR . TEMP_DIR . '/backup/' . gmdate('Y-m-d_H-i-s') . '_backup.sql';
+
+        if (self::$db_engine === 'mysql') {
+
+            $command = sprintf(
+                'mysqldump %s -h %s -u %s -p%s --routines --single-transaction -r %s',
+                self::$db_name,
+                self::$db_host,
+                self::$db_user,
+                self::$db_pass,
+                $file
+            );
+
+            exec($command);
+
+        }
+
+        if (self::$db_engine === 'postgresql') {
+
+        }
+
+        $res = (File::exists($file) && (File::size($file) > 0));
+
+        Log::log($res ? Log::INFO : Log::ERROR, 'System\DB', $res ? "Database backup created in $file" : 'Database backup error');
+
+        return $res;
     }
 
-    public function __destruct()
+    // ToDo: refactor
+    public static function restore(string $file): bool
     {
-        self::close();
+
+        if ((File::exists($file) && (File::size($file) > 0))) {
+
+            if (self::$db_engine === 'mysql') {
+
+                $command = sprintf(
+                    'mysql %s -h %s -u %s -p%s < %s',
+                    self::$db_name,
+                    self::$db_host,
+                    self::$db_user,
+                    self::$db_pass,
+                    $file
+                );
+
+                exec($command);
+
+            }
+
+            if (self::$db_engine === 'postgresql') {
+
+            }
+
+            return true;
+
+        }
+
+        return false;
     }
 
-    public function __clone()
+    /**
+     * Build WHERE part to perform basic search
+     *
+     * @param array $fields
+     * @param string $search
+     * @return string
+     */
+    public static function buildSearch(array $fields, string $search): string
     {
-        //
-    }
+        $like = '';
 
-    public function __wakeup()
-    {
-        //
+        if ($search) {
+
+            $chunks = explode(' ', preg_replace('/\s+/', ' ', trim($search)));
+
+            $like_chunks = [];
+
+            foreach ($chunks as $chunk) {
+
+                $field_chunks = [];
+
+                foreach ($fields as $field) {
+                    $field_chunks[] = "UPPER($field) LIKE '%" . mb_strtoupper($chunk) . "%'";
+                }
+
+                $like_chunks[] = implode(' OR ', $field_chunks);
+            }
+
+            $like = implode(' AND ', $like_chunks);
+        }
+
+        return $like;
     }
 
 }

@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.1
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Cookie
@@ -21,41 +21,53 @@ class Cookie
 		//---
 	}
 
-	public static function set($key, $value, $expire = 86400, $domain = '', $path = '/', $secure = false, $httpOnly = false): bool
+    /**
+     * Set cookie value
+     *
+     * @param string $key key
+     * @param string $value value
+     * @param int $expire cookie lifetime
+     * @param string $domain cookie domain
+     * @param string $path path
+     * @param bool $secure should only be transmitted over a secure HTTPS connection
+     * @param bool $httpOnly should be accessible only through the HTTP protocol
+     * @return bool
+     */
+    public static function set(string $key, string $value, int $expire = 86400, string $domain = '', string $path = '/', bool $secure = false, bool $httpOnly = false): bool
     {
-		$key = (string)$key;
-		$path = (string)$path;
-		$domain = (string)$domain;
-		$secure = (bool)$secure;
-		$httpOnly = (bool)$httpOnly;
-
 		return setcookie($key, $value, $expire, $path, $domain, $secure, $httpOnly);
 	}
 
 
-	public static function get($key)
+    /**
+     * Get cookie value
+     *
+     * @param string $key ключ
+     * @return bool|mixed|string
+     */
+    public static function get(string $key)
 	{
-		$key = (string)$key;
-
-		if (!isset($_COOKIE[$key])) {
-            return false;
-        }
-
-		$value = (get_magic_quotes_gpc())
-			? stripslashes($_COOKIE[$key])
-			: $_COOKIE[$key];
-
-		return $value;
-	}
+        return $_COOKIE[$key] ?? false;
+    }
 
 
-	public static function delete($key): void
+    /**
+     * Delete cookie
+     *
+     * @param string $key ключ
+     */
+    public static function delete(string $key): void
     {
 		unset($_COOKIE[$key]);
 	}
 
 
-	public static function setDomain($cookie_domain = ''): void
+    /**
+     * Set cookies domain
+     *
+     * @param string $cookie_domain domain
+     */
+    public static function setDomain(string $cookie_domain = ''): void
     {
         if (empty($cookie_domain)) {
             if (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN !== '') {
@@ -65,7 +77,7 @@ class Cookie
             }
         }
 
-		//--- Delete leading www and port number
+		// Delete `www` prefix and port number
 		$cookie_domain = ltrim($cookie_domain, '.');
 
 		if (strpos($cookie_domain, 'www.') === 0) {
@@ -74,8 +86,8 @@ class Cookie
 
 		$cookie_domain = '.' . explode(':', $cookie_domain)[0];
 
-		// According to RFC 2109, domain name for a cookie must be a second or more level.
-		// So, don't set cookie_domain for 'localhost' or IP address.
+		// According to RFC 2109, the domain for cookies must be level 2 or higher.
+		// Therefore, you cannot set a cookie_domain for 'localhost' or IP address.
 		if (!IP::isValid($cookie_domain) && count(explode('.', $cookie_domain)) > 2) {
             ini_set('session.cookie_domain', $cookie_domain);
         }

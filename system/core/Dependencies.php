@@ -1,38 +1,50 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.1
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 2.0
  */
 
 class Dependencies
 {
-	public static $files = array();
+	public static array $files = [];
 
 	function __construct()
 	{
 		//
 	}
 
-	public static function add($file, $priority = 10, $params = '')
+    /**
+     * Добавить файл.
+     *
+     * @param string $file путь и имя файла
+     * @param int $priority приоритет для сортировки
+     * @param string $params параметры
+     */
+    public static function add(string $file, int $priority = 10, string $params = ''): void
 	{
-		self::$files[] = array(
-			'file' => (string)$file,
-			'priority' => (int)$priority,
-            'params' => (string)$params
-		);
+		self::$files[] = [
+			'file' => $file,
+			'priority' => $priority,
+            'params' => $params
+		];
 	}
 
-	public static function get()
+    /**
+     * Получить отсортированный список файлов.
+     *
+     * @return array массив с файлами
+     */
+    public static function get(): array
 	{
 		return Arrays::multiSort(self::$files, 'priority');
 	}

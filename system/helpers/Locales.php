@@ -1,32 +1,27 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    1.1
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
 class Locales
 {
 
-	public static function set(): void
+    /**
+     * Set locale params
+     */
+    public static function set(string $locale): void
     {
-		$acp_language = Session::checkvar('current_language')
-			? Session::getvar('current_language')
-			: 'en';
-
-		$locale = strtolower(defined('CP_ACCESS')
-			? $acp_language
-			: Session::getvar('current_language'));
-
 		switch ($locale) {
 			case 'ru':
 				@setlocale(LC_ALL, 'ru_RU.UTF-8', 'rus_RUS.UTF-8', 'russian');

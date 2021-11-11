@@ -1,26 +1,34 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    2.8
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
+
+// ToDo: refactor JS minification
 
 class Html
 {
 
-    //--- Compress and output
+
+    /**
+     * Display minified and GZipped HTML
+     *
+     * @param string $data data to display
+     * @return string
+     */
     public static function output(string $data): string
     {
-        $headers = array();
+        $headers = [];
 
         $Gzip = strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false;
 
@@ -36,12 +44,12 @@ class Html
         $headers[] = 'Content-Type: text/html; charset=utf-8';
         $headers[] = 'Cache-Control: must-revalidate';
         if (OUTPUT_EXPIRE) {
-            $headers[] = 'Expires: ' . gmdate("D, d M Y H:i:s", time() + OUTPUT_EXPIRE_OFFSET) . ' GMT';
+            $headers[] = 'Expires: ' . gmdate('r', time() + OUTPUT_EXPIRE_OFFSET);
         }
         $headers[] = 'Content-Length: ' . strlen($data);
         $headers[] = 'Vary: Accept-Encoding';
 
-        Request::setHeaders($headers);
+        Response::setHeaders($headers);
 
         unset($headers);
 
@@ -52,7 +60,7 @@ class Html
     {
         $blocks = array('for', 'while', 'if', 'else');
         $javascript = preg_replace('/([-\+])\s+\+([^\s;]*)/', '$1 (+$2)', $javascript);
-        //--- remove new line in statements
+        // remove new line in statements
         $javascript = preg_replace('/\s+\|\|\s+/', ' || ', $javascript);
         $javascript = preg_replace('/\s+\&\&\s+/', ' && ', $javascript);
         $javascript = preg_replace('/\s*([=+-\/\*:?])\s*/', '$1 ', $javascript);
@@ -80,14 +88,15 @@ class Html
         }
         //regex to detect all regex
         $regex = "/[\k(](\/[\k\S]+\/)/";
+        $matches = [];
         preg_match($regex, $javascript, $matches, PREG_OFFSET_CAPTURE, 1);
-        if (count($matches) > 0) {
+        if (!empty($matches)) {
             $elements[$matches[1][0]] = $matches[1][1];
         }
         $elements = array_filter($elements, static function ($k) {
             return $k !== false;
         });
-        if (count($elements) === 0) {
+        if (empty($elements)) {
             return false;
         }
         $min = min($elements);
@@ -157,23 +166,23 @@ class Html
         return $css;
     }
 
-    //--- Minify HTML
+    // Minify HTML
     public static function minifyHtml(string $data): string
     {
 
-        $search = array(
+        $search = [
             '/\>[^\S ]+/s',     // strip whitespaces after tags, except space
             '/[^\S ]+\</s',     // strip whitespaces before tags, except space
             '/(\s)+/s',         // shorten multiple whitespace sequences
             '/<!--(.|\s)*?-->/' // Remove HTML comments
-        );
+        ];
 
-        $replace = array(
+        $replace = [
             '>',
             '<',
             '\\1',
             ''
-        );
+        ];
 
         $data = preg_replace($search, $replace, $data);
 

@@ -1,153 +1,253 @@
 <?php
 
 /**
- * This file is part of the RGB.dashboard package.
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * (c) Alexey Graham <contact@rgbvision.net>
+ * (c) Alex Graham <contact@rgbvision.net>
  *
- * @package    RGB.dashboard
- * @author     Alexey Graham <contact@rgbvision.net>
- * @copyright  2017-2019 RGBvision
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    1.7
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
- * @since      Class available since Release 1.0
+ * @since      File available since Release 1.0
  */
 
-class Load
+class Loader
 {
-	protected static $classes = array();
-	protected static $directories = array();
-	protected static $namespaces = array();
-	protected static $aliases = array();
+    protected static array $classes = [];
+    protected static array $directories = [];
+    protected static array $namespaces = [];
+    protected static array $aliases = [];
+    protected static array $modules = [];
 
-	protected function __construct()
-	{
-		//
-	}
+    protected function __construct()
+    {
+        //
+    }
 
-	public static function addClass($className, $classPath)
-	{
-		self::$classes[$className] = $classPath;
-	}
+    /**
+     * Add class to autoloader
+     *
+     * @param string $className class name
+     * @param string $classPath class file path
+     */
+    public static function addClass(string $className, string $classPath): void
+    {
+        self::$classes[$className] = $classPath;
+    }
 
-	public static function addClasses(array $classes)
-	{
-		foreach ($classes as $name => $path) {
-			self::$classes[$name] = $path;
-		}
-	}
+    /**
+     * Add array of classes to autoloader
+     *
+     * @param array $classes
+     */
+    public static function addClasses(array $classes): void
+    {
+        foreach ($classes as $name => $path) {
+            self::$classes[$name] = $path;
+        }
+    }
 
-	public static function addFiles($path)
-	{
-		$files = glob($path . '/*.php');
+    /**
+     * Включить и выполнить PHP файлы по указанному пути
+     *
+     * @param string $path путь к директории с файлами
+     */
+    public static function addFiles(string $path): void
+    {
+        $files = glob($path . '/*.php');
 
-		foreach ($files as $file) {
-			require($file);
-		}
-	}
+        foreach ($files as $file) {
+            require($file);
+        }
+    }
 
-	public static function addModules($path = '')
-	{
-		$dir = dir($path . '/modules');
+    /**
+     * Load modules
+     *
+     * @param string $path modules directory
+     * @return array
+     */
+    public static function addModules(string $path = ''): array
+    {
+        $dir = dir($path);
 
-		$modules = array();
+        while (false !== ($entry = $dir->read())) {
 
-		while (false !== ($entry = $dir->read())) {
-			if (substr($entry, 0, 1) === '.')
-				continue;
+            if (strpos($entry, '.') === 0) {
+                continue;
+            }
 
-			$module_dir = $dir->path . '/' . $entry;
+            if (self::$modules['Module' . $entry]) {
+                continue;
+            }
 
-			if (!is_dir($module_dir))
-				continue;
+            $module_dir = $dir->path . '/' . $entry;
 
-			if (!(is_file($module_dir . '/Module.php') && include_once($module_dir . '/Module.php'))) {
-				$modules['errors'][] = $entry;
-				continue;
-			} else {
-				$module_name = 'Module' . $entry;
-				new $module_name();
-			}
-		}
+            if (!is_dir($module_dir)) {
+                continue;
+            }
 
-		$dir->Close();
+            if (!(is_file($module_dir . '/Module.php') && include_once($module_dir . '/Module.php'))) {
+                $modules['errors'][] = $entry;
+                continue;
+            }
 
-		return $modules;
-	}
+            $module_name = 'Module' . $entry;
+            new $module_name();
 
-	public static function addDirectory($path)
-	{
-		self::$directories[] = rtrim($path, '/');
-	}
+            self::$modules[$entry] = $module_dir;
 
-	public static function regNamespace($namespace, $path)
-	{
-		self::$namespaces[trim($namespace, '\\') . '\\'] = rtrim($path, '/');
-	}
+        }
 
-	public static function addAlias($alias, $className)
-	{
-		self::$aliases[$alias] = $className;
-	}
+        $dir->Close();
 
-	protected static function PSR0($className, $directory = null)
-	{
-		$classPath = '';
+        return self::$modules;
+    }
 
-		if (($pos = strripos($className, '\\')) !== false) {
-			$namespace = substr($className, 0, $pos);
-			$className = substr($className, $pos + 1);
-			$classPath = str_replace('\\', '/', $namespace) . '/';
-		}
+    /**
+     * Load module and its classes
+     *
+     * @param string $name
+     * @return string|null
+     */
+    public static function loadModule(string $name = ''): ?string
+    {
+        if (self::$modules[$name]) {
 
-		$classPath .= str_replace('_', '/', $className) . '.php';
+            // Модель
+            $file = self::$modules[$name] . '/model/Model.php';
+            $model = 'Model' . $name;
 
-		$directories = ($directory === null)
-			? self::$directories
-			: array($directory);
+            if (is_file($file)) {
+                Loader::addClass($model, $file);
+            } else {
+                Request::redirect('/errors/model?model=' . $model);
+            }
 
-		foreach ($directories as $_directory) {
-			if (file_exists($_directory . '/' . $classPath)) {
-				include($_directory . '/' . $classPath);
+            // Контроллер
+            $file = self::$modules[$name] . '/controller/Controller.php';
+            $controller = 'Controller' . $name;
 
-				return true;
-			}
-		}
+            if (is_file($file)) {
+                Loader::addClass($controller, $file);
+                return $controller;
+            } else {
+                Request::redirect('/errors/controller?controller=' . $controller);
+            }
 
-		return false;
-	}
+        } else {
+            Request::redirect('/errors/module?module=' . $name);
+        }
 
-	public static function loadClass($className)
-	{
+        return null;
 
-		$className = ltrim($className, '\\');
+    }
 
-		if (isset(self::$aliases[$className]))
-			return class_alias(self::$aliases[$className], $className);
+    /**
+     * Add directory to autoloader
+     *
+     * @param string $path путь к папке с классами
+     */
+    public static function addDirectory(string $path): void
+    {
+        self::$directories[] = rtrim($path, '/');
+    }
 
-		if (isset(self::$classes[$className]) && file_exists(self::$classes[$className])) {
-			include self::$classes[$className];
+    /**
+     * Register namespace
+     *
+     * @param string $namespace имя
+     * @param string $path путь
+     */
+    public static function regNamespace(string $namespace, string $path): void
+    {
+        self::$namespaces[trim($namespace, '\\') . '\\'] = rtrim($path, '/');
+    }
 
-			return true;
-		}
+    /**
+     * Add class alias
+     *
+     * @param string $alias псевдоним
+     * @param string $className имя класса
+     */
+    public static function addAlias(string $alias, string $className): void
+    {
+        self::$aliases[$alias] = $className;
+    }
 
-		foreach (self::$namespaces as $namespace => $path) {
-			if (strpos($className, $namespace) === 0) {
-				if (self::PSR0(substr($className, strlen($namespace)), $path))
-					return true;
-			}
-		}
+    /**
+     * PSR0
+     *
+     * @param string $className имя класса
+     * @param string|null $directory папка
+     * @return bool
+     */
+    protected static function PSR0(string $className, ?string $directory = null): bool
+    {
+        $classPath = '';
 
-		if (self::PSR0($className) || self::PSR0(strtolower($className)))
-			return true;
+        if (($pos = strripos($className, '\\')) !== false) {
+            $namespace = substr($className, 0, $pos);
+            $className = substr($className, $pos + 1);
+            $classPath = str_replace('\\', '/', $namespace) . '/';
+        }
 
-		return false;
-	}
+        $classPath .= str_replace('_', '/', $className) . '.php';
 
-	public static function init()
-	{
-		spl_autoload_register('self::loadClass', true);
-	}
+        $directories = ($directory === null)
+            ? self::$directories
+            : [$directory];
+
+        foreach ($directories as $_directory) {
+            if (file_exists($_directory . '/' . $classPath)) {
+                include($_directory . '/' . $classPath);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Load class
+     *
+     * @param string $className имя класса
+     * @return bool
+     */
+    public static function loadClass(string $className): bool
+    {
+
+        $className = ltrim($className, '\\');
+
+        if (isset(self::$aliases[$className])) {
+            return class_alias(self::$aliases[$className], $className);
+        }
+
+        if (isset(self::$classes[$className]) && file_exists(self::$classes[$className])) {
+            include self::$classes[$className];
+
+            return true;
+        }
+
+        foreach (self::$namespaces as $namespace => $path) {
+            if ((strpos($className, $namespace) === 0) && self::PSR0(substr($className, strlen($namespace)), $path)) {
+                return true;
+            }
+        }
+
+        return self::PSR0($className) || self::PSR0(strtolower($className));
+    }
+
+    /**
+     * Register autoloader
+     */
+    public static function init(): void
+    {
+        spl_autoload_register('self::loadClass');
+    }
 
 }
