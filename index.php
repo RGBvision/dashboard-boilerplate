@@ -23,6 +23,12 @@ require_once __DIR__ . '/system/init.php';
 // Run hook after system initialised
 Hooks::action('system_after_init');
 
+// API call handler
+if (($path = Request::getPath()) && (strpos($path, ABS_PATH . 'api/') === 0)) {
+    ApiRouter::init('API', DASHBOARD_DIR . '/app/api/API.php', str_replace(ABS_PATH . 'api/', '', $path));
+    ApiRouter::response(ApiRouter::execute());
+}
+
 // Template engine instance
 $Template = Template::getInstance();
 
