@@ -269,7 +269,7 @@ class Auth
 
         $user = Arrays::toObject((array)DB::row($sql, $email));
 
-        if (!$user || !(isset($user->password) && password_verify(hash_hmac("sha256", $password, $user->salt . PWD_PEPPER), $user->password))) {
+        if (!$user || !(isset($user->password) && self::verifyPassword($password, $user->salt, $user->password))) {
             return self::WRONG_PASS;
         }
 
@@ -279,7 +279,7 @@ class Auth
 
         $salt = randomString();
 
-        $password_hash = password_hash(hash_hmac("sha256", $password, $salt . PWD_PEPPER), PASSWORD_ARGON2ID);
+        $password_hash =  self::getPasswordHash($password, $salt);
 
         $time = time();
 
@@ -319,4 +319,15 @@ class Auth
 
         return self::LOGIN_SUCCESS;
     }
+
+    public static function getPasswordHash(string $password, string $salt): string
+    {
+        return password_hash(hash_hmac("sha256", $password, $salt . PWD_PEPPER), PASSWORD_ARGON2ID) ?: '';
+    }
+
+    public static function verifyPassword(string $password, string $salt, string $hash): bool
+    {
+        return password_verify(hash_hmac("sha256", $password, $salt . PWD_PEPPER), $hash);
+    }
+
 }

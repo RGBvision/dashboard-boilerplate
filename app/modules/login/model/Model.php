@@ -67,7 +67,7 @@ class ModelLogin extends Model
     {
 
         $salt = randomString();
-        $password_hash = password_hash(hash_hmac("sha256", $pass, $salt . PWD_PEPPER), PASSWORD_ARGON2ID);
+        $password_hash = Auth::getPasswordHash($pass, $salt);
 
         DB::update("users", ["password" => $password_hash, "salt" => $salt, "hash" => "", "hash_expire" => null], ["email" => $email, "hash" => $hash]);
 
