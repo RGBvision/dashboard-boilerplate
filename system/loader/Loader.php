@@ -80,7 +80,7 @@ class Loader
                 continue;
             }
 
-            if (self::$modules['Module' . $entry]) {
+            if (!empty(self::$modules['Module' . $entry])) {
                 continue;
             }
 
