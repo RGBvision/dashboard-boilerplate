@@ -5,7 +5,7 @@
                 <h6 class="card-title mb-0">{#dashboard_title_storage#}</h6>
             </div>
             <div class="card-body">
-                <div id="storageChart" class="mx-auto position-relative" style="width: 200px; height: 200px;" data-usage="{$storage_usage.percentage}"></div>
+                <div id="storageChart" class="mx-auto position-relative" style="width: 200px; height: 200px;" data-usage="{$storage_usage.usage}"></div>
                 <div class="row mt-4 mb-3">
                     <div class="col-6 d-flex justify-content-end">
                         <div>
@@ -39,10 +39,14 @@
             <div class="card-footer text-center pb-1">
                 <div class="row">
                     <div class="col-12 col-md-6">
-                        <a id="backupDB" href="{$ABS_PATH}dashboard/backup_db" class="btn w-100 btn-success mb-2">{#dashboard_make_db_backup#}</a>
+                        <a id="backupDB"
+                           href="{$ABS_PATH}dashboard/backup_db"
+                           class="btn w-100 btn-success mb-2 {if !Permission::check('dashboard_backup_db')}disabled{/if}">{#dashboard_make_db_backup#}</a>
                     </div>
                     <div class="col-12 col-md-6">
-                        <a id="clearCache" href="{$ABS_PATH}dashboard/clear_cache" class="btn w-100 btn-danger mb-2">{#dashboard_clear_cache#}</a>
+                        <a id="clearCache"
+                           href="{$ABS_PATH}dashboard/clear_cache"
+                           class="btn w-100 btn-danger mb-2 {if !Permission::check('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
                     </div>
                 </div>
 
@@ -50,7 +54,7 @@
         </div>
     </div>
 </div>
-{if $smarty.const.UID == 1}
+{if $smarty.const.UID == 1} {* Only Superuser can generate modules *}
     <div class="row">
         <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
             <div class="card">

@@ -28,7 +28,7 @@ $config_defaults = [];
 // ---------------------------------------------------------------
 // Environment
 // ---------------------------------------------------------------
-$config_defaults['CP_ENVIRONMENT'] = [
+$config_defaults['SYSTEM_ENVIRONMENT'] = [
     'DEFAULT' => 'public',
     'TYPE' => 'dropdown',
     'VARIANT' => 'development,demo,public',

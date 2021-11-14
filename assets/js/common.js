@@ -1,5 +1,6 @@
 const $window = $(window);
 const $body = $('body');
+const $locale = $('html').attr('lang') || navigator.language;
 
 const DashboardCommon = {
 
@@ -9,7 +10,8 @@ const DashboardCommon = {
     },
 
     build() {
-        this.setThemeCookie();
+        this.setTimezoneCookie();
+        //this.setThemeCookie();
         this.addValidateMethods();
         this.initializeClipboardPlugin();
         this.initializeBootstrapTooltip();
@@ -25,6 +27,17 @@ const DashboardCommon = {
         this.onSidebarHover();
         this.onSidebarOutsideClick();
         this.onHorizontalMenuToggle();
+    },
+
+    // set browser timezone cookie
+    setTimezoneCookie() {
+        const timezone = $body.data('timezone');
+        const browser_timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        if (timezone.length && browser_timezone && (browser_timezone !== timezone)) {
+            Cookies.set('browser_timezone', browser_timezone, {expires: 365, path: '/'});
+            location.reload();
+        }
     },
 
     // set theme cookie
@@ -51,6 +64,8 @@ const DashboardCommon = {
             Cookies.set('theme', newTheme, {expires: 365});
             cssElement.attr('href', cssURL.replace(/(dark|light)/g, newTheme));
             $('#themeSwitch').prop('checked', (newTheme === 'dark'));
+
+            window.dispatchEvent(new CustomEvent('theme.change', {detail: {theme: newTheme}}));
 
             return false;
         });

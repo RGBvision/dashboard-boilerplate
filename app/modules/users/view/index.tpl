@@ -37,7 +37,7 @@
             </div>
             <div class="card-body p-1 px-md-4 py-md-3">
                 <div class="table-responsive">
-                    <table id="controlTable" class="table table-hover text-nowrap">
+                    <table id="controlTable" class="table table-hover text-nowrap align-middle">
                         <thead>
                         <tr>
                             <th class="text-center d-none d-md-table-cell" width="1%" data-orderable="false"><i class="mdi mdi-camera-iris m-0"></i></th>

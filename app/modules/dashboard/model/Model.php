@@ -1,16 +1,28 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.2
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
 class ModelDashboard extends Model
 {
 
-    public static function getStorageSize(): int
+    public function getStorageSize(): int
     {
         return 100 * pow(1024, 3);
-
     }
 
-    public static function getStorageUsage(): array
+    public function getStorageUsage(): array
     {
 
         $Template = Template::getInstance();
@@ -25,17 +37,81 @@ class ModelDashboard extends Model
             $Template->_get('dashboard_storage_user_files') => Dir::size(DASHBOARD_DIR . '/uploads/'),
         ];
 
-        $size = 0;
-
-        foreach ($details as $usage) {
-            $size += $usage;
-        }
+        $size = array_sum($details);
 
         return [
             'size' => $size,
-            'percentage' => round($size / (self::getStorageSize() / 100) / 100, 2),
+            'usage' => round($size / self::getStorageSize(), 2),
             'details' => $details,
         ];
+    }
+
+    /**
+     * Copy module template to modules directory as a new module
+     *
+     * @param string $source
+     * @param string $destination
+     * @param string $module_name Generated module name
+     */
+    public function copy_template(string $source, string $destination, string $module_name): void
+    {
+        $dir = opendir($source);
+
+        if (!Dir::create($destination)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $destination));
+        }
+
+        while (false !== ($file = readdir($dir))) {
+            if (($file !== '.') && ($file !== '..')) {
+                if (is_dir($source . '/' . $file)) {
+                    switch ($file) {
+                        case 'css':
+                        case 'js':
+                            self::copy_template($source . '/' . $file, DASHBOARD_DIR . '/assets/' . $file, $module_name);
+                            break;
+                        default:
+                            self::copy_template($source . '/' . $file, $destination . '/' . $file, $module_name);
+                            break;
+                    }
+                } else {
+
+                    $new_file = str_replace(
+                        'example',
+                        preg_replace('/\s+/', '', strtolower($module_name)),
+                        $file
+                    );
+
+                    $_new_name = explode(' ', $module_name);
+
+                    foreach ($_new_name as &$part) {
+                        $part = ucfirst($part);
+                    }
+
+                    $content = File::getContents($source . '/' . $file);
+
+                    $new_content = str_replace(
+                        [
+                            'example',
+                            'Example',
+                            'EXAMPLE',
+                            ':date:',
+                        ],
+                        [
+                            strtolower(implode('', $_new_name)),
+                            implode('', $_new_name),
+                            implode(' ', $_new_name),
+                            date('d.m.Y'),
+                        ],
+                        $content
+                    );
+
+                    File::putContents($destination . '/' . $new_file, $new_content, true, true);
+
+                }
+            }
+        }
+
+        closedir($dir);
     }
 
 }

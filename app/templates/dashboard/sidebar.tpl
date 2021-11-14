@@ -12,7 +12,7 @@
                     {if !isset($sidebar_menu_item.submenu)}
 
                         <li class="nav-item {if $data.page == $sidebar_menu_item.id}active{/if}">
-                            <a id="{$sidebar_menu_item.id}" href="{$ABS_PATH}{$sidebar_menu_item.link}" class="nav-link">
+                            <a id="{$sidebar_menu_item.id}" href="{$sidebar_menu_item.link}" class="nav-link">
                                 <i class="link-icon {$sidebar_menu_item.icon}"></i>
                                 <span class="link-title">{$sidebar_menu_item.name}</span>
                             </a>
@@ -32,7 +32,7 @@
                                     {foreach from=$sidebar_menu_item.submenu item=submenu_item}
 
                                         <li class="nav-item {if $data.page == $submenu_item.id}active{/if}">
-                                            <a id="{$submenu.id}" href="{$ABS_PATH}{$submenu_item.link}" class="nav-link">{$submenu_item.name}</a>
+                                            <a id="{$submenu.id}" href="{$submenu_item.link}" class="nav-link">{$submenu_item.name}</a>
                                         </li>
 
                                     {/foreach}

@@ -1,22 +1,37 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
+
 class ControllerUsers extends Controller
 {
 
-    public static string $route_id;
-    protected static Model $model;
-
+    /**
+     * Constructor
+     */
     public function __construct()
     {
 
+        // Parent
+        parent::__construct();
+
+        // Check if user has permission
         if (!Permission::check('users_view')) {
-            Request::redirect(ABS_PATH);
-            Response::shutDown();
+            Router::response(false, '', ABS_PATH);
         }
 
-        self::$route_id = Router::getId();
-        self::$model = Router::model();
-
+        // Add JS/CSS dependencies
         $files = [
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css',
             ABS_PATH . 'assets/vendors/datatables.net/jquery.dataTables.js',
@@ -36,22 +51,31 @@ class ControllerUsers extends Controller
 
     }
 
+    /**
+     * Users list page
+     */
     public static function index()
     {
 
+        // Template engine instance
         $Template = Template::getInstance();
 
+        // Load i18n variables
         $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'main');
         $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
         $data = [
 
+            // Page ID
             'page' => 'users',
 
+            // Page Title
             'page_title' => $Template->_get('users_page_title'),
 
+            // Page Header
             'header' => $Template->_get('users_page_header'),
 
+            // Breadcrumbs
             'breadcrumbs' => [
                 [
                     'text' => $Template->_get('main_page'),
@@ -68,6 +92,7 @@ class ControllerUsers extends Controller
             ],
         ];
 
+        // Push data to template engine
         $Template
             ->assign('data', $data)
             ->assign('groups', UserGroup::getList())
@@ -78,6 +103,9 @@ class ControllerUsers extends Controller
             ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/index.tpl'));
     }
 
+    /**
+     * Get users list data
+     */
     public static function get()
     {
 
@@ -97,12 +125,17 @@ class ControllerUsers extends Controller
 
     }
 
+    /**
+     * View user profile page
+     *
+     * @param int $user_id
+     * @throws \libphonenumber\NumberParseException
+     */
     public static function view(int $user_id)
     {
 
         if (!$user_id) {
-            Request::redirect(Request::referrer());
-            Response::shutDown();
+            Router::response(false, '', Request::referrer());
         }
 
         $Template = Template::getInstance();
@@ -154,12 +187,16 @@ class ControllerUsers extends Controller
             ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/view.tpl'));
     }
 
+    /**
+     * Edit user profile page
+     *
+     * @param int $user_id
+     */
     public static function edit(int $user_id)
     {
 
         if (!$user_id || !Permission::check('users_edit')) {
-            Request::redirect(Request::referrer());
-            Response::shutDown();
+            Router::response(false, '', Request::referrer());
         }
 
         $Template = Template::getInstance();
@@ -213,6 +250,9 @@ class ControllerUsers extends Controller
             ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/edit.tpl'));
     }
 
+    /**
+     * Add user
+     */
     public static function add()
     {
 
@@ -222,7 +262,7 @@ class ControllerUsers extends Controller
         try {
 
             if (
-                Permission::perm('users_edit') &&
+                Permission::check('users_add') &&
                 ($firstname = Request::post('firstname')) &&
                 ($lastname = Request::post('lastname')) &&
                 ($code = Request::post('code')) &&
@@ -239,9 +279,13 @@ class ControllerUsers extends Controller
         } catch (\libphonenumber\NumberParseException $e) {
         }
 
-        Request::redirect(ABS_PATH . 'users');
+        Router::response(true, '', ABS_PATH . 'users');
+
     }
 
+    /**
+     * Save user data
+     */
     public static function save()
     {
 
@@ -272,9 +316,12 @@ class ControllerUsers extends Controller
         } catch (\libphonenumber\NumberParseException $e) {
         }
 
-        Request::redirect(ABS_PATH . 'users');
+        Router::response(true, '', ABS_PATH . 'users');
     }
 
+    /**
+     * Save user avatar
+     */
     public static function save_avatar()
     {
         if (
@@ -289,6 +336,9 @@ class ControllerUsers extends Controller
 
     }
 
+    /**
+     * Block user
+     */
     public static function block()
     {
         if (
@@ -300,6 +350,9 @@ class ControllerUsers extends Controller
         Request::redirect(Request::referrer() ?? ABS_PATH . 'users');
     }
 
+    /**
+     * Unblock user
+     */
     public static function unblock()
     {
         if (
@@ -311,6 +364,9 @@ class ControllerUsers extends Controller
         Request::redirect(Request::referrer() ?? ABS_PATH . 'users');
     }
 
+    /**
+     * Delete user
+     */
     public static function delete()
     {
         if (
@@ -322,6 +378,9 @@ class ControllerUsers extends Controller
         Request::redirect(Request::referrer() ?? ABS_PATH . 'users');
     }
 
+    /**
+     * Restore deleted user
+     */
     public static function restore()
     {
         if (
@@ -333,6 +392,9 @@ class ControllerUsers extends Controller
         Request::redirect(Request::referrer() ?? ABS_PATH . 'users');
     }
 
+    /**
+     * Check if phone number used by another user
+     */
     public static function check_phone()
     {
 
@@ -360,6 +422,9 @@ class ControllerUsers extends Controller
         Response::shutDown();
     }
 
+    /**
+     * Check if email used by another user
+     */
     public static function check_email()
     {
 

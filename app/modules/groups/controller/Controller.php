@@ -1,67 +1,93 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
 class ControllerGroups extends Controller
 {
 
-	public static string $route_id;
-	protected static Model $model;
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
 
+        parent::__construct();
 
-	
-	public function __construct()
-	{
-
+        // Check user permissions
         if (!Permission::check('groups_view')) {
-            Request::redirect(ABS_PATH);
-            Response::shutDown();
+            Router::response(false, '', ABS_PATH);
         }
 
-        self::$route_id = Router::getId();
-		self::$model = Router::model();
-
-        Dependencies::add(
+        // Add JS dependencies
+        $files = [
+            ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css',
+            ABS_PATH . 'assets/vendors/datatables.net/jquery.dataTables.js',
+            ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js',
             ABS_PATH . 'assets/js/groups.js',
-            100
-        );
-	}
+        ];
 
+        foreach ($files as $i => $file) {
+            Dependencies::add(
+                $file,
+                $i + 100
+            );
+        }
 
-	
-	public static function index()
-	{
+    }
 
-		$Template = Template::getInstance();
+    /**
+     * Display user groups
+     */
+    public static function index()
+    {
 
-		$Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        // Template engine instance
+        $Template = Template::getInstance();
 
-		$data = array(
+        // Load i18n variables
+        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
-			'page' => 'groups',
+        $data = [
 
-			'page_title' => $Template->_get('groups_page_title'),
+            // Page ID
+            'page' => 'groups',
 
-			'header' => $Template->_get('groups_page_header'),
+            // Page Title
+            'page_title' => $Template->_get('groups_page_title'),
 
-			'breadcrumbs' => array(
-				array(
-					'text' => $Template->_get('main_page'),
-					'href' => '/',
-					'page' => 'project',
-					'push' => 'true',
-					'active' => false
-				),
-				array(
-					'text' => $Template->_get('groups_breadcrumb'),
-					'href' => '',
-					'page' => '',
-					'push' => '',
-					'active' => true
-				)
-			)
-		);
+            // Page Header
+            'header' => $Template->_get('groups_page_header'),
 
-		$groups = UserGroup::getList();
+            // Breadcrumbs
+            'breadcrumbs' => [
+                [
+                    'text' => $Template->_get('main_page'),
+                    'href' => ABS_PATH . 'dashboard',
+                    'page' => 'dashboard',
+                    'active' => false,
+                ],
+                [
+                    'text' => $Template->_get('groups_breadcrumb'),
+                    'href' => '',
+                    'page' => '',
+                    'active' => true,
+                ],
+            ],
+        ];
+
+        $groups = UserGroup::getList();
 
         if (UGROUP !== UserGroup::SUPERADMIN) {
             foreach ($groups as $k => $group) {
@@ -71,140 +97,134 @@ class ControllerGroups extends Controller
             }
         }
 
-		$Template
+        // Load i18n variables
+        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+
+        // Push data to template engine
+        $Template
             ->assign('data', $data)
-			->assign('groups', $groups)
-			->assign('access', Permission::perm('groups_edit'))
-			->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/groups/view/index.tpl'));
-	}
+            ->assign('groups', $groups)
+            ->assign('access', Permission::perm('groups_edit'))
+            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/groups/view/index.tpl'));
+    }
 
 
-	
-	public static function edit()
-	{
-		$user_group_id = (int)Request::get('user_group_id');
-		$user_group_name = self::$model::getGroupName($user_group_id);
+    public static function edit()
+    {
+        $user_group_id = (int)Request::get('user_group_id');
+        $user_group_name = self::$model->getGroupName($user_group_id);
 
-		$Template = Template::getInstance();
+        $Template = Template::getInstance();
 
-		$Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
-		$data = array(
+        $data = [
 
-			'page' => 'groups',
+            'page' => 'groups',
 
-			'page_title' => $Template->_get('groups_page_edit_title'),
+            'page_title' => $Template->_get('groups_page_edit_title'),
 
-			'header' => $Template->_get('groups_page_edit_header'),
+            'header' => $Template->_get('groups_page_edit_header'),
 
-			'breadcrumbs' => array(
-				array(
-					'text' => $Template->_get('main_page'),
-					'href' => '/',
-					'page' => 'project',
-					'push' => 'true',
-					'active' => true
-				),
-				array(
-					'text' => $Template->_get('groups_breadcrumb'),
-					'href' => '/groups',
-					'page' => 'groups',
-					'push' => 'true',
-					'active' => true
-				),
-				array(
-					'text' => $Template->_get('groups_breadcrumb_edit'),
-					'href' => '',
-					'page' => '',
-					'push' => '',
-					'active' => false
-				)
-			)
-		);
+            'breadcrumbs' => [
+                [
+                    'text' => $Template->_get('main_page'),
+                    'href' => ABS_PATH . 'dashboard',
+                    'page' => 'dashboard',
+                    'active' => false,
+                ],
+                [
+                    'text' => $Template->_get('groups_breadcrumb'),
+                    'href' => ABS_PATH . 'groups',
+                    'page' => 'groups',
+                    'active' => false,
+                ],
+                [
+                    'text' => $Template->_get('groups_breadcrumb_edit'),
+                    'href' => '',
+                    'page' => '',
+                    'active' => true,
+                ],
+            ],
+        ];
 
-		$editable = self::$model->isEditable($user_group_id);
-		$disabled = self::$model->getDisabled($user_group_id);
-		$exists = self::$model->getGroup($user_group_id);
+        $editable = self::$model->isEditable($user_group_id);
+        $disabled = self::$model->getDisabled($user_group_id);
+        $exists = self::$model->getGroup($user_group_id);
 
-		$Template
-			->assign('data', $data)
-			->assign('user_group_id', $user_group_id)
-			->assign('user_group_name', $user_group_name)
-			->assign('disabled', $disabled)
-			->assign('editable', $editable)
-			->assign('exists', $exists)
-			->assign('permissions', self::$model::getAllPermissions($user_group_id))
-			->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/groups/view/edit.tpl'));
-	}
+        $Template
+            ->assign('data', $data)
+            ->assign('user_group_id', $user_group_id)
+            ->assign('user_group_name', $user_group_name)
+            ->assign('disabled', $disabled)
+            ->assign('editable', $editable)
+            ->assign('exists', $exists)
+            ->assign('permissions', self::$model->getAllPermissions($user_group_id))
+            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/groups/view/edit.tpl'));
+    }
 
 
-	
-	public static function add()
-	{
+    public static function add()
+    {
 
-		$Template = Template::getInstance();
+        $Template = Template::getInstance();
 
-		$Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
-		$data = array(
+        $data = [
 
-			'page' => 'groups',
+            'page' => 'groups',
 
-			'page_title' => $Template->_get('groups_page_add_title'),
+            'page_title' => $Template->_get('groups_page_add_title'),
 
-			'header' => $Template->_get('groups_page_add_header'),
+            'header' => $Template->_get('groups_page_add_header'),
 
-			'breadcrumbs' => array(
-				array(
-					'text' => $Template->_get('main_page'),
-					'href' => '/',
-					'page' => 'project',
-					'push' => 'true',
-					'active' => true
-				),
-				array(
-					'text' => $Template->_get('groups_breadcrumb'),
-					'href' => '/groups',
-					'page' => 'groups',
-					'push' => 'true',
-					'active' => true
-				),
-				array(
-					'text' => $Template->_get('groups_breadcrumb_add'),
-					'href' => '',
-					'page' => '',
-					'push' => '',
-					'active' => false
-				)
-			)
-		);
+            'breadcrumbs' => [
+                [
+                    'text' => $Template->_get('main_page'),
+                    'href' => ABS_PATH . 'dashboard',
+                    'page' => 'dashboard',
+                    'active' => false,
+                ],
+                [
+                    'text' => $Template->_get('groups_breadcrumb'),
+                    'href' => ABS_PATH . 'groups',
+                    'page' => 'groups',
+                    'active' => false,
+                ],
+                [
+                    'text' => $Template->_get('groups_breadcrumb_add'),
+                    'href' => '',
+                    'page' => '',
+                    'active' => true,
+                ],
+            ],
+        ];
 
-		$Template
-			->assign('data', $data)
-			->assign('access', Permission::perm('groups_edit'))
-			->assign('permissions', self::$model->getAllPermissions())
-			->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/groups/view/add.tpl'));
-	}
+        $Template
+            ->assign('data', $data)
+            ->assign('access', Permission::perm('groups_edit'))
+            ->assign('permissions', self::$model->getAllPermissions())
+            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/groups/view/add.tpl'));
+    }
 
 
-	
-	public static function save()
-	{
-		$Template = Template::getInstance();
+    public static function save()
+    {
+        $Template = Template::getInstance();
 
-		$Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
-		self::$model::saveGroup();
-	}
+        self::$model->saveGroup();
+    }
 
 
-	
-	public static function delete()
-	{
-		$Template = Template::getInstance();
+    public static function delete()
+    {
+        $Template = Template::getInstance();
 
-		$Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
-		self::$model::deleteGroup();
-	}
+        self::$model->deleteGroup();
+    }
 }

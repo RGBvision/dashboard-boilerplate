@@ -1,23 +1,36 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.3
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
 class ControllerEventlog extends Controller
 {
 
-    public static string $route_id;
-    protected static Model $model;
-
+    /**
+     * Constructor
+     */
     public function __construct()
     {
 
+        parent::__construct();
+
+        // Check if user has permission at least to view module default page
         if (!Permission::check('eventlog_view')) {
-            Request::redirect(ABS_PATH);
-            Response::shutDown();
+            Router::response(false, '', ABS_PATH);
         }
 
-        self::$route_id = Router::getId();
-        self::$model = Router::model();
-
+        // Add JS dependencies
         $files = [
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css',
             ABS_PATH . 'assets/vendors/datatables.net/jquery.dataTables.js',
@@ -33,21 +46,30 @@ class ControllerEventlog extends Controller
         }
     }
 
+    /**
+     * Display event log
+     */
     public static function index()
     {
 
+        // Template engine instance
         $Template = Template::getInstance();
 
+        // Load i18n variables
         $Template->_load(DASHBOARD_DIR . '/app/modules/eventlog/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $data = [
 
+            // Page ID
             'page' => 'eventlog',
 
+            // Page Title
             'page_title' => $Template->_get('eventlog_page_title'),
 
+            // Page Header
             'header' => $Template->_get('eventlog_page_header'),
 
+            // Breadcrumbs
             'breadcrumbs' => [
                 [
                     'text' => $Template->_get('main_page'),
@@ -64,14 +86,19 @@ class ControllerEventlog extends Controller
             ],
         ];
 
+        // Load i18n variables
         $Template->_load(DASHBOARD_DIR . '/app/modules/eventlog/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
+        // Push data to template engine
         $Template
             ->assign('data', $data)
-            ->assign('_is_ajax', Request::isAjax())
             ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/eventlog/view/index.tpl'));
+
     }
 
+    /**
+     * Get log data
+     */
     public static function get()
     {
 

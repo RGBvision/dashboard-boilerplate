@@ -1,20 +1,46 @@
 <?php
 
-	class ModuleErrors extends Module
-	{
-		public static $version = '1.0';
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.1
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
-		public static $date = '11.10.2021';
+class ModuleErrors extends Module
+{
 
-		public static $_moduleName = 'errors';
+    /**
+     * @var string Module version
+     */
+    public static string $version = '1.0';
 
+    /**
+     * @var string Module release date
+     */
+    public static string $date = '11.10.2021';
 
-		public function __construct()
-		{
-			parent::__construct();
+    /**
+     * @var string Module system name
+     */
+    public static string $moduleName = 'errors';
 
-			$Template = Template::getInstance();
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
 
-			$Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'name');
-		}
-	}
+        // Parent
+        parent::__construct();
+
+    }
+
+}

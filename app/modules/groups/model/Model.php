@@ -1,10 +1,23 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
 class ModelGroups extends Model
 {
 
-    public static function getGroups($exclude = '')
+    public function getGroups($exclude = '')
     {
         $exclude = ($exclude != '' && is_numeric($exclude))
             ? "AND grp.user_group_id != " . (int)$exclude
@@ -42,7 +55,7 @@ class ModelGroups extends Model
         return $groups;
     }
 
-    public static function getDeletable($user_group_id, $count)
+    public function getDeletable($user_group_id, $count): bool
     {
         return !(
             ($user_group_id == 1) ||
@@ -52,7 +65,7 @@ class ModelGroups extends Model
         );
     }
 
-    public static function isEditable($user_group_id)
+    public function isEditable($user_group_id): bool
     {
         return (
             ((UGROUP != 1) && ($user_group_id == 1)) ||
@@ -61,12 +74,12 @@ class ModelGroups extends Model
         );
     }
 
-    public static function saveGroup()
+    public function saveGroup()
     {
         $save = true;
 
         $type = 'danger';
-        $arg = array();
+        $arg = [];
 
 
         $Template = Template::getInstance();
@@ -119,7 +132,7 @@ class ModelGroups extends Model
                 if ($user_group_id) {
                     $message = $Template->_get('groups_message_edit_success');
                     $type = 'success';
-                    $arg = array('id' => $user_group_id);
+                    $arg = ['id' => $user_group_id];
                 } else {
                     $message = $Template->_get('groups_message_edit_error');
                 }
@@ -131,7 +144,7 @@ class ModelGroups extends Model
         Router::response($type === 'success', $message, ABS_PATH . 'groups', $arg);
     }
 
-    public static function deleteGroup()
+    public function deleteGroup()
     {
 
 
@@ -173,7 +186,7 @@ class ModelGroups extends Model
         Router::response($type === 'success', $message, '/route/groups');
     }
 
-    public static function getGroup($user_group_id)
+    public function getGroup($user_group_id)
     {
         $sql = "
 				SELECT
@@ -204,39 +217,39 @@ class ModelGroups extends Model
         return $group;
     }
 
-    public static function getAllPermissions($user_group_id = null)
+    public function getAllPermissions($user_group_id = null)
     {
-        $permissions = array();
+        $permissions = [];
 
         $_permissions = Permission::get();
 
-        $group_permissons = self::getGroupPermissions($user_group_id);
+        $group_permissions = self::getGroupPermissions($user_group_id);
 
         foreach ($_permissions as $category => $permission) {
-            $permissions[$category] = array();
+            $permissions[$category] = [];
 
             $permissions[$category]['name'] = 'perm_header_' . $category;
 
             if (is_array($permission['perm'])) {
                 foreach ($permission['perm'] as $perm) {
-                    $permissions[$category]['perm'][$perm] = (in_array($perm, $group_permissons) ? true : false);
+                    $permissions[$category]['perm'][$perm] = in_array($perm, $group_permissions);
                 }
             }
 
-            if (isset($_permissions[$category]['icon']))
-                $permissions[$category]['icon'] = $_permissions[$category]['icon'];
+            if (isset($permission['icon']))
+                $permissions[$category]['icon'] = $permission['icon'];
 
-            $permissions[$category]['priority'] = $_permissions[$category]['priority'];
+            $permissions[$category]['priority'] = $permission['priority'];
         }
 
-        unset($_permissions, $group_permissons);
+        unset($_permissions, $group_permissions);
 
         return Arrays::multiSort($permissions, 'priority');
     }
 
-    public static function getGroupPermissions($user_group_id)
+    public function getGroupPermissions($user_group_id)
     {
-        $permissions = array();
+        $permissions = [];
 
         if (!empty($user_group_id)) {
             $sql = "
@@ -256,7 +269,7 @@ class ModelGroups extends Model
         return $permissions;
     }
 
-    public static function getGroupName($user_group_id)
+    public function getGroupName($user_group_id)
     {
         $sql = "
 				SELECT
@@ -267,18 +280,11 @@ class ModelGroups extends Model
 					user_group_id = '" . (int)$user_group_id . "'
 			";
 
-        $name = DB::cell($sql);
-
-        return $name;
+        return DB::cell($sql);
     }
 
-    public static function getDisabled($user_group_id)
+    public function getDisabled($user_group_id): bool
     {
-        $disabled = (
-            ($user_group_id == 1) or
-            ($user_group_id == 2)
-        );
-
-        return $disabled;
+        return ($user_group_id == 1) || ($user_group_id == 2);
     }
 }

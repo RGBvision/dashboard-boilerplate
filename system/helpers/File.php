@@ -231,8 +231,8 @@ class File
      */
     public static function putContents(string $filename, string $content, bool $create_file = true, bool $append = false, int $chmod = 0666): bool
     {
-        if (!$create_file && File::exists($filename)) {
-            throw new RuntimeException(vsprintf("%s(): The file '{$filename}' doesn't exist", array(__METHOD__)));
+        if (!$create_file && !File::exists($filename)) {
+            throw new RuntimeException(vsprintf("%s(): The file '$filename' doesn't exist", array(__METHOD__)));
         }
 
         Dir::create(dirname($filename));
@@ -242,7 +242,7 @@ class File
             : @fopen($filename, 'wb');
 
         if ($handler === false) {
-            throw new RuntimeException(vsprintf("%s(): The file '{$filename}' could not be created.", array(__METHOD__)));
+            throw new RuntimeException(vsprintf("%s(): The file '$filename' could not be created.", array(__METHOD__)));
         }
 
         $level = error_reporting();
@@ -252,7 +252,7 @@ class File
         $write = fwrite($handler, $content);
 
         if ($write === false) {
-            throw new RuntimeException(vsprintf("%s(): The file '{$filename}' could not be created.", array(__METHOD__)));
+            throw new RuntimeException(vsprintf("%s(): The file '$filename' could not be created.", array(__METHOD__)));
         }
 
         fclose($handler);

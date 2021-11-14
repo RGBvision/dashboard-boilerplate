@@ -1,14 +1,27 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
 class ModuleGroups extends Module
 {
 
-    public static $version = '1.0';
+    public static string $version = '3.0';
 
-    public static $date = '01.11.2021';
+    public static string $date = '01.11.2021';
 
-    public static $_moduleName = 'groups';
+    public static string $moduleName = 'groups';
 
 
     public function __construct()
@@ -39,8 +52,8 @@ class ModuleGroups extends Module
             10,
             $Template->_get('groups_menu_name'),
             'mdi mdi-key-chain',
+            ABS_PATH . 'groups',
             'groups',
-            self::$_moduleName,
             Navigation::SIDEBAR,
             Navigation::SIDEBAR_SETTINGS,
             '',

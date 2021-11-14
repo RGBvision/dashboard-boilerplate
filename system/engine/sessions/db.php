@@ -78,7 +78,7 @@ class Sessions
 					expire > ?
 			", $sessionId, date('Y-m-d H:i:s'));
 
-        if (($value = $qid['value']) && ($ip = $qid['ip']) && ($ip === IP::getIp())) {
+        if (($qid) && ($value = $qid['value']) && ($ip = $qid['ip']) && ($ip === IP::getIp())) {
             return $value;
         }
 

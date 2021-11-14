@@ -21,94 +21,108 @@ class Core
     public static $environment;
     public static $cookie_domain;
 
+
     /**
-     *  Конструктор класса Core.
+     * Check if valid Timezone
+     *
+     * @param $timezoneId
+     * @return bool
+     */
+    private static function isValidTimezoneId($timezoneId): bool
+    {
+        try {
+            new DateTimeZone($timezoneId);
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     *  Constructor
      */
     protected function __construct()
     {
 
         // Check if Timezone in HTTP header
-        if ($_http_timezone = $_SERVER['HTTP_TIMEZONE']) {
+        if (($_http_timezone = $_SERVER['HTTP_TIMEZONE']) && self::isValidTimezoneId($_http_timezone)) {
             define('TIMEZONE', $_http_timezone);
         }
 
-        // Загрузка конфигурации подключения к БД.
+        // Check if Timezone in cookie
+        if (!defined('TIMEZONE') && ($_browser_timezone = $_COOKIE['browser_timezone']) && self::isValidTimezoneId($_browser_timezone)) {
+            define('TIMEZONE', $_browser_timezone);
+        }
+
+        // DB connection configuration
         $config = [];
         include_once(DASHBOARD_DIR . '/configs/db.config.php');
 
-        // Загрузка конфигурации.
+        // System configuration
         self::loadConfig();
 
-        // Обработка ошибок.
+        // Errors handler
         self::phpErrors();
 
-        // Тип окружения.
-        self::$environment = CP_ENVIRONMENT;
+        // Environment type
+        self::$environment = SYSTEM_ENVIRONMENT;
 
-        // Заголовки ответа.
+        // HTTP headers
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
             'X-Engine: ' . APP_NAME,
             'X-Engine-Build: ' . APP_BUILD,
             'X-Engine-Copyright: (c) RGBvision ' . date('Y'),
-            'X-Engine-Site: https://rgbvision.net'
+            'X-Engine-Site: https://rgbvision.net',
         ];
 
-        // Установка кодировки UTF-8.
+        // UTF-8 encoding
         function_exists('mb_language') and mb_language('uni');
         function_exists('mb_regex_encoding') and mb_regex_encoding('UTF-8');
         function_exists('mb_internal_encoding') and mb_internal_encoding('UTF-8');
 
-        // Установка константы ABS_PATH.
+        // Define ABS_PATH.
         self::absPath();
 
-        // Подключение автозагрузчика.
+        // Loader
         require_once DASHBOARD_DIR . '/system/loader/Loader.php';
 
-        // Инициализация автозагрузчика.
+        // Loader initialization
         Loader::init();
 
-        // Загрузка EasyDB
+        // EasyDB
         Loader::addDirectory(DASHBOARD_DIR . '/libraries/db/');
 
-        // Загрузка SMARTY
+        // SMARTY
         require_once(DASHBOARD_DIR . '/libraries/Smarty/bootstrap.php');
 
-        // Загрузка классов движка системы.
+        // Engines
         Loader::addClasses([
-
-            // БД
             'DB' => DASHBOARD_DIR . '/system/engine/db/DB.php',
-
-            // Язык
             'i18n' => DASHBOARD_DIR . '/system/engine/language/i18n.php',
-
-            // Сессии
             'Session' => DASHBOARD_DIR . '/system/engine/sessions/Session.php',
-
-            // Шаблонизатор
             'Template' => DASHBOARD_DIR . '/system/engine/template/Template.php',
         ]);
 
-        // Загрузка классов ядра.
+        // Core classes
         Loader::addDirectory(DASHBOARD_DIR . '/system/core/');
 
-        // Загрузка вспомогательных классов.
+        // Helpers
         Loader::addDirectory(DASHBOARD_DIR . '/system/helpers/');
 
-        // Загрузка вспомогательных функций.
+        // Functions
         Loader::addFiles(DASHBOARD_DIR . '/system/functions/');
 
-        // Установка HOST.
+        // Define HOST
         self::setHost();
 
-        // Установка домена хранения cookies
+        // Set cookie domain
         Cookie::setDomain();
 
-        // Инициализация подключения к БД.
+        // DB initialization
         DB::init($config);
 
-        // Установка TimeZone.
+        // DB TimeZone
         $tz = (new DateTime('now', new DateTimeZone(TIMEZONE)))->format('P');
 
         switch (DB::$db_engine) {
@@ -121,16 +135,16 @@ class Core
 
         }
 
-        // Старт сессии.
+        // Session start
         Session::init();
 
-        // Инициализация установок.
+        // Load system settings
         Settings::init();
 
-        // Инициализация роутера.
+        // Router initialization
         Router::init();
 
-        // Загрузка алиасов роутера
+        // Router aliases
         $routes = [];
         include_once(DASHBOARD_DIR . '/configs/routes.php');
 
@@ -138,34 +152,34 @@ class Core
             Router::addAlias(ABS_PATH . $alias[0], $alias[1], $alias[2]);
         }
 
-        // Установка формата вывода даты и времени.
+        // DateTime format
         self::setDTFormat();
 
-        // Установка HEADERS ответа.
+        // Response HEADERS
         Response::setHeaders($headers);
 
-        // Установка языка по умолчанию.
+        // Set default language
         self::defaultLanguage();
 
-        // Установка настроек локали.
+        // Locale settings
         Locales::set(Session::getvar('current_language') ?? DEFAULT_LANGUAGE);
 
-        // Хук после инициализации ядра системы.
+        // Hook after system initialize
         Hooks::action('system_initialize');
     }
 
 
     /**
-     * Установка хоста.
+     * Define HOST
      */
     public static function setHost(): void
     {
         if (isset($_SERVER['HTTP_HOST'])) {
-            // Все символы в $_SERVER['HTTP_HOST'] переводятся в нижний регистр и проверяются на наличие недопустимых в соответствии со спецификацией RFC 952 и RFC 2181
+            // According to RFC 952 and RFC 2181 all characters in $_SERVER['HTTP_HOST'] are converted to lowercase and checked for invalid characters
             $_SERVER['HTTP_HOST'] = strtolower($_SERVER['HTTP_HOST']);
 
             if (!preg_match('/^\[?(?:[a-z0-9-:\]_]+\.?)+$/', $_SERVER['HTTP_HOST'])) {
-                // Если $_SERVER['HTTP_HOST'] не соответствует спецификации, то это скорее всего попытка взлома. Значит нужно завершить выполнение со статусом 400.
+                // Probably a hack attempt if $_SERVER['HTTP_HOST'] is out of specification. So stop execution with 400 status.
                 Response::setStatus(400);
                 Response::shutDown();
             }
@@ -190,7 +204,7 @@ class Core
 
 
     /**
-     * Установка константы ABS_PATH, которая содержит абсолютный путь с файлам системы.
+     * Define ABS_PATH with system files absolute path.
      */
     protected static function absPath(): void
     {
@@ -199,7 +213,7 @@ class Core
                 ? $_SERVER['PHP_SELF']
                 : $_SERVER['SCRIPT_NAME']);
 
-        if (defined('CP_DIR')) {
+        if (defined('DASHBOARD_DIR')) {
             $abs_path = dirname($abs_path);
         }
 
@@ -208,7 +222,7 @@ class Core
 
 
     /**
-     * Проверка защищенного (SSL) соединения.
+     * Check if SSL connection
      *
      * @return bool
      */
@@ -220,7 +234,7 @@ class Core
 
 
     /**
-     * Загрузка конфигурации.
+     * Load system configuration
      */
     protected static function loadConfig(): void
     {
@@ -231,6 +245,11 @@ class Core
         }
     }
 
+    /**
+     * Get language by browser locale
+     *
+     * @return string
+     */
     public static function getBrowserLang(): string
     {
 
@@ -259,7 +278,7 @@ class Core
 
 
     /**
-     * Установка языка по умолчанию.
+     * Set default language
      */
     public static function defaultLanguage(): void
     {
@@ -302,7 +321,7 @@ class Core
 
 
     /**
-     * Установка обработчика ошибок.
+     * Set error handler
      */
     protected static function phpErrors(): void
     {
@@ -323,7 +342,7 @@ class Core
 
 
     /**
-     * Установка формата вывода даты и времени.
+     * Set DateTime format
      */
     public static function setDTFormat(): void
     {
@@ -333,7 +352,7 @@ class Core
 
 
     /**
-     * Инициализация инстанса класса.
+     * Instantiate class
      *
      * @return Core|null
      */

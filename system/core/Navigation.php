@@ -108,6 +108,10 @@ class Navigation
 
         }
 
+        if (empty($nav_sort[$type])) {
+            return [];
+        }
+
         foreach ($nav_sort[$type] as $key => $nav) {
 
             if (!empty($nav)) {

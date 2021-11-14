@@ -127,7 +127,7 @@ var Users = {
                 {
                     data: 'last_activity',
                     render: function (data, type, row) {
-                        return data ? new Date(data).toLocaleString(navigator.language) : '-';
+                        return data ? new Date(data).toLocaleString($locale) : '-';
                     },
                     createdCell: function (td, cellData, rowData, row, col) {
                         $(td).addClass('d-none d-md-table-cell');
@@ -314,15 +314,6 @@ var Users = {
     addValidateMethods() {
 
         $.validator.addMethod(
-            "regex",
-            (value, element, regexp) => {
-                var re = new RegExp(regexp);
-                return re.test(value);
-            },
-            validator_i18n.required
-        );
-
-        $.validator.addMethod(
             "phoneWithCode",
             (value, element, arg) => {
 
@@ -366,36 +357,6 @@ var Users = {
             },
             validator_i18n.select
         );
-
-    },
-
-    // Show form validation messages as tooltip
-    customValidatorMessage(errorMap, errorList) {
-
-        // Удаляем все tooltip для валидных элементов
-        $.each(this.validElements(), (index, element) => {
-            var $element = $(element);
-            if ($element.hasClass("select2-hidden-accessible")) {
-                $("#select2-" + $element.attr("id") + "-container").parent().removeClass("border-danger");
-            } else {
-                $element.removeClass("is-invalid");
-            }
-            $element.attr("title", "")
-                .tooltip("dispose");
-        });
-
-        // Create new tooltips for invalid elements
-        $.each(errorList, (index, error) => {
-            var $element = $(error.element);
-            if ($element.hasClass("select2-hidden-accessible")) {
-                $("#select2-" + $element.attr("id") + "-container").parent().addClass("border-danger");
-            } else {
-                $element.addClass("is-invalid");
-            }
-            $element.tooltip("dispose") // Удаляем tooltip, если он есть на элементе
-                .attr("title", error.message)
-                .tooltip(); // Генерируем новый tooltip с сообщением об ошибке, которое предварительно воткнуто в title
-        });
 
     },
 
@@ -494,28 +455,9 @@ var Users = {
                     minlength: $.validator.format(validator_i18n.minLength)
                 },
             },
-            // errorPlacement: function () {
-            //     return false;
-            // },
-            showErrors: this.customValidatorMessage,
+            showErrors: DashboardCommon.validateCustomErrorMessage,
             errorClass: "is-invalid",
             validClass: "is-valid",
-            // highlight: function (element, errorClass, validClass) {
-            //     var elem = $(element);
-            //     if (elem.hasClass("select2-hidden-accessible")) {
-            //         $("#select2-" + elem.attr("id") + "-container").parent().addClass(errorClass);
-            //     } else {
-            //         elem.addClass(errorClass);
-            //     }
-            // },
-            // unhighlight: function (element, errorClass, validClass) {
-            //     var elem = $(element);
-            //     if (elem.hasClass("select2-hidden-accessible")) {
-            //         $("#select2-" + elem.attr("id") + "-container").parent().removeClass(errorClass);
-            //     } else {
-            //         elem.removeClass(errorClass);
-            //     }
-            // },
             submitHandler: (form) => {
                 form.submit();
             }

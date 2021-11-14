@@ -87,8 +87,8 @@ class User
 
             $row['phone'] = Valid::internationalPhone($row['phone'], $row['country_code']);
 
-            $row['deletable'] = self::isDeletable($row['user_id'], $row['user_group_id']) and ($row['owner'] != '1');
-            $row['editable'] = self::isEditable($row['user_id'], $row['user_group_id']);
+            $row['deletable'] = self::isDeletable($row['user_id'], $row['group_id']) and ($row['owner'] != '1');
+            $row['editable'] = self::isEditable($row['user_id'], $row['group_id']);
             $row['avatar'] = self::getAvatar((int)$row['user_id']);
 
             array_push($users, $row);
@@ -124,10 +124,10 @@ class User
     public static function getAvatar(int $id): string
     {
 
-        if ($file = File::find(DASHBOARD_DIR . '/uploads/avatars/' . md5($id) . '_*.jpg')[0]) {
-            $user_avatar = HOST . '/uploads/avatars/' . File::basename($file) . '?v=' . File::lastChange($file);
+        if ($file = File::find(DASHBOARD_DIR . '/uploads/avatars/' . md5($id) . '_*.jpg')[0] ?? null) {
+            $user_avatar = HOST . ABS_PATH . 'uploads/avatars/' . File::basename($file) . '?v=' . File::lastChange($file);
         } else {
-            $user_avatar = HOST . '/uploads/avatars/default.jpg';
+            $user_avatar = HOST . ABS_PATH . 'uploads/avatars/default.jpg';
         }
 
         return $user_avatar;

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge"/>
 
-    <title>{$data.page_title}</title>
+    <title>{$data.page_title} &middot; {$APP_NAME}</title>
 
     <meta name="description" content="">
     <meta name="author" content="">
@@ -22,7 +22,7 @@
     {$styles_tpl}
 
 </head>
-<body data-page-id="{$data.page}">
+<body data-page-id="{$data.page}" data-timezone="{$smarty.const.TIMEZONE}" data-theme="{$smarty.cookies.theme|default:'light'}">
 <div class="main-wrapper">
 
     <nav class="sidebar">

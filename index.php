@@ -71,9 +71,9 @@ $base_template = (Request::request('only') && (int)Request::request('only') === 
 // Push all data to template engine
 $Template
 
+    ->assign('APP_NAME', APP_NAME)
     ->assign('APP_BUILD', APP_BUILD)
 
-    ->assign('ABS_PATH', ABS_PATH)
     ->assign('_is_ajax', Request::isAjax())
 
     ->assign('dependencies', Dependencies::get())
@@ -83,6 +83,7 @@ $Template
     ->assign('current_language', Session::getvar('current_language'))
     ->assign('sidebar_headers', Navigation::$sidebar_headers)
     ->assign('sidebar_menu_items', Navigation::get(Navigation::SIDEBAR))
+    ->assign('user_menu_items', Navigation::get(Navigation::USER))
 
     ->assign('styles_tpl', $Template->fetch('styles.tpl'))
     ->assign('sidebar_tpl', $Template->fetch('sidebar.tpl'))

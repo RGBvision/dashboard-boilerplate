@@ -1,26 +1,39 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
 class ControllerProfile extends Controller
 {
 
-    public static string $route_id;
-    protected static Model $model;
-
-
-    
+    /**
+     * Constructor
+     */
     public function __construct()
     {
-        self::$route_id = Router::getId();
-        self::$model = Router::model();
 
+        // Parent
+        parent::__construct();
+
+        // Check if user has permission
+        if (!Permission::check('profile_view')) {
+            Router::response(false, '', ABS_PATH);
+        }
+
+        // Add JS dependencies
         $files = [
-            ABS_PATH . 'assets/vendors/select2/select2.min.css',
-            ABS_PATH . 'assets/vendors/select2/select2.min.js',
-            ABS_PATH . 'assets/vendors/sweetalert2/sweetalert2.min.css',
-            ABS_PATH . 'assets/vendors/sweetalert2/sweetalert2.min.js',
-            ABS_PATH . 'assets/vendors/libphonenumber/libphonenumber.js',
-            ABS_PATH . 'assets/vendors/jquery-validation/jquery.validate.min.js',
+            ABS_PATH . 'assets/vendors/libphonenumber/libphonenumber-max.js',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.css',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.js',
             ABS_PATH . 'assets/vendors/tinymce/tinymce.min.js',
@@ -35,29 +48,31 @@ class ControllerProfile extends Controller
         }
     }
 
-
-    
+    /**
+     * Profile page
+     */
     public static function index()
     {
 
-        if (!Permission::check('profile_view')) {
-            Request::redirect(ABS_PATH);
-            Response::shutDown();
-        }
-
+        // Template engine instance
         $Template = Template::getInstance();
 
+        // Load i18n variables
         $Template->_load(DASHBOARD_DIR . '/app/modules/profile/i18n/' . Session::getvar('current_language') . '.ini', 'main');
         $Template->_load(DASHBOARD_DIR . '/app/modules/profile/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
         $data = [
 
+            // Page ID
             'page' => 'profile',
 
+            // Page Title
             'page_title' => $Template->_get('profile_page_title'),
 
+            // Page Header
             'header' => $Template->_get('profile_page_header'),
 
+            // Breadcrumbs
             'breadcrumbs' => [
                 [
                     'text' => $Template->_get('main_page'),
@@ -76,29 +91,43 @@ class ControllerProfile extends Controller
             ],
         ];
 
-        $user = self::$model::getUser(UID);
+        // Get user data
+        $user = self::$model->getUser(UID);
 
+        // Push data to template engine
         $Template
             ->assign('data', $data)
-            ->assign('_is_ajax', Request::isAjax())
             ->assign('countries', Valid::getAllCountries())
             ->assign('user', $user)
             ->assign('cropper_tpl', $Template->fetch(DASHBOARD_DIR . '/app/modules/profile/view/cropper.tpl'))
             ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/profile/view/index.tpl'));
     }
 
+    /**
+     * Save user avatar
+     * ToDo: Crop and resize
+     */
     public static function save_avatar()
     {
+
+        $success = false;
+
         if (
             UID && ($photo = Request::post('new_avatar'))
         ) {
-            User::saveAvatar(UID, $photo);
+            $success = User::saveAvatar(UID, $photo);
         }
 
-        Request::isAjax() ? Response::shutDown() : Request::redirect(Request::referrer());
+        Router::response($success, '', Request::referrer());
 
     }
 
+    /**
+     * Set user settings
+     *
+     * @param string $key
+     * @param string $val
+     */
     public static function settings_set(string $key, string $val)
     {
         if (

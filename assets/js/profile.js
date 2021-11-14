@@ -148,10 +148,9 @@ var Profile = {
                 let imgSrc = cropper.getCroppedCanvas({
                     width: 1000
                 }).toDataURL('image/jpeg', 100);
-                $('.profile-pic').eq(0).attr('src', imgSrc);
                 $('#newAvatar').val(imgSrc);
                 avatarEditModal.modal('hide');
-                $.post('/profile/save_avatar', {"new_avatar": imgSrc}, () => location.reload());
+                $.post('/profile/save_avatar', {"new_avatar": imgSrc}, () => $('.user-profile-pic').attr('src', imgSrc));
                 return false;
             });
 
@@ -169,7 +168,7 @@ var Profile = {
     tinymceEditor() {
         if ($(".tinymce-editor").length) {
 
-            const useDarkMode = $('body').hasClass('-theme-dark');
+            const useDarkMode = $('body').data('theme') === 'dark';
 
             tinymce.init({
                 selector: '.tinymce-editor',

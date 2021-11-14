@@ -64,7 +64,7 @@ class Template extends Smarty
         // don't show SMARTY errors
         self::muteExpectedErrors();
 
-        $this->assign('CP_DIR', DASHBOARD_DIR);
+        $this->assign('DASHBOARD_DIR', DASHBOARD_DIR);
         $this->assign('ABS_PATH', ABS_PATH);
         $this->assign('DATE_FORMAT', DATE_FORMAT);
         $this->assign('TIME_FORMAT', TIME_FORMAT);
@@ -77,7 +77,7 @@ class Template extends Smarty
             return $file;
         }
 
-        $r_tpl = str_replace(DASHBOARD_DIR, DASHBOARD_DIR . '/templates/' . THEME_FOLDER, $file);
+        $r_tpl = str_replace(DASHBOARD_DIR, DASHBOARD_DIR . '/app/templates/' . THEME_FOLDER, $file);
 
         return (file_exists($r_tpl) && is_file($r_tpl)) ? $r_tpl : $file;
     }

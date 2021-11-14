@@ -1,18 +1,78 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.1
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
+
 class ControllerErrors extends Controller
 {
 
-    public static string $route_id;
-    protected static Model $model;
-
+    /**
+     * Constructor
+     */
     public function __construct()
     {
-        self::$route_id = Router::getId();
-        self::$model = Router::model();
+        parent::__construct();
     }
 
+    /**
+     * Display error page
+     *
+     * @param string $header
+     * @param string $message
+     */
+    private static function displayError(string $header, string $message)
+    {
 
+        $Template = Template::getInstance();
+
+        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+
+        $data = [
+
+            'page' => 'errors',
+
+            'page_title' => $Template->_get('error_page_title'),
+
+            'header' => $Template->_get('error_page_title'),
+
+            'breadcrumbs' => [
+                [
+                    'text' => $Template->_get('main_page'),
+                    'href' => ABS_PATH . 'dashboard',
+                    'page' => 'home',
+                    'active' => false,
+                ],
+                [
+                    'text' => $Template->_get('error_breadcrumb'),
+                    'href' => '',
+                    'page' => '',
+                    'active' => true,
+                ],
+            ],
+        ];
+
+        $Template
+            ->assign('data', $data)
+            ->assign('_header', $header)
+            ->assign('_message', $message)
+            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
+
+    }
+
+    /**
+     * 404 error (default)
+     */
     public static function index()
     {
 
@@ -20,41 +80,16 @@ class ControllerErrors extends Controller
 
         $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
-        $_header = $Template->_get('header_404');
-        $_message = $Template->_get('message_404');
+        $header = $Template->_get('header_404');
+        $message = $Template->_get('message_404');
 
-        $data = [
+        self::displayError($header, $message);
 
-            'page' => 'errors',
-
-            'page_title' => $Template->_get('404_page_title'),
-
-            'header' => $Template->_get('404_page_title'),
-
-            'breadcrumbs' => [
-                [
-                    'text' => $Template->_get('main_page'),
-                    'href' => ABS_PATH,
-                    'page' => 'home',
-                    'active' => false,
-                ],
-                [
-                    'text' => $Template->_get('404_breadcrumb'),
-                    'href' => '',
-                    'page' => '',
-                    'active' => true,
-                ],
-            ],
-        ];
-
-        $Template
-            ->assign('data', $data)
-            ->assign('_header', $_header)
-            ->assign('_message', $_message)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
     }
 
-
+    /**
+     * Module not found
+     */
     public static function module()
     {
 
@@ -62,46 +97,18 @@ class ControllerErrors extends Controller
 
         $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
-        $request = Request::get('model');
+        $module = Request::get('module');
 
-        $_header = $Template->_get('header_model');
-        $_message = sprintf($Template->_get('message_module'), $request);
+        $header = $Template->_get('header_module');
+        $message = sprintf($Template->_get('message_module'), $module);
 
-        if (Request::isAjax())
-            self::$model->message($_header, $_message);
+        self::displayError($header, $message);
 
-        $data = [
-
-            'page' => 'errors',
-
-            'page_title' => $Template->_get('error_page_title'),
-
-            'header' => $Template->_get('error_page_title'),
-
-            'breadcrumbs' => [
-                [
-                    'text' => $Template->_get('main_page'),
-                    'href' => './',
-                    'page' => 'dashboard',
-                    'active' => false,
-                ],
-                [
-                    'text' => $Template->_get('error_page_title'),
-                    'href' => '',
-                    'page' => '',
-                    'active' => true,
-                ],
-            ],
-        ];
-
-        $Template
-            ->assign('data', $data)
-            ->assign('_header', $_header)
-            ->assign('_message', $_message)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
     }
 
-
+    /**
+     * Model not found
+     */
     public static function model()
     {
 
@@ -109,46 +116,18 @@ class ControllerErrors extends Controller
 
         $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
-        $request = Request::get('model');
+        $model = Request::get('model');
 
-        $_header = $Template->_get('header_model');
-        $_message = sprintf($Template->_get('message_model'), $request);
+        $header = $Template->_get('header_model');
+        $message = sprintf($Template->_get('message_model'), $model);
 
-        if (Request::isAjax())
-            self::$model->message($_header, $_message);
+        self::displayError($header, $message);
 
-        $data = [
-
-            'page' => 'errors',
-
-            'page_title' => $Template->_get('error_page_title'),
-
-            'header' => $Template->_get('error_page_title'),
-
-            'breadcrumbs' => [
-                [
-                    'text' => $Template->_get('main_page'),
-                    'href' => './',
-                    'page' => 'dashboard',
-                    'active' => false,
-                ],
-                [
-                    'text' => $Template->_get('error_page_title'),
-                    'href' => '',
-                    'page' => '',
-                    'active' => true,
-                ],
-            ],
-        ];
-
-        $Template
-            ->assign('data', $data)
-            ->assign('_header', $_header)
-            ->assign('_message', $_message)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
     }
 
-
+    /**
+     * Controller not found
+     */
     public static function controller()
     {
 
@@ -156,43 +135,18 @@ class ControllerErrors extends Controller
 
         $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
-        $request = Request::get('controller');
+        $controller = Request::get('controller');
 
-        $_header = $Template->_get('header_controller');
-        $_message = sprintf($Template->_get('message_controller'), $request);
+        $header = $Template->_get('header_controller');
+        $message = sprintf($Template->_get('message_controller'), $controller);
 
-        $data = [
+        self::displayError($header, $message);
 
-            'page' => 'errors',
-
-            'page_title' => $Template->_get('error_page_title'),
-
-            'header' => $Template->_get('error_page_title'),
-
-            'breadcrumbs' => [
-                [
-                    'text' => $Template->_get('main_page'),
-                    'href' => './',
-                    'page' => 'dashboard',
-                    'active' => false,
-                ],
-                [
-                    'text' => $Template->_get('error_page_title'),
-                    'href' => '',
-                    'page' => '',
-                    'active' => true,
-                ],
-            ],
-        ];
-
-        $Template
-            ->assign('data', $data)
-            ->assign('_header', $_header)
-            ->assign('_message', $_message)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
     }
 
-
+    /**
+     * Method not found
+     */
     public static function method()
     {
 
@@ -201,46 +155,22 @@ class ControllerErrors extends Controller
         $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $request = Request::get('method');
+
         $parts = [];
 
         if (isset($request))
             $parts = explode('/', preg_replace('/[^a-zA-Z0-9_\/]/', '', trim((string)$request, '/')));
 
-        $_header = $Template->_get('header_method');
-        $_message = sprintf($Template->_get('message_method'), $parts[0], $parts[1]);
+        $header = $Template->_get('header_method');
+        $message = sprintf($Template->_get('message_method'), $parts[0], $parts[1]);
 
-        $data = [
+        self::displayError($header, $message);
 
-            'page' => 'errors',
-
-            'page_title' => $Template->_get('error_page_title'),
-
-            'header' => $Template->_get('error_page_title'),
-
-            'breadcrumbs' => [
-                [
-                    'text' => $Template->_get('main_page'),
-                    'href' => './',
-                    'page' => 'dashboard',
-                    'active' => false,
-                ],
-                [
-                    'text' => $Template->_get('error_page_title'),
-                    'href' => '',
-                    'page' => '',
-                    'active' => true,
-                ],
-            ],
-        ];
-
-        $Template
-            ->assign('data', $data)
-            ->assign('_header', $_header)
-            ->assign('_message', $_message)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
     }
 
-
+    /**
+     * Access denied
+     */
     public static function denied()
     {
 
@@ -248,37 +178,10 @@ class ControllerErrors extends Controller
 
         $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
-        $_header = $Template->_get('header_denied');
-        $_message = $Template->_get('message_denied');
+        $header = $Template->_get('header_denied');
+        $message = $Template->_get('message_denied');
 
-        $data = [
+        self::displayError($header, $message);
 
-            'page' => 'errors',
-
-            'page_title' => $Template->_get('error_page_title'),
-
-            'header' => $Template->_get('error_page_title'),
-
-            'breadcrumbs' => [
-                [
-                    'text' => $Template->_get('main_page'),
-                    'href' => './',
-                    'page' => 'dashboard',
-                    'active' => false,
-                ],
-                [
-                    'text' => $Template->_get('error_page_title'),
-                    'href' => '',
-                    'page' => '',
-                    'active' => true,
-                ],
-            ],
-        ];
-
-        $Template
-            ->assign('data', $data)
-            ->assign('_header', $_header)
-            ->assign('_message', $_message)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
     }
 }

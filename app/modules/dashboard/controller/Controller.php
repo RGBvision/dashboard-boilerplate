@@ -1,22 +1,38 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2021, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.2
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
+ */
 
 class ControllerDashboard extends Controller
 {
 
-    public static string $route_id;
-    protected static Model $model;
-
+    /**
+     * Constructor
+     */
     public function __construct()
     {
 
+        parent::__construct();
+
+        // Check if user has permission at least to view module default page
         if (!Permission::check('dashboard_view')) {
+            // Redirect to login page because dashboard is default module for authorized users
+            // So we assume that user is not logged in if user has no access to this module
             Router::response(false, '', ABS_PATH . 'login');
         }
 
-        self::$route_id = Router::getId();
-        self::$model = Router::model();
-
+        // Add JS dependencies
         $files = [
             ABS_PATH . 'assets/vendors/progressbar.js/progressbar.min.js',
             ABS_PATH . 'assets/js/dashboard.js',
@@ -30,21 +46,30 @@ class ControllerDashboard extends Controller
         }
     }
 
+    /**
+     * Default page
+     */
     public static function index()
     {
 
+        // Template engine instance
         $Template = Template::getInstance();
 
+        // Load i18n variables
         $Template->_load(DASHBOARD_DIR . '/app/modules/dashboard/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $data = [
 
+            // Page ID
             'page' => 'dashboard',
 
+            // Page Title
             'page_title' => $Template->_get('dashboard_page_title'),
 
+            // Page Header
             'header' => $Template->_get('dashboard_page_header'),
 
+            // Breadcrumbs
             'breadcrumbs' => [
                 [
                     'text' => $Template->_get('dashboard_breadcrumb'),
@@ -55,94 +80,63 @@ class ControllerDashboard extends Controller
             ],
         ];
 
+        // Load i18n variables
         $Template->_load(DASHBOARD_DIR . '/app/modules/dashboard/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
+        // Push data to template engine
         $Template
             ->assign('data', $data)
-            ->assign('_is_ajax', Request::isAjax())
-            ->assign('storage_size', self::$model::getStorageSize())
-            ->assign('storage_usage', self::$model::getStorageUsage())
+            ->assign('storage_size', self::$model->getStorageSize())
+            ->assign('storage_usage', self::$model->getStorageUsage())
             ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/dashboard/view/index.tpl'));
     }
 
+    /**
+     * Backup database
+     */
     public static function backup_db()
     {
-        $status = DB::backup();
-        Response::setStatus($status ? 200 : 503);
+        $status = false;
+        if (Permission::check('dashboard_backup_db')) {
+            $status = DB::backup();
+            Response::setStatus($status ? 200 : 503);
+        }
         Json::show(['success' => $status], true);
     }
 
+    /**
+     * Clear cache: delete SMARTY cache files
+     */
     public static function clear_cache()
     {
-        Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/smarty');
-        Json::show(['success' => true], true);
+        if (Permission::check('dashboard_clear_cache')) {
+            Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/smarty');
+            Json::show(['success' => true], true);
+        }
+        Json::show(['success' => false], true);
     }
 
 
-    public static function copy_template(string $src, string $dst, string $newname): void
-    {
-        $dir = opendir($src);
-
-        if (!mkdir($dst) && !is_dir($dst)) {
-            throw new RuntimeException(sprintf('Directory "%s" was not created', $dst));
-        }
-
-        while (false !== ($file = readdir($dir))) {
-            if (($file !== '.') && ($file !== '..')) {
-                if (is_dir($src . '/' . $file)) {
-                    self::copy_template($src . '/' . $file, $dst . '/' . $file, $newname);
-                } else {
-
-                    $new_file = str_replace(
-                        'example',
-                        preg_replace('/\s+/', '', strtolower($newname)),
-                        $file
-                    );
-
-                    $_new_name = explode(' ', $newname);
-
-                    foreach ($_new_name as &$part) {
-                        $part = ucfirst($part);
-                    }
-
-                    $content = File::getContents($src . '/' . $file);
-
-                    $new_content = str_replace(
-                        [
-                            'example',
-                            'Example',
-                            'EXAMPLE',
-                            ':date:',
-                        ],
-                        [
-                            strtolower(implode('', $_new_name)),
-                            implode('', $_new_name),
-                            implode(' ', $_new_name),
-                            date('d.m.Y'),
-                        ],
-                        $content
-                    );
-
-                    File::putContents($dst . '/' . $new_file, $new_content);
-
-                }
-            }
-        }
-
-        closedir($dir);
-    }
-
+    /**
+     * Generate new module
+     */
     public static function generate()
     {
 
+        $success = false;
+
         if (
-            ($name = Request::post('module')) &&
-            (!Dir::exists(DASHBOARD_DIR . "/modules/$name"))
+            (UID === 1) &&
+            ($name = preg_replace('/[^a-z ]/i', '', Request::post('module'))) &&
+            ($dir_name = preg_replace('/\s+/', '', strtolower($name))) &&
+            (!Dir::exists(DASHBOARD_DIR . "/app/modules/$dir_name"))
         ) {
-            self::copy_template(DASHBOARD_DIR . "/tmp/module_template", DASHBOARD_DIR . '/app/modules/' . preg_replace('/\s+/', '', strtolower($name)), $name);
+            self::$model->copy_template(DASHBOARD_DIR . "/tmp/module_template", DASHBOARD_DIR . "/app/modules/$dir_name", $name);
+            $success = Dir::exists(DASHBOARD_DIR . "/app/modules/$dir_name");
         }
 
-        Request::redirect(Request::referrer());
+        Router::response($success, '', Request::referrer());
+
     }
 
 }

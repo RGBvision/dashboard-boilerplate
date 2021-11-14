@@ -2,7 +2,7 @@
 
 define('TIMEZONE', 'Europe/Moscow');
 
-define('CP_ENVIRONMENT', 'public');
+define('SYSTEM_ENVIRONMENT', 'public');
 
 define('DARK_THEME', true);
 
@@ -40,7 +40,7 @@ define('SYSTEM_CACHE_LIFETIME', 300);
 
 define('PHP_DEBUGGING', false);
 
-define('SELF_ERROR', true);
+define('SELF_ERROR', false);
 
 define('SMARTY_DEBUGGING', false);
 

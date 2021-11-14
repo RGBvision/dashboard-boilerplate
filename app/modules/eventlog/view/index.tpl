@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <table id="eventlogControlTable" class="table table-hover text-nowrap">
+                <table id="eventlogControlTable" class="table table-hover text-nowrap align-middle">
                     <thead>
                     <tr>
                         <th class="text-start">{#eventlog_dt#}</th>

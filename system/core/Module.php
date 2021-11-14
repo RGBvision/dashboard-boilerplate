@@ -20,17 +20,17 @@ abstract class Module
     /**
      * @var string Module version
      */
-    public static $version;
+    public static string $version;
 
     /**
      * @var string Module release date
      */
-    public static $date;
+    public static string $date;
 
     /**
      * @var string Module system name
      */
-    public static $moduleName;
+    public static string $moduleName;
 
     /**
      * Constructor

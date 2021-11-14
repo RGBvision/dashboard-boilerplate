@@ -25,6 +25,7 @@ class ControllerLogin extends Controller
 
         parent::__construct();
 
+        // Add JS dependencies
         Dependencies::add(ABS_PATH . 'assets/js/login.js', 100);
 
     }
@@ -36,6 +37,7 @@ class ControllerLogin extends Controller
      */
     private static function displayLoginForm(?string $message = null, ?string $error = null): void
     {
+
         // Template engine instance
         $Template = Template::getInstance();
 

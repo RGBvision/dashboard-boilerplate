@@ -20,17 +20,17 @@ class ModuleLogin extends Module
     /**
      * @var string Module version
      */
-    public static $version = '3.1';
+    public static string $version = '3.1';
 
     /**
      * @var string Module release date
      */
-    public static $date = '07.10.2021';
+    public static string $date = '07.10.2021';
 
     /**
      * @var string Module system name
      */
-    public static $moduleName = 'login';
+    public static string $moduleName = 'login';
 
     /**
      * Constructor
@@ -40,6 +40,26 @@ class ModuleLogin extends Module
 
         // Parent
         parent::__construct();
+
+        // Template engine instance
+        $Template = Template::getInstance();
+
+        // Load i18n variables
+        $Template->_load(DASHBOARD_DIR . '/app/modules/login/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+
+        // Add navigation entry
+        Navigation::add(
+            500,
+            $Template->_get('login_logout'),
+            'mdi mdi-logout',
+            ABS_PATH . 'logout',
+            'logout',
+            Navigation::USER,
+            1,
+            '',
+            '',
+            false
+        );
 
     }
 
