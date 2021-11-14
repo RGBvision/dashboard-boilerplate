@@ -11,7 +11,7 @@ const DashboardCommon = {
 
     build() {
         this.setTimezoneCookie();
-        //this.setThemeCookie();
+        this.setThemeCookie();
         this.addValidateMethods();
         this.initializeClipboardPlugin();
         this.initializeBootstrapTooltip();
@@ -34,7 +34,7 @@ const DashboardCommon = {
         const timezone = $body.data('timezone');
         const browser_timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-        if (timezone.length && browser_timezone && (browser_timezone !== timezone)) {
+        if (timezone?.length && browser_timezone && (browser_timezone !== timezone)) {
             Cookies.set('browser_timezone', browser_timezone, {expires: 365, path: '/'});
             location.reload();
         }

@@ -22,7 +22,7 @@
     {$styles_tpl}
 
 </head>
-<body data-page-id="{$data.page}">
+<body data-page-id="{$data.page}" data-timezone="{$smarty.const.TIMEZONE}" data-theme="{$smarty.cookies.theme|default:'light'}">
 
 <!-- CONTENT -->
 {$content}
