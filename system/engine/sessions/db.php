@@ -155,7 +155,7 @@ class Sessions
 
     public static function _gc($maxlifetime)
     {
-        $statement = EasyStatement::open()->with("expire < " . date('Y-m-d H:i:s', (time() - (int)$maxlifetime)));
+        $statement = EasyStatement::open()->with("expire < " . date('Y-m-d H:i:s', time()));
         $session_res = DB::delete("sessions", $statement->values());
 
         if (!$session_res) {
