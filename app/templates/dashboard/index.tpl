@@ -48,12 +48,12 @@
                 <i class="mdi mdi-menu"></i>
             </a>
             <div class="navbar-content">
-                <form class="search-form">
+                <form class="search-form" autocomplete="off">
                     <div class="input-group">
                         <div class="input-group-text">
                             <i class="mdi mdi-magnify"></i>
                         </div>
-                        <input type="text" class="form-control" id="navbarForm" placeholder="{#search_form#}">
+                        <input type="search" autocomplete="off" class="form-control" id="navbarForm" placeholder="{#search_form#}">
                     </div>
                 </form>
                 <ul class="navbar-nav">
