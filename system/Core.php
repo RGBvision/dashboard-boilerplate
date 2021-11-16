@@ -96,19 +96,19 @@ class Core
         // SMARTY
         require_once(DASHBOARD_DIR . '/libraries/Smarty/bootstrap.php');
 
-        // Engines
+        // Drivers
         Loader::addClasses([
-            'DB' => DASHBOARD_DIR . '/system/engine/db/DB.php',
-            'i18n' => DASHBOARD_DIR . '/system/engine/language/i18n.php',
-            'Session' => DASHBOARD_DIR . '/system/engine/sessions/Session.php',
-            'Template' => DASHBOARD_DIR . '/system/engine/template/Template.php',
+            'DB' => DASHBOARD_DIR . '/system/drivers/db/DB.php',
+            'i18n' => DASHBOARD_DIR . '/system/drivers/language/i18n.php',
+            'Session' => DASHBOARD_DIR . '/system/drivers/sessions/Session.php',
+            'Template' => DASHBOARD_DIR . '/system/drivers/template/Template.php',
         ]);
 
         // Core classes
         Loader::addDirectory(DASHBOARD_DIR . '/system/core/');
 
-        // Helpers
-        Loader::addDirectory(DASHBOARD_DIR . '/system/helpers/');
+        // Common classes
+        Loader::addDirectory(DASHBOARD_DIR . '/system/common/');
 
         // Functions
         Loader::addFiles(DASHBOARD_DIR . '/system/functions/');

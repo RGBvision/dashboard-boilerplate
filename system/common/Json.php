@@ -17,10 +17,10 @@
 class Json
 {
 
-	protected function __construct()
-	{
-		//---
-	}
+    protected function __construct()
+    {
+        //---
+    }
 
     /**
      * Convert array to JSON
@@ -29,20 +29,20 @@ class Json
      * @param int $flags
      * @return string
      */
-    public static function encode(array $array, int $flags = JSON_UNESCAPED_UNICODE): string
-	{
-		$json = json_encode($array, $flags); // JSON_UNESCAPED_UNICODE
+    public static function encode(array $array, int $flags = 0): string
+    {
+        $json = json_encode($array, $flags); // JSON_UNESCAPED_UNICODE
 
-		if ($json === false) {
+        if ($json === false) {
             $json = json_encode(['jsonError', json_last_error_msg()]);
         }
 
-		if ($json === false) {
+        if ($json === false) {
             $json = '{"jsonError": "unknown"}';
         }
 
-		return $json;
-	}
+        return $json;
+    }
 
     /**
      * Convert JSON to array or object
@@ -52,9 +52,9 @@ class Json
      * @return mixed
      */
     public static function decode(string $string, bool $object = false)
-	{
-		return json_decode($string, !$object);
-	}
+    {
+        return json_decode($string, !$object);
+    }
 
     /**
      * Output JSON
@@ -64,23 +64,23 @@ class Json
      */
     public static function show(array $array, bool $shutdown = false): void
     {
-		$headers = array(
-			'Pragma: no-cache',
-			'Cache-Control: private, no-cache',
-			'Content-Disposition: inline; filename="response.json"',
-			'Vary: Accept',
-			'Content-type: application/json; charset=utf-8',
-            'Expires: ' . gmdate('r', time() + (OUTPUT_EXPIRE ? OUTPUT_EXPIRE_OFFSET : 0))
-		);
+        $headers = [
+            'Pragma: no-cache',
+            'Cache-Control: private, no-cache',
+            'Content-Disposition: inline; filename="response.json"',
+            'Vary: Accept',
+            'Content-type: application/json; charset=utf-8',
+            'Expires: ' . gmdate('r', time() + (OUTPUT_EXPIRE ? OUTPUT_EXPIRE_OFFSET : 0)),
+        ];
 
-		Response::setHeaders($headers);
+        Response::setHeaders($headers);
 
-		$json = self::encode($array, 0);
+        $json = self::encode($array, 0);
 
-		echo $json;
+        echo $json;
 
-		if ($shutdown) {
+        if ($shutdown) {
             Response::shutDown();
         }
-	}
+    }
 }
