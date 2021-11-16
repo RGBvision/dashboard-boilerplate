@@ -52,13 +52,13 @@
     ├── /libraries              # 3rd party PHP plugins
     └── /system                 # System files
         ├── /common             # Common classes
-        ├── /core               # Core system classes
+        ├── /core               # Core classes
         ├── /drivers            # Drivers (DB, Session, etc.)
         ├── /functions          # Common functios
         ├── /i18n               # Back-end translations
         ├── /loader             # System loader
         ├── config.php          # Default system configuration 
-        ├── Core.php            # Core class 
+        ├── Core.php            # Core main class 
         ├── errors.php          # Runtime errors handler
         └── init.php            # System initialization 
     ├── /tmp                    # Cache and temporary files
