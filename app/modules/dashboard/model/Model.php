@@ -17,6 +17,27 @@
 class ModelDashboard extends Model
 {
 
+    /**
+     * Get number of visits
+     * GENERATED DATA FOR DEMO PURPOSES ONLY
+     *
+     * @return string
+     */
+    public function getVisits(): string
+    {
+
+        $data = [];
+
+        for ($i = 0; $i < 28; $i++) {
+            $data[date('Y-m-d', strtotime("today -$i days"))] = round(((int)date('z', strtotime("today -$i days")) % 22) * (int)date('N', strtotime("today -$i days"))) + 500;
+        }
+
+        ksort($data);
+
+        return Json::encode($data);
+
+    }
+
     public function getStorageSize(): int
     {
         return 100 * pow(1024, 3);

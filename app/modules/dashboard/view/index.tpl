@@ -1,4 +1,14 @@
 <div class="row">
+    <div class="col-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">{#dashboard_title_visits#}</h6>
+            </div>
+            <div class="card-body">
+                <div id="dailyVisitsChart" data-chart='{$visits}' data-series="{#dashboard_title_visits#}"></div>
+            </div>
+        </div>
+    </div>
     <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
         <div class="card">
             <div class="card-header">

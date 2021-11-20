@@ -49,4 +49,24 @@ var ajaxErrorStatus = 'No connection. Check your Internet connection.',
         "email": "Please enter email address",
         "email_used": "This email address is already in use",
         "equalTo": "Please enter the same value again",
+    },
+    apex_i18n = {
+        "name": "en",
+        "options": {
+            "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+            "toolbar": {
+                "exportToSVG": "Download SVG",
+                "exportToPNG": "Download PNG",
+                "menu": "Menu",
+                "selection": "Selection",
+                "selectionZoom": "Selection Zoom",
+                "zoomIn": "Zoom In",
+                "zoomOut": "Zoom Out",
+                "pan": "Panning",
+                "reset": "Reset Zoom"
+            }
+        }
     };

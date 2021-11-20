@@ -1,16 +1,6 @@
-const gridLineColor = 'rgba(128,128,128,0.25)';
+let colorScheme;
 
-const colors = {
-    primary: "#0095ff",
-    secondary: "#545454",
-    success: "#1bb322",
-    info: "#0dcaf0",
-    warning: "#ffc107",
-    danger: "#de3131",
-    light: "#f0f0f0",
-    dark: "#15202B",
-    muted: "#888888"
-};
+const fontFamily = "'Roboto', Helvetica, sans-serif";
 
 const Dashboard = {
 
@@ -20,6 +10,8 @@ const Dashboard = {
     },
 
     build() {
+        this.setColorScheme();
+        this.visitsChart();
         this.storageChart();
     },
 
@@ -29,11 +21,165 @@ const Dashboard = {
         this.onClearCache();
     },
 
+    setColorScheme() {
+
+        colorScheme = {
+            gridLineColor: $body.data('theme') === 'dark' ? "#1a2835" : "#f0f0f0",
+            colors: {
+                primary: "#0095ff",
+                secondary: "#545454",
+                success: "#1bb322",
+                info: "#0dcaf0",
+                warning: "#ffc107",
+                danger: "#de3131",
+                light: "#f0f0f0",
+                dark: "#15202B",
+                muted: $body.data('theme') === 'dark' ? "#cccccc" : "#888888",
+                bodyColor: $body.data('theme') === 'dark' ? "#f0f0f0" : "#15202B",
+                cardBg: $body.data('theme') === 'dark' ? "#15202B" : "#ffffff",
+                gridBorder: $body.data('theme') === 'dark' ? "#1a2835" : "#f0f0f0",
+            }
+        }
+
+        $window.on('themechange', () => {
+            this.setColorScheme();
+        });
+
+    },
+
+    visitsChart() {
+        if ($('#dailyVisitsChart').length) {
+
+            const _chartData = $('#dailyVisitsChart').data('chart');
+
+            const chartData = (typeof _chartData == "object") ? _chartData : JSON.parse(_chartData);
+
+            if (Object.keys(chartData).length) {
+
+                let chartKeys = [];
+                let chartValues = [];
+
+                for (const [key, value] of Object.entries(chartData)) {
+                    chartKeys.push(key);
+                    chartValues.push(value);
+                }
+
+                console.dir(chartKeys, chartValues);
+
+                const options = {
+                    chart: {
+                        locales: [apex_i18n],
+                        defaultLocale: $locale,
+                        type: 'bar',
+                        height: '250',
+                        parentHeightOffset: 0,
+                        foreColor: colorScheme.colors.bodyColor,
+                        background: colorScheme.colors.cardBg,
+                        toolbar: {
+                            show: false
+                        },
+                        animations: {
+                            enabled: true,
+                            easing: 'easeinout',
+                            speed: 200,
+                            animateGradually: {
+                                enabled: true,
+                                delay: 50
+                            },
+                            dynamicAnimation: {
+                                enabled: true,
+                                speed: 150
+                            }
+                        }
+                    },
+                    theme: {
+                        mode: $body.data('theme')
+                    },
+                    tooltip: {
+                        theme: $body.data('theme')
+                    },
+                    colors: [colorScheme.colors.primary],
+                    fill: {
+                        opacity: .9
+                    },
+                    grid: {
+                        padding: {
+                            bottom: -4
+                        },
+                        borderColor: colorScheme.colors.gridBorder,
+                        xaxis: {
+                            lines: {
+                                show: false
+                            }
+                        }
+                    },
+                    series: [{
+                        name: $('#dailyVisitsChart').data('series'),
+                        data: chartValues,
+                    }],
+                    xaxis: {
+                        type: 'datetime',
+                        categories: chartKeys,
+                        axisBorder: {
+                            color: colorScheme.colors.gridBorder,
+                        },
+                        axisTicks: {
+                            color: colorScheme.colors.gridBorder,
+                        },
+                    },
+                    legend: {
+                        show: true,
+                        position: "top",
+                        horizontalAlign: 'center',
+                        fontFamily: fontFamily,
+                        itemMargin: {
+                            horizontal: 8,
+                            vertical: 0
+                        },
+                    },
+                    stroke: {
+                        width: 0
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                            fontSize: '10px',
+                            fontFamily: fontFamily,
+                        },
+                        offsetY: -27
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: "50%",
+                            borderRadius: 4,
+                            dataLabels: {
+                                position: 'top',
+                                orientation: 'vertical',
+                            }
+                        },
+                    },
+                };
+
+                const apexBarChart = new ApexCharts(document.querySelector("#dailyVisitsChart"), options);
+                apexBarChart.render();
+
+                $window.on('themechange', () => {
+                    setTimeout(() => {
+                        apexBarChart.destroy();
+                        this.visitsChart();
+                    }, 10);
+                });
+
+            }
+
+        }
+    },
+
     storageChart() {
         if ($('#storageChart').length) {
             const bar = new ProgressBar.Circle(storageChart, {
-                color: colors.primary,
-                trailColor: gridLineColor,
+                color: colorScheme.colors.primary,
+                trailColor: colorScheme.gridLineColor,
                 // This has to be the same size as the maximum width to
                 // prevent clipping
                 strokeWidth: 4,
@@ -43,8 +189,8 @@ const Dashboard = {
                 text: {
                     autoStyleContainer: false
                 },
-                from: {color: colors.primary, width: 1},
-                to: {color: colors.danger, width: 4},
+                from: {color: colorScheme.colors.primary, width: 1},
+                to: {color: colorScheme.colors.danger, width: 4},
                 // Set default step function for all animate calls
                 step: function (state, circle) {
                     circle.path.setAttribute('stroke', state.color);
@@ -59,6 +205,14 @@ const Dashboard = {
             bar.text.style.fontSize = '3rem';
 
             bar.animate(parseFloat($('#storageChart').data('usage')));
+
+            $window.on('themechange', () => {
+                setTimeout(() => {
+                    bar.destroy();
+                    this.storageChart();
+                }, 10);
+            });
+
         }
     },
 

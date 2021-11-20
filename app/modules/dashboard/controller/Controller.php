@@ -34,6 +34,7 @@ class ControllerDashboard extends Controller
 
         // Add JS dependencies
         $files = [
+            ABS_PATH . 'assets/vendors/apexcharts/apexcharts.min.js',
             ABS_PATH . 'assets/vendors/progressbar.js/progressbar.min.js',
             ABS_PATH . 'assets/js/dashboard.js',
         ];
@@ -86,6 +87,7 @@ class ControllerDashboard extends Controller
         // Push data to template engine
         $Template
             ->assign('data', $data)
+            ->assign('visits', self::$model->getVisits())
             ->assign('storage_size', self::$model->getStorageSize())
             ->assign('storage_usage', self::$model->getStorageUsage())
             ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/dashboard/view/index.tpl'));
