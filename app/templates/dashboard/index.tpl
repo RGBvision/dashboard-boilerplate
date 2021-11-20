@@ -77,6 +77,16 @@
 
         <div class="page-content">
 
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    {$header_tpl}
+                    {$breadcrumbs_tpl}
+                </div>
+                <div>
+                    {$header_addons_tpl}
+                </div>
+            </div>
+
             <!-- CONTENT -->
             {$content}
             <!-- ./CONTENT -->

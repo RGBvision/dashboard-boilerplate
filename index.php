@@ -90,7 +90,7 @@ $Template
     ->assign('user_tpl', $Template->fetch('user.tpl'))
     ->assign('header_tpl', $Template->fetch('header.tpl'))
     ->assign('header_addons_tpl', $Template->fetch('header_addons.tpl'))
-    ->assign('breadcrumb_tpl', $Template->fetch('breadcrumbs.tpl'))
+    ->assign('breadcrumbs_tpl', $Template->fetch('breadcrumbs.tpl'))
     ->assign('footer_tpl', $Template->fetch('footer.tpl'))
     ->assign('scripts_tpl', $Template->fetch('scripts.tpl'));
 
