@@ -63,9 +63,10 @@ const DashboardCommon = {
 
             Cookies.set('theme', newTheme, {expires: 365});
             cssElement.attr('href', cssURL.replace(/(dark|light)/g, newTheme));
+            $body.data('theme', newTheme);
             $('#themeSwitch').prop('checked', (newTheme === 'dark'));
 
-            window.dispatchEvent(new CustomEvent('theme.change', {detail: {theme: newTheme}}));
+            window.dispatchEvent(new CustomEvent('themechange', {detail: {theme: newTheme}}));
 
             return false;
         });
