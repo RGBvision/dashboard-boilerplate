@@ -41,6 +41,9 @@ class ModuleLogin extends Module
         // Parent
         parent::__construct();
 
+        // Module permissions
+        Permission::add('login', ['login_view', 'logout_view'], 'mdi mdi-account-circle-outline', 10);
+
         // Template engine instance
         $Template = Template::getInstance();
 
