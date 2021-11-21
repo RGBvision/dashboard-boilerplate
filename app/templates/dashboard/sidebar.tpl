@@ -21,7 +21,7 @@
                     {else}
 
                         <li class="nav-item">
-                            <a id="{$sidebar_menu_item.id}" href="#{$sidebar_menu_item.id}_submenu" class="nav-link" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="{$sidebar_menu_item.id}_submenu">
+                            <a id="{$sidebar_menu_item.id}" href="#{$sidebar_menu_item.id}_submenu" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="{$sidebar_menu_item.id}_submenu">
                                 <i class="link-icon {$sidebar_menu_item.icon}"></i>
                                 <span class="link-title">{$sidebar_menu_item.name}</span>
                                 <i class="link-arrow mdi mdi-chevron-down"></i>

@@ -29,7 +29,7 @@
                     <span class="ms-2">{#dark_theme#}</span>
                 </div>
                 <div class="form-check form-switch m-0">
-                    <input type="checkbox" class="form-check-input" id="themeSwitch" {if $smarty.cookies.theme == 'dark'}checked{/if}>
+                    <input type="checkbox" class="form-check-input" style="pointer-events: none;" id="themeSwitch" {if $smarty.cookies.theme == 'dark'}checked{/if}>
                     <label class="custom-control-label" for="themeSwitch"></label>
                 </div>
             </a>
