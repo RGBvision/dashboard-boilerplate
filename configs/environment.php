@@ -4,11 +4,7 @@ define('TIMEZONE', 'Europe/Moscow');
 
 define('SYSTEM_ENVIRONMENT', 'public');
 
-define('DARK_THEME', true);
-
 define('LOGIN_USER_IP', false);
-
-define('MEMORY_LIMIT_PANIC', -1);
 
 define('PWD_PEPPER', 'uI50XZoFT7sajhwa');
 

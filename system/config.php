@@ -34,21 +34,9 @@ $config_defaults['SYSTEM_ENVIRONMENT'] = [
     'VARIANT' => 'development,demo,public',
 ];
 
-$config_defaults['DARK_THEME'] = [
-    'DEFAULT' => false,
-    'TYPE' => 'bool',
-    'VARIANT' => '',
-];
-
 $config_defaults['LOGIN_USER_IP'] = [
     'DEFAULT' => false,
     'TYPE' => 'bool',
-    'VARIANT' => '',
-];
-
-$config_defaults['MEMORY_LIMIT_PANIC'] = [
-    'DEFAULT' => -1,
-    'TYPE' => 'integer',
     'VARIANT' => '',
 ];
 
@@ -58,7 +46,7 @@ $config_defaults['MEMORY_LIMIT_PANIC'] = [
 // ---------------------------------------------------------------
 $config_defaults['PWD_PEPPER'] = [
     'DEFAULT' => '',
-    'TYPE' => 'string',
+    'TYPE' => 'readonly',
     'VARIANT' => '',
 ];
 
@@ -102,7 +90,7 @@ $config_defaults['SESSION_DIR'] = [
 $config_defaults['SESSION_SAVE_HANDLER'] = [
     'DEFAULT' => 'db',
     'TYPE' => 'dropdown',
-    'VARIANT' => 'db,files,memcached,memcache,redis,native',
+    'VARIANT' => 'db,files,native',
 ];
 
 $config_defaults['SESSION_LIFETIME'] = [
