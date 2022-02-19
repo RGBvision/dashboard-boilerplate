@@ -81,7 +81,7 @@ class Router
                     self::$id = $callback['module'];
 
                     if (!$controller = Loader::loadModule($callback['module'])) {
-                        Request::redirect('/errors/controller?controller=' . $callback['module']);
+                        Request::redirect(ABS_PATH . 'errors/controller?controller=' . $callback['module']);
                         return false;
                     }
 
@@ -100,16 +100,16 @@ class Router
                     return call_user_func_array($function, $matches);
                 }
 
-                Request::redirect('/errors/method?method=' . $function);
+                Request::redirect(ABS_PATH . 'errors/method?method=' . $function);
                 return false;
             }
         }
 
-        $parts = explode('/', preg_replace('#[^a-zA-Z0-9_/]#', '', trim($route, '/')));
+        $parts = explode('/', trim($route, '/'));
 
         if (count($parts)) {
 
-            $_module = array_shift($parts);
+            $_module = preg_replace('/[^a-z0-9_]/i', '', array_shift($parts));
 
             $file = DASHBOARD_DIR . '/app/modules/' . $_module . '/controller/Controller.php';
 
@@ -124,7 +124,7 @@ class Router
         }
 
         if (!isset(self::$route)) {
-            Request::redirect('/errors/controller?controller=' . trim($route, '/'));
+            Request::redirect(ABS_PATH . 'errors/controller?controller=' . trim($route, '/'));
             return false;
         }
 
@@ -132,26 +132,93 @@ class Router
             return new \Exception('Error: Calls to magic methods are not allowed!');
         }
 
-        if (!$controller = Loader::loadModule(preg_replace('/[^a-zA-Z0-9]/', '', self::$route))) {
-            Request::redirect('/errors/controller?controller=' . self::$route);
+        if (!$controller = Loader::loadModule(preg_replace('/[^a-z0-9_]/i', '', self::$route))) {
+            Request::redirect(ABS_PATH . 'errors/controller?controller=' . self::$route);
             return false;
         }
 
         $_controller = new $controller();
 
         try {
+
             $reflection = new ReflectionClass($_controller);
 
             if ($reflection->hasMethod(self::$method) && $reflection->getMethod(self::$method)->getNumberOfRequiredParameters() <= count($parts)) {
+
                 // ToDo: add parameter type check
-                return call_user_func_array([$_controller, self::$method], $parts);
+
+                $arguments = [];
+
+                $reflectionMethod = new ReflectionMethod($_controller, self::$method);
+
+                foreach ($reflectionMethod->getParameters() as $parameter) {
+
+                    $_parameter = array_shift($parts);
+
+                    if ($_parameter !== null) {
+
+                        if ($parameter->hasType()) {
+
+                            $parameterType = $parameter->getType();
+                            assert($parameterType instanceof ReflectionNamedType);
+
+                            if ($parameterType->isBuiltin()) {
+
+                                if (in_array($parameterType->getName(), ['int', 'integer'])) {
+                                    $strictInt = filter_var($_parameter, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+                                    if ($strictInt === null) {
+                                        return ['message' => sprintf(i18n::_('router.error.parameter_type'), $parameter->name, $parameterType->getName())];
+                                    }
+                                    $_parameter = $strictInt;
+                                }
+
+                                if (in_array($parameterType->getName(), ['float', 'double'])) {
+                                    $strictFloat = filter_var($_parameter, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE);
+                                    if ($strictFloat === null) {
+                                        return ['message' => sprintf(i18n::_('router.error.parameter_type'), $parameter->name, $parameterType->getName())];
+                                    }
+                                    $_parameter = $strictFloat;
+                                }
+
+                                if (in_array($parameterType->getName(), ['bool', 'boolean'])) {
+                                    $strictBool = filter_var($_parameter, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                                    if ($strictBool === null) {
+                                        return ['message' => sprintf(i18n::_('router.error.parameter_type'), $parameter->name, $parameterType->getName())];
+                                    }
+                                    $_parameter = $strictBool;
+                                }
+
+                                if (!is_array($_parameter) && $parameterType->getName() === 'array') {
+                                    return ['message' => sprintf(i18n::_('router.error.parameter_type'), $parameter->name, $parameterType->getName())];
+                                }
+
+                                settype($_parameter, $parameterType->getName());
+                            }
+                        }
+
+                        $arguments[$parameter->name] = $_parameter;
+
+
+                    } else if (!$parameter->isOptional()) {
+
+                        return ['message' => sprintf(i18n::_('router.error.required_parameter'), $parameter->name)];
+
+                    }
+
+                    unset($_parameter);
+
+                }
+
+                return call_user_func_array([$_controller, self::$method], $arguments);
             }
 
         } catch (ReflectionException $e) {
-            Request::redirect('/errors/controller?controller=' . self::$route);
+
+            Request::redirect(ABS_PATH . 'errors/controller?controller=' . self::$route);
+
         }
 
-        Request::redirect('/errors/method?method=' . self::$route . '/' . self::$method);
+        Request::redirect(ABS_PATH . 'errors/method?method=' . self::$route . '/' . self::$method);
 
         return false;
     }

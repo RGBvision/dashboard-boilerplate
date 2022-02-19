@@ -62,16 +62,13 @@ class ApiRouter
         }
 
         try {
-            $reflection = new ReflectionClass($controller);
-        } catch (ReflectionException $e) {
-            return ['message' => sprintf(i18n::_('router.error.runtime'), $e->getMessage())];
-        }
 
-        try {
+            $reflection = new ReflectionClass($controller);
 
             if ($reflection->hasMethod(self::$method)) {
 
                 $arguments = [];
+
                 $reflectionMethod = new ReflectionMethod($controller, self::$method);
 
                 foreach ($reflectionMethod->getParameters() as $parameter) {
@@ -81,8 +78,10 @@ class ApiRouter
                     if ($_parameter !== null) {
 
                         if ($parameter->hasType()) {
+
                             $parameterType = $parameter->getType();
                             assert($parameterType instanceof ReflectionNamedType);
+
                             if ($parameterType->isBuiltin()) {
 
                                 if (in_array($parameterType->getName(), ['int', 'integer'])) {

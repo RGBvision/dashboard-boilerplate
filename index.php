@@ -44,7 +44,7 @@ $Template->__set('template_dir', DASHBOARD_DIR . '/app/templates/' . TPL_DIR . '
 $Template->_load(DASHBOARD_DIR . '/system/i18n/' . Session::getvar('current_language') . '.ini');
 
 // Execute router
-Router::execute(preg_replace('/[^a-zA-Z0-9_\/]/', '', Request::getPath()));
+Router::execute(Request::getPath());
 
 // Display «No permission» page if user has no permission to access requested page
 if (defined('NO_PERMISSION')) {
