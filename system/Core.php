@@ -152,9 +152,6 @@ class Core
             Router::addAlias(ABS_PATH . $alias[0], $alias[1], $alias[2]);
         }
 
-        // DateTime format
-        self::setDTFormat();
-
         // Response HEADERS
         Response::setHeaders($headers);
 
@@ -338,16 +335,6 @@ class Core
             error_reporting(E_ERROR);
             ini_set('display_errors', 7);
         }
-    }
-
-
-    /**
-     * Set DateTime format
-     */
-    public static function setDTFormat(): void
-    {
-        define('DATE_FORMAT', Settings::get('main', 'date_format'));
-        define('TIME_FORMAT', Settings::get('main', 'time_format'));
     }
 
 
