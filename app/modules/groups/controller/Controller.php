@@ -134,7 +134,7 @@ class ControllerGroups extends Controller
                     'active' => false,
                 ],
                 [
-                    'text' => $Template->_get('groups_breadcrumb'),
+                    'text' => $Template->_get('groups_breadcrumb_parent'),
                     'href' => ABS_PATH . 'groups',
                     'page' => 'groups',
                     'active' => false,
@@ -187,7 +187,7 @@ class ControllerGroups extends Controller
                     'active' => false,
                 ],
                 [
-                    'text' => $Template->_get('groups_breadcrumb'),
+                    'text' => $Template->_get('groups_breadcrumb_parent'),
                     'href' => ABS_PATH . 'groups',
                     'page' => 'groups',
                     'active' => false,

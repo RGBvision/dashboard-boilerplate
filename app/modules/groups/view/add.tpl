@@ -36,8 +36,8 @@
                             </div>
                         {/foreach}
                     </div>
-                    <div class="card-footer text-right">
-                        <a href="{$ABS_PATH}groups" class="btn btn-secondary btn-icon-text"><i class="mdi mdi-undo btn-icon-prepend"></i> {#button_cancel#}</a>
+                    <div class="card-footer text-end">
+                        <a href="{$smarty.server.HTTP_REFERER}" class="btn btn-secondary btn-icon-text"><i class="mdi mdi-undo btn-icon-prepend"></i> {#button_cancel#}</a>
                         <button type="submit" class="SaveGroupBtn btn btn-primary btn-icon-text"> <i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
                     </div>
                 </form>

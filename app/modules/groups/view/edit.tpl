@@ -44,7 +44,7 @@
                         {/foreach}
                     </div>
                     <div class="card-footer text-end">
-                        <a href="{$smarty.server.HTTP_REFERER}" class="btn btn-secondary btn-icon-text mr-3"><i class="mdi mdi-arrow-left btn-icon-prepend"></i> {#button_return#}</a>
+                        <a href="{$smarty.server.HTTP_REFERER}" class="btn btn-secondary btn-icon-text"><i class="mdi mdi-arrow-left btn-icon-prepend"></i> {#button_return#}</a>
                         {if $editable && !$disabled && $exists}
                             <button type="submit" class="SaveGroupBtn btn btn-primary btn-icon-text"><i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
                         {else}
