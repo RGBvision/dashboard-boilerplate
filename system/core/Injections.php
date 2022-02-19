@@ -29,11 +29,25 @@ class Injections
      * @param string $html HTML code
      * @param int $priority priority
      */
-    public static function add(string $html, int $priority = 10): void
+    public static function addHtml(string $html, int $priority = 10): void
     {
         self::$templates[] = [
             'html' => $html,
-            'priority' => $priority
+            'priority' => $priority,
+        ];
+    }
+
+    /**
+     * Add template file to inject
+     *
+     * @param string $file template file
+     * @param int $priority priority
+     */
+    public static function addFile(string $file, int $priority = 10): void
+    {
+        self::$templates[] = [
+            'file' => $file,
+            'priority' => $priority,
         ];
     }
 
@@ -44,7 +58,19 @@ class Injections
      */
     public static function get(): array
     {
-        return Arrays::multiSort(self::$templates, 'priority');
+
+        $Template = Template::getInstance();
+
+        $injections = Arrays::multiSort(self::$templates, 'priority');
+
+        foreach ($injections as &$injection) {
+            if ($injection['file']) {
+                $injection['html'] = $Template->fetch($injection['file']);
+                unset($injection['file']);
+            }
+        }
+
+        return $injections;
     }
 
 }
