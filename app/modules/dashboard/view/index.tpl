@@ -40,7 +40,7 @@
             </div>
             <div class="card-body">
                 {foreach from=$storage_usage.details key=key item=item name=foo}
-                    <div class="row pb-2 mb-2 {if !$smarty.foreach.foo.last} border-bottom {/if}">
+                    <div class="row py-2 bg-highlight-hover {if !$smarty.foreach.foo.last} border-bottom {/if}">
                         <div class="col">{$key}</div>
                         <div class="col text-end">{$item|formatSize}</div>
                     </div>

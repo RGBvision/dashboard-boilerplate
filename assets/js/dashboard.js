@@ -127,11 +127,20 @@ const Dashboard = {
                             color: colorScheme.colors.gridBorder,
                         },
                     },
+                    yaxis: {
+                        labels: {
+                            style: {
+                                fontFamily: fontFamily,
+                                fontWeight: 300,
+                            }
+                        },
+                    },
                     legend: {
                         show: true,
                         position: "top",
                         horizontalAlign: 'center',
                         fontFamily: fontFamily,
+                        fontWeight: 300,
                         itemMargin: {
                             horizontal: 8,
                             vertical: 0
@@ -145,6 +154,7 @@ const Dashboard = {
                         style: {
                             fontSize: '10px',
                             fontFamily: fontFamily,
+                            fontWeight: 300,
                         },
                         offsetY: -27
                     },
