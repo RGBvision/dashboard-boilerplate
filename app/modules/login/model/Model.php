@@ -40,7 +40,7 @@ class ModelLogin extends Model
 
         $expired = date('Y-m-d H:i:s', strtotime('+4 hours'));
 
-        $hash = md5($user_id . $email) . md5($user_id . $expired);
+        $hash = md5($user_id . $email) . md5($user_id . strtotime($expired));
 
         DB::update("users", ["hash" => $hash, "hash_expire" => $expired], ["email" => $email]);
 

@@ -139,7 +139,7 @@ class ControllerLogin extends Controller
             ($user = DB::row("SELECT * FROM users WHERE email = ? LIMIT 1", $email))
         ) {
 
-            self::$model->preparePassChange((int)$user['id'], $email);
+            self::$model->preparePassChange((int)$user['user_id'], $email);
 
             self::displayLoginForm($Template->_get('login_reset_mail_sent'));
 
@@ -156,11 +156,13 @@ class ControllerLogin extends Controller
     public static function change(string $hash = ''): void
     {
 
+        sleep(3);
+
         if (
             ($hash)
-            && ($user = DB::row("SELECT * FROM users WHERE hash = ?", $hash))
+            && ($user = DB::row("SELECT * FROM users WHERE hash = ?", Secure::sanitize($hash)))
             && (strtotime($user['hash_expire']) > time())
-            && ($hash === (md5($user['id'] . $user['email']) . md5($user['id'] . $user['hash_expire'])))
+            && ($hash === (md5($user['user_id'] . $user['email']) . md5($user['user_id'] . strtotime($user['hash_expire']))))
         ) {
 
             // Template engine instance
