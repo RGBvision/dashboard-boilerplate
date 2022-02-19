@@ -66,8 +66,6 @@ class Template extends Smarty
 
         $this->assign('DASHBOARD_DIR', DASHBOARD_DIR);
         $this->assign('ABS_PATH', ABS_PATH);
-        $this->assign('DATE_FORMAT', DATE_FORMAT);
-        $this->assign('TIME_FORMAT', TIME_FORMAT);
     }
 
     // change templates folder
