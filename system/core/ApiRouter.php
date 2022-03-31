@@ -40,7 +40,11 @@ class ApiRouter
         if (strtolower($_SERVER['REQUEST_METHOD']) === 'get') {
             self::$params = $_GET;
         } else {
-            self::$params = Json::decode(file_get_contents("php://input"));
+            if (mb_strtolower(Request::header('Content-Type')) === 'application/json') {
+                self::$params = Json::decode(file_get_contents("php://input"));
+            } else {
+                self::$params = $_POST;
+            }
         }
     }
 
@@ -129,7 +133,7 @@ class ApiRouter
 
                 }
 
-                return call_user_func_array(array($controller, self::$method), $arguments);
+                return call_user_func_array([$controller, self::$method], $arguments);
             }
 
         } catch (ReflectionException $e) {

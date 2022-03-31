@@ -173,4 +173,17 @@ class Request
     {
         return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && (strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));
     }
+
+    /**
+     * Get header
+     *
+     * @param string $key
+     * @param string|null $default
+     * @return string | null
+     */
+    public static function header(string $key, ?string $default = null): ?string
+    {
+        $_key = str_replace([' ', '-'], '_', mb_strtoupper($key));
+        return $_SERVER["HTTP_$_key"] ?? $default;
+    }
 }
