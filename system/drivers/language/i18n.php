@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.0
+ * @version    2.1
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -19,12 +19,12 @@ class i18n
 
     private static $_path = null;
     private static $_language = null;
-    private static $_fallbackLanguage = 'ru';
+    private static $_fallbackLanguage = 'en';
     private static $_translation = [];
     private static $_missingTranslation = []; // ToDo: Log missing translations
 
     // Init i18n static class
-    public static function init($path = null, $language = 'ru'): void
+    public static function init($path = null, $language = 'en'): void
     {
         self::$_language = $language;
         self::$_path = $path;
