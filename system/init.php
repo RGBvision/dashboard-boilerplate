@@ -7,7 +7,7 @@
  *
  * @package    dashboard.rgbvision.net
  * @author     Alex Graham <contact@rgbvision.net>
- * @copyright  Copyright 2017-2021, Alex Graham
+ * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
  * @version    3.0
  * @link       https://dashboard.rgbvision.net
@@ -43,7 +43,7 @@ if (defined('UID')) {
 }
 
 // System i18n
-i18n::init(DASHBOARD_DIR . '/system/i18n/', 'en');
+i18n::init(DASHBOARD_DIR . '/system/i18n/', Session::getvar('current_language'));
 
 // App modules
 Loader::addModules(DASHBOARD_DIR . '/app/modules/');
