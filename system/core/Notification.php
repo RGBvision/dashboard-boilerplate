@@ -7,7 +7,7 @@
  *
  * @package    dashboard.rgbvision.net
  * @author     Alex Graham <contact@rgbvision.net>
- * @copyright  Copyright 2017-2021, Alex Graham
+ * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
  * @version    2.3
  * @link       https://dashboard.rgbvision.net
