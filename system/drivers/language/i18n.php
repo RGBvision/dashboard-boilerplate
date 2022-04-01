@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.1
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -17,11 +17,13 @@
 class i18n
 {
 
-    private static $_path = null;
-    private static $_language = null;
-    private static $_fallbackLanguage = 'en';
-    private static $_translation = [];
-    private static $_missingTranslation = []; // ToDo: Log missing translations
+    private static ?string $_path = null;
+    private static ?string $_language = null;
+    private static string $_fallbackLanguage = 'en';
+    private static array $_translation = [];
+    private static array $_missingTranslations = [];
+
+    public static ?string $active_language = null;
 
     // Init i18n static class
     public static function init($path = null, $language = 'en'): void
@@ -45,9 +47,10 @@ class i18n
     }
 
     // Get list of missing translations
+    // ToDo: Log missing translations
     public static function getMissingTranslations(): array
     {
-        return self::$_missingTranslation;
+        return self::$_missingTranslations;
     }
 
     // Check if translated string is available
@@ -68,7 +71,7 @@ class i18n
         $return = self::_getKey($key);
 
         if (!$return) {
-            self::$_missingTranslation[] = ['language' => self::$_language, 'key' => $key];
+            self::$_missingTranslations[self::$_language] = array_unique([...self::$_missingTranslations[self::$_language], $key]);
             $return = $key;
         }
 
@@ -85,10 +88,17 @@ class i18n
         $dir = glob($_translation_files);
 
         if (count($dir) === 0) {
+
             $dir = glob($_fallback_files);
+
             if (count($dir) === 0) {
                 throw new \RuntimeException('Translation file not found');
+            } else {
+                self::$active_language = self::$_fallbackLanguage;
             }
+
+        } else {
+            self::$active_language = self::$_language;
         }
 
         $translations = [];
