@@ -7,9 +7,9 @@
 
     <title>{$data.page_title} &middot; {$APP_NAME}</title>
 
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="keywords" content="">
+    <meta name="description" content="{$data.page_description|default:''}">
+    <meta name="keywords" content="{$data.page_keywords|default:''}"">
+    <meta name="author" content="{$data.page_author|default:''}"">
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
