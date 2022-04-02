@@ -101,7 +101,6 @@ test@rgbvision.net / demo12345
 - [jQuery](https://jquery.com/)
 - [jQuery.inputmask](https://robinherbots.github.io/Inputmask/)
 - [jQuery Mouse Wheel Plugin](https://github.com/jquery/jquery-mousewheel)
-- [jQuery Steps](http://www.jquery-steps.com/GettingStarted)
 - [jQuery Tags Input](https://github.com/xoxco/jQuery-Tags-Input)
 - [jQuery Validation](https://jqueryvalidation.org/)
 - [Libphonenumber-js](https://catamphetamine.github.io/libphonenumber-js/)
