@@ -110,7 +110,7 @@ class Dir
 			$files = [];
 
 			while ($element = readdir($handle)) {
-				if ($element !== '.' && $element !== '..' && is_dir($dir . DS . $element)) {
+				if ($element !== '.' && $element !== '..' && !is_dir($dir . DS . $element)) {
                     $files[] = $element;
                 }
 			}
