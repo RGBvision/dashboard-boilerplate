@@ -16,10 +16,6 @@
 
 class Cookie
 {
-	protected function __construct()
-	{
-		//---
-	}
 
     /**
      * Set cookie value
@@ -70,21 +66,19 @@ class Cookie
     public static function setDomain(string $cookie_domain = ''): void
     {
         if (empty($cookie_domain)) {
-            if (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN !== '') {
+            if (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN) {
                 $cookie_domain = COOKIE_DOMAIN;
-            } elseif (!empty($_SERVER['HTTP_HOST'])) {
+            } elseif ($_SERVER['HTTP_HOST']) {
                 $cookie_domain = htmlspecialchars($_SERVER['HTTP_HOST'], ENT_QUOTES);
             }
         }
 
-		// Delete `www` prefix and port number
-		$cookie_domain = ltrim($cookie_domain, '.');
+		// Cleanup domain name
+		$cookie_domain = ltrim(parse_url($cookie_domain, PHP_URL_HOST), '.');
 
 		if (strpos($cookie_domain, 'www.') === 0) {
             $cookie_domain = substr($cookie_domain, 4);
         }
-
-		$cookie_domain = '.' . explode(':', $cookie_domain)[0];
 
 		// According to RFC 2109, the domain for cookies must be level 2 or higher.
 		// Therefore, you cannot set a cookie_domain for 'localhost' or IP address.

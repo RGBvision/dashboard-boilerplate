@@ -30,6 +30,7 @@ class Curl
         
         return $response ?: '';
     }
+
     public static function post(string $url, array $headers = [], array $params = []): string
     {
 

@@ -16,11 +16,6 @@
 
 class Dir
 {
-	protected function __construct()
-	{
-		//--
-	}
-
 
     /**
      * Create new directory if not exists

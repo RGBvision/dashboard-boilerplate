@@ -127,13 +127,7 @@ class Mailer
         }
 
         // generate transport
-        // ToDo: remove deprecated transport
         switch (self::getSettings('mail_type')) {
-            default:
-            case 'mail':
-                $transport = new Swift_MailTransport();
-                break;
-
             case 'smtp':
                 $transport = new Swift_SmtpTransport(stripslashes(self::getSettings('smtp_host')), (int)self::getSettings('smtp_port'));
 
@@ -150,6 +144,7 @@ class Mailer
                         ->setPassword(stripslashes($smtp_pass));
                 break;
 
+            default:
             case 'sendmail':
                 $transport = new Swift_SendmailTransport(self::getSettings('sendmail_path'));
                 break;

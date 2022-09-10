@@ -16,10 +16,6 @@
 
 class Secure
 {
-    protected function __construct()
-    {
-        //--
-    }
 
     /**
      * Get string without escaping and HTML entities

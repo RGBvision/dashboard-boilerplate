@@ -17,12 +17,6 @@
 class Arrays
 {
 
-    protected function __construct()
-    {
-        //
-    }
-
-
     /**
      * Get value by key or path
      *
@@ -92,6 +86,13 @@ class Arrays
         }
     }
 
+    /**
+     * @param array $array
+     * @param callable $callback
+     * @param $userdata
+     * @param bool $delete
+     * @return array
+     */
     private static function array_walk_recursive_delete(array &$array, callable $callback, $userdata = null, bool $delete = false)
     {
         foreach ($array as $key => &$value) {
@@ -109,7 +110,14 @@ class Arrays
         return $array;
     }
 
-    // Unset value by key name
+    /**
+     * Unset value by key name
+     *
+     * @param array $array
+     * @param array $key_names
+     * @param bool $delete
+     * @return void
+     */
     public static function filterKeys(array &$array, array $key_names, bool $delete = false): void
     {
 
@@ -120,15 +128,47 @@ class Arrays
         }
     }
 
-    // Trim all values
-    public static function trimAll(array &$array): void
+    /**
+     * Recursively iterates over each value in the array passing them to the callback function
+     *
+     * @param array $input
+     * @param $callback
+     * @return array
+     */
+    public static function filterRecursive(array $input, $callback = null): array
+    {
+        foreach ($input as &$value)
+        {
+            if (is_array($value))
+            {
+                $value = self::filterRecursive($value, $callback);
+            }
+        }
+
+        return array_filter($input, $callback);
+    }
+
+    /**
+     * Trim all array values
+     *
+     * @param array $array
+     * @param string $characters
+     * @return void
+     */
+    public static function trimAll(array &$array, string $characters = " \t\n\r\0\x0B"): void
     {
         array_walk_recursive($array, function (&$v) {
             $v = trim($v);
         });
     }
 
-    // Rename keys in array
+    /**
+     * Rename keys in array
+     *
+     * @param array $array
+     * @param array $pattern
+     * @return void
+     */
     public static function renameKeys(array &$array, array $pattern): void
     {
         if (!empty($array) && !empty($pattern)) {
@@ -154,7 +194,13 @@ class Arrays
         }
     }
 
-    // Unset value by key name (string only)
+    /**
+     * Unset value by key name (string only)
+     *
+     * @param array $array
+     * @param string $key_name
+     * @return void
+     */
     public static function deleteKey(array &$array, string $key_name): void
     {
 
@@ -180,7 +226,14 @@ class Arrays
         array_walk_recursive_delete($array, '_isKey', $key_name);
     }
 
-    // Unset value by key name and value (string only)
+    /**
+     * Unset value by key name and value (string only)
+     *
+     * @param array $array
+     * @param string $key_name
+     * @param string $val
+     * @return void
+     */
     public static function deleteKeyValue(array &$array, string $key_name, string $val): void
     {
 
@@ -206,10 +259,21 @@ class Arrays
         array_walk_recursive_delete($array, '_isKeyVal', $key_name);
     }
 
-    public static function pathByKeyValue(array $arr, $key, $val, string $glue = '.', bool $add_self_key = true, &$stack = [])
+    /**
+     * Return element's path by key-value pair
+     *
+     * @param array $array
+     * @param $key
+     * @param $val
+     * @param string $glue
+     * @param bool $add_self_key
+     * @param array $stack
+     * @return false|int|string
+     */
+    public static function pathByKeyValue(array $array, $key, $val, string $glue = '.', bool $add_self_key = true, array &$stack = [])
     {
 
-        foreach ($arr as $k => $v) {
+        foreach ($array as $k => $v) {
 
             if (($v === $val) && ($k === $key)) {
                 if ($add_self_key) {
@@ -290,6 +354,13 @@ class Arrays
 
     }
 
+    /**
+     * Convert array to XML file
+     *
+     * @param $array
+     * @param $values_to_attributes
+     * @return string
+     */
     public static function toXML($array, $values_to_attributes = false): string
     {
         function array_to_xml($data, &$xml_data, $values_to_attributes = false)
@@ -323,6 +394,12 @@ class Arrays
 
     }
 
+    /**
+     * Convert array to CSV file
+     *
+     * @param $array
+     * @return string
+     */
     public static function toCSV($array): string
     {
 
@@ -382,7 +459,7 @@ class Arrays
     }
 
     /**
-     * Multisort array by key
+     * Sort multi-dimensional array by key
      *
      * @param array $array
      * @param $key

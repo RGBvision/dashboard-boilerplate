@@ -80,11 +80,6 @@ class File
         'zip' => 'application/zip',
     );
 
-    protected function __construct()
-    {
-        //
-    }
-
     /**
      * Проверка существования файла
      *

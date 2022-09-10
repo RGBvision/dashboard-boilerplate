@@ -65,11 +65,6 @@ class Response
         505 => 'HTTP/1.1 505 HTTP Version Not Supported',
     ];
 
-    protected function __construct()
-    {
-        //--
-    }
-
     /**
      * Set HTTP status
      *

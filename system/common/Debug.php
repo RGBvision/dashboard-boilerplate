@@ -384,7 +384,7 @@ var_dump(<strong>' . trim($fn_name) . '</strong>) - ' . self::_trace() .
 
             $replace = [
                 i18n::_('statistics.time_generate'),
-                Number::numFormat(Number::microtimeDiff(START_CP, microtime()), 6, ',', ' '),
+                Number::numFormat(Number::microTimeDiff(START_CP, microtime()), 6, ',', ' '),
                 i18n::_('statistics.seconds'),
             ];
 

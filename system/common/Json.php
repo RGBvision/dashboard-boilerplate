@@ -17,11 +17,6 @@
 class Json
 {
 
-    protected function __construct()
-    {
-        //---
-    }
-
     /**
      * Convert array to JSON
      *
