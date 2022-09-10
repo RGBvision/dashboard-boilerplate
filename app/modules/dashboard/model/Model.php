@@ -84,16 +84,11 @@ class ModelDashboard extends Model
 
         while (false !== ($file = readdir($dir))) {
             if (($file !== '.') && ($file !== '..')) {
+
                 if (is_dir($source . '/' . $file)) {
-                    switch ($file) {
-                        case 'css':
-                        case 'js':
-                            self::copy_template($source . '/' . $file, DASHBOARD_DIR . '/assets/' . $file, $module_name);
-                            break;
-                        default:
-                            self::copy_template($source . '/' . $file, $destination . '/' . $file, $module_name);
-                            break;
-                    }
+
+                    self::copy_template($source . '/' . $file, $destination . '/' . $file, $module_name);
+
                 } else {
 
                     $new_file = str_replace(

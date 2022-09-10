@@ -39,7 +39,7 @@ class ControllerUsers extends Controller
             ABS_PATH . 'assets/vendors/libphonenumber/libphonenumber-max.js',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.css',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.js',
-            ABS_PATH . 'assets/js/users.js',
+            ABS_PATH . 'app/modules/users/js/users.js',
         ];
 
         foreach ($files as $i => $file) {

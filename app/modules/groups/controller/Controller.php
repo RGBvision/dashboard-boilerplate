@@ -35,7 +35,7 @@ class ControllerGroups extends Controller
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css',
             ABS_PATH . 'assets/vendors/datatables.net/jquery.dataTables.js',
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js',
-            ABS_PATH . 'assets/js/groups.js',
+            ABS_PATH . 'app/modules/groups/js/groups.js',
         ];
 
         foreach ($files as $i => $file) {

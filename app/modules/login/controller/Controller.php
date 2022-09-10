@@ -26,7 +26,7 @@ class ControllerLogin extends Controller
         parent::__construct();
 
         // Add JS dependencies
-        Dependencies::add(ABS_PATH . 'assets/js/login.js', 100);
+        Dependencies::add(ABS_PATH . 'app/modules/login/js/login.js', 100);
 
     }
 

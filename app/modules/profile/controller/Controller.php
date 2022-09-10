@@ -37,7 +37,7 @@ class ControllerProfile extends Controller
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.css',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.js',
             ABS_PATH . 'assets/vendors/tinymce/tinymce.min.js',
-            ABS_PATH . 'assets/js/profile.js',
+            ABS_PATH . 'app/modules/profile/js/profile.js',
         ];
 
         foreach ($files as $i => $file) {

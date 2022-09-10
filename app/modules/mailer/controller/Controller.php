@@ -41,7 +41,7 @@ class ControllerMailer extends Controller
     {
 
         Dependencies::add(
-            ABS_PATH . 'modules/mailer/js/mailer.js',
+            ABS_PATH . 'app/modules/mailer/js/mailer.js',
             100
         );
 

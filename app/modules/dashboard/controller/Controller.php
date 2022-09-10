@@ -36,7 +36,7 @@ class ControllerDashboard extends Controller
         $files = [
             ABS_PATH . 'assets/vendors/apexcharts/apexcharts.min.js',
             ABS_PATH . 'assets/vendors/progressbar.js/progressbar.min.js',
-            ABS_PATH . 'assets/js/dashboard.js',
+            ABS_PATH . 'app/modules/dashboard/js/dashboard.js',
         ];
 
         foreach ($files as $i => $file) {

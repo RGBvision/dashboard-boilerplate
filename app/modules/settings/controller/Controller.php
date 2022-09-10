@@ -15,7 +15,7 @@ class ControllerSettings extends Controller
     {
         parent::__construct();
         Dependencies::add(
-            ABS_PATH . 'assets/js/settings.js',
+            ABS_PATH . 'app/modules/settings/js/settings.js',
             100
         );
     }
