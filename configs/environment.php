@@ -1,61 +1,61 @@
 <?php
 
-define('TIMEZONE', 'Europe/Moscow');
+const TIMEZONE = 'Europe/Moscow';
 
-define('SYSTEM_ENVIRONMENT', 'public');
+const SYSTEM_ENVIRONMENT = 'public';
 
-define('LOGIN_USER_IP', false);
+const LOGIN_USER_IP = false;
 
-define('PWD_PEPPER', 'uI50XZoFT7sajhwa');
+const PWD_PEPPER = 'uI50XZoFT7sajhwa';
 
-define('TEMP_DIR', '/tmp');
+const TEMP_DIR = '/tmp';
 
-define('ATTACH_DIR', '/tmp/attachments');
+const ATTACH_DIR = '/tmp/attachments';
 
-define('UPLOAD_DIR', '/uploads');
+const UPLOAD_DIR = '/uploads';
 
-define('SESSION_DIR', '/tmp/sessions');
+const SESSION_DIR = '/tmp/sessions';
 
-define('SESSION_SAVE_HANDLER', 'db');
+const SESSION_SAVE_HANDLER = 'db';
 
-define('SESSION_LIFETIME', 86400);
+const SESSION_LIFETIME = 86400;
 
-define('COOKIE_DOMAIN', '');
+const COOKIE_DOMAIN = '';
 
-define('COOKIE_LIFETIME', 1209600);
+const COOKIE_LIFETIME = 1209600;
 
-define('SMARTY_COMPILE_CHECK', true);
+const SMARTY_COMPILE_CHECK = true;
 
-define('SMARTY_USE_SUB_DIRS', true);
+const SMARTY_USE_SUB_DIRS = true;
 
-define('CACHE_DOC_TPL', false);
+const CACHE_DOC_TPL = false;
 
-define('CACHE_LIFETIME', 3600);
+const CACHE_LIFETIME = 3600;
 
-define('SYSTEM_CACHE_LIFETIME', 300);
+const SYSTEM_CACHE_LIFETIME = 300;
 
-define('PHP_DEBUGGING', false);
+const PHP_DEBUGGING = false;
 
-define('SELF_ERROR', false);
+const SELF_ERROR = false;
 
-define('SMARTY_DEBUGGING', false);
+const SMARTY_DEBUGGING = false;
 
-define('SQL_DEBUGGING', false);
+const SQL_DEBUGGING = false;
 
-define('SQL_ERRORS_STOP', false);
+const SQL_ERRORS_STOP = false;
 
-define('SEND_SQL_ERROR', false);
+const SEND_SQL_ERROR = false;
 
-define('SQL_PROFILING', false);
+const SQL_PROFILING = false;
 
-define('PROFILING', false);
+const PROFILING = false;
 
-define('HTML_COMPRESSION', false);
+const HTML_COMPRESSION = false;
 
-define('GZIP_COMPRESSION', true);
+const GZIP_COMPRESSION = true;
 
-define('OUTPUT_EXPIRE', false);
+const OUTPUT_EXPIRE = false;
 
-define('OUTPUT_EXPIRE_OFFSET', 3600);
+const OUTPUT_EXPIRE_OFFSET = 3600;
 
-define('CHECK_VERSION', false);
+const CHECK_VERSION = false;
