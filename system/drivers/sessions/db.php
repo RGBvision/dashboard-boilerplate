@@ -137,7 +137,7 @@ class Sessions
     public static function _insert($sessionId, $data)
     {
         DB::insert("sessions", [
-            "token" => token(),
+            "token" => Secure::randomToken(),
             "sesskey" => $sessionId,
             "expire" => date('Y-m-d H:i:s', (time() + self::$sessLifetime)),
             "value" => $data,

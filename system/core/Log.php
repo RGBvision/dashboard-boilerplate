@@ -42,13 +42,13 @@ class Log
 
             File::putContents(
                 DASHBOARD_DIR . TEMP_DIR . '/logs/' . gmdate('Y-m-d') . '.log',
-                '[' . gmdate('Y-m-d H:i:s') . " GMT] [$_type] [$module] [UID: " . (defined('UID') ? UID : 0) . '] [' . Ip::getIp() . "] $message" . PHP_EOL,
+                '[' . gmdate('Y-m-d H:i:s') . " GMT] [$_type] [$module] [UID: " . (defined('UID') ? UID : 0) . '] [' . IP::getIp() . "] $message" . PHP_EOL,
                 true,
                 true
             );
 
             $id = (int)DB::query("INSERT INTO logs (`type`, `module`, `user_id`, `ip`, `timestamp`, `message`) VALUES (?, ?, ?, ?, NOW(), ?)",
-                $_type, $module, defined('UID') ? UID : 0, Ip::getIp(), $message);
+                $_type, $module, defined('UID') ? UID : 0, IP::getIp(), $message);
 
             return ($id > 0);
 

@@ -74,4 +74,40 @@ class Secure
         return $string;
     }
 
+    /**
+     * Get random string
+     *
+     * @param int $length
+     * @param string $chars
+     * @return string
+     */
+    public static function randomString(int $length = 16, string $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQSTUVWXYZ~!@#$%^&*()-_=+{[;:/?.,]}0123456789'): string
+    {
+
+        $s_len = strlen($chars) - 1;
+
+        $string = '';
+
+        while (strlen($string) < $length) {
+            try {
+                $string .= $chars[random_int(0, $s_len)];
+            } catch (Exception $e) {
+
+            }
+        }
+
+        return $string;
+    }
+
+    /**
+     * Get random token
+     *
+     * @param int $length
+     * @return string
+     */
+    public static function randomToken(int $length = 32): string
+    {
+        return self::randomString($length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+    }
+
 }

@@ -66,7 +66,7 @@ class ModelLogin extends Model
     public function doPassChange(string $email, string $hash, string $pass):void
     {
 
-        $salt = randomString();
+        $salt = Secure::randomString();
         $password_hash = Auth::getPasswordHash($pass, $salt);
 
         DB::update("users", ["password" => $password_hash, "salt" => $salt, "hash" => "", "hash_expire" => null], ["email" => $email, "hash" => $hash]);

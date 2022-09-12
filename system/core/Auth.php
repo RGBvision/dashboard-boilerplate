@@ -277,7 +277,7 @@ class Auth
             return self::USER_INACTIVE;
         }
 
-        $salt = randomString();
+        $salt = Secure::randomString();
 
         $password_hash =  self::getPasswordHash($password, $salt);
 

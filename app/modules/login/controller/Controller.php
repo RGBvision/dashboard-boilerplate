@@ -52,7 +52,7 @@ class ControllerLogin extends Controller
             'page_title' => $Template->_get('login_page_title'),
         ];
 
-        if (isAjax()) {
+        if (Request::isAjax()) {
             Router::response(!$error, $error ?? $message, Request::referrer());
         }
 
@@ -134,7 +134,7 @@ class ControllerLogin extends Controller
         $Template->_load(DASHBOARD_DIR . '/app/modules/login/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         if (
-            ($email = normalizeEmail(Request::post('email'))) &&
+            ($email = Valid::normalizeEmail(Request::post('email'))) &&
             (DB::exists("SELECT COUNT(email) FROM users WHERE email = ?", $email)) &&
             ($user = DB::row("SELECT * FROM users WHERE email = ? LIMIT 1", $email))
         ) {
@@ -209,7 +209,7 @@ class ControllerLogin extends Controller
         if (
             Request::post('email') &&
             ($pass = Request::post('password')) &&
-            ($email = normalizeEmail(Request::post('email'))) &&
+            ($email = Valid::normalizeEmail(Request::post('email'))) &&
             ($hash = Secure::sanitize(Request::post('hash')))
         ) {
 

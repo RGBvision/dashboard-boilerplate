@@ -198,7 +198,7 @@ class User
 
             if ($pass) { // Update pass
 
-                $salt = randomString();
+                $salt = Secure::randomString();
                 $password_hash = password_hash(hash_hmac("sha256", $pass, $salt . PWD_PEPPER), PASSWORD_ARGON2ID);
 
                 DB::update(
@@ -226,7 +226,7 @@ class User
                 return false;
             }
 
-            $salt = randomString();
+            $salt = Secure::randomString();
             $password_hash = password_hash(hash_hmac("sha256", $pass, $salt . PWD_PEPPER), PASSWORD_ARGON2ID);
 
             $id = DB::insertGet(
