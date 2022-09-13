@@ -1,5 +1,7 @@
 <?php
 
+use ParagonIE\EasyDB\EasyDB;
+
 /**
  * This file is part of the dashboard.rgbvision.net package.
  *
@@ -9,11 +11,10 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.2
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
-
 class DB
 {
     // Instance
@@ -21,21 +22,21 @@ class DB
     // DB engine
     static public string $db_engine = 'mysql'; // default
     // DB host
-    static protected $db_host;
+    static protected ?string $db_host;
     // DB user
-    static protected $db_user;
+    static protected ?string $db_user;
     // DB password
-    static protected $db_pass;
+    static protected ?string $db_pass;
     // DB port
-    static protected $db_port;
+    static protected ?string $db_port;
     // DB socket
-    static protected $db_socket;
+    static protected ?string $db_socket;
     // DB name
-    static protected $db_name;
+    static protected ?string $db_name;
     // This connect
-    static public $connect;
+    static public PDO $connect;
     // driver (EasyDB)
-    static public $driver = null;
+    static public ?EasyDB $driver = null;
 
     const TTL = 0;
 
@@ -66,22 +67,19 @@ class DB
             self::$db_port = ($config['dbsock'] ?? null);
         }
 
-        if (!is_object(self::$connect) || !self::$connect instanceof PDO) {
+        $connection_string = sprintf("%s:host=%s;port=%d;dbname=%s;user=%s;password=%s;charset=utf8;",
+            (self::$db_engine === 'postgresql') ? 'pgsql' : 'mysql',
+            self::$db_host,
+            self::$db_port,
+            self::$db_name,
+            self::$db_user,
+            self::$db_pass);
 
-            $connection_string = sprintf("%s:host=%s;port=%d;dbname=%s;user=%s;password=%s;charset=utf8;",
-                (self::$db_engine === 'postgresql') ? 'pgsql' : 'mysql',
-                self::$db_host,
-                self::$db_port,
-                self::$db_name,
-                self::$db_user,
-                self::$db_pass);
-
-            try {
-                self::$connect = @new PDO($connection_string);
-                self::$driver = new ParagonIE\EasyDB\EasyDB(self::$connect, self::$db_engine);
-            } catch (PDOException $pe) {
-                self::shutDown(__METHOD__ . ': ' . $pe->getMessage());
-            }
+        try {
+            self::$connect = @new PDO($connection_string);
+            self::$driver = new ParagonIE\EasyDB\EasyDB(self::$connect, self::$db_engine);
+        } catch (PDOException $pe) {
+            self::shutDown(__METHOD__ . ': ' . $pe->getMessage());
         }
     }
 
@@ -117,7 +115,7 @@ class DB
      *
      * @param string $error
      */
-    public static function shutDown(string $error = ''): void
+    public static function shutDown(string $error = ''): never
     {
         ob_start();
         header('HTTP/1.1 503 Service Temporarily Unavailable');
@@ -132,9 +130,9 @@ class DB
      *
      * @param string $statement
      * @param mixed ...$params
-     * @return array|bool|int|mixed|object
+     * @return array
      */
-    public static function query(string $statement, ...$params)
+    public static function query(string $statement, ...$params): array
     {
 
         if ((self::TTL > 0) && (strtoupper(substr(trim($statement), 0, 6)) === 'SELECT')) {
@@ -183,7 +181,7 @@ class DB
         }
 
         if (self::$db_engine === 'postgresql') {
-            $db_size = (int)DB::cell('SELECT pg_database_size(?)', self::$db_name);
+            $db_size = (int)self::$driver->cell('SELECT pg_database_size(?)', self::$db_name);
         }
 
         return $db_size;
@@ -211,7 +209,7 @@ class DB
         }
 
         if (self::$db_engine === 'postgresql') {
-
+            //--
         }
 
         $res = (File::exists($file) && (File::size($file) > 0));
@@ -243,7 +241,7 @@ class DB
             }
 
             if (self::$db_engine === 'postgresql') {
-
+                //--
             }
 
             return true;
