@@ -259,7 +259,7 @@ if (!defined('TIMEZONE')) {
 
 @date_default_timezone_set(TIMEZONE);
 
-ini_set('arg_separator.output', '&amp;');
+ini_set('arg_separator.output', '&');
 ini_set('session.cache_limiter', 'none');
 ini_set('session.cookie_lifetime', COOKIE_LIFETIME);
 ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
