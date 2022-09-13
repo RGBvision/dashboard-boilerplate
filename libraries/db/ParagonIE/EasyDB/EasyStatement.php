@@ -2,8 +2,22 @@
 
 namespace ParagonIE\EasyDB;
 
-use ParagonIE\EasyDB\Exception\MustBeNonEmpty;
+use ParagonIE\EasyDB\Exception\{
+    MustBeEmpty,
+    MustBeNonEmpty
+};
 use RuntimeException;
+use TypeError;
+use function
+    array_merge,
+    array_reduce,
+    count,
+    is_object,
+    is_string,
+    sprintf,
+    str_repeat,
+    str_replace,
+    trim;
 
 /**
  * Class EasyStatement
@@ -12,34 +26,24 @@ use RuntimeException;
 class EasyStatement
 {
     /**
-     * @var array
-     *
-     * @psalm-var array<int, array{type:string, condition:self|string, values?:array<int, mixed>}>
+     * @var array<int, array{type:string, condition:self|string, values?:array<int, mixed>}> $parts
      */
-    private $parts = [];
+    private array $parts = [];
 
-    /**
-     * @var EasyStatement|null
-     */
-    private $parent;
+    private ?EasyStatement $parent;
 
-    /**
-     * @var bool
-     */
-    private $allowEmptyInStatements = false;
+    private bool $allowEmptyInStatements = false;
 
-    /**
-     * @return int
-     */
     public function count(): int
     {
-        return \count($this->parts);
+        return count($this->parts);
     }
 
     /**
      * Open a new statement.
      *
      * @return self
+     * @psalm-suppress UnsafeInstantiation
      */
     public static function open(): self
     {
@@ -59,13 +63,11 @@ class EasyStatement
     /**
      * Alias for andWith().
      *
-     * @param string $condition
+     * @param EasyStatement|string $condition
      * @param mixed ...$values
-     *
      * @return self
-     * @throws \TypeError
      */
-    public function with(string $condition, ...$values): self
+    public function with(EasyStatement|string $condition, ...$values): self
     {
         return $this->andWith($condition, ...$values);
     }
@@ -75,18 +77,18 @@ class EasyStatement
      *
      * @param string|self $condition
      * @param mixed ...$values
-     *
      * @return self
-     * @throws \TypeError
-     * @psalm-suppress RedundantConditionGivenDocblockType
+     *
+     * @throws MustBeEmpty
      */
-    public function andWith($condition, ...$values): self
+    public function andWith(EasyStatement|string $condition, ...$values): self
     {
         if ($condition instanceof EasyStatement) {
+            if (!empty($values)) {
+                throw new MustBeEmpty("EasyStatement provided; must be only argument.");
+            }
+            $values = $condition->values();
             $condition = '(' . $condition . ')';
-        }
-        if (!\is_string($condition)) {
-            throw new \TypeError('An EasyStatement or string is expected for argument 1');
         }
         return $this->andWithString($condition, ...$values);
     }
@@ -98,6 +100,8 @@ class EasyStatement
      * @param mixed ...$values
      *
      * @return self
+     *
+     * @psalm-taint-source input $condition
      */
     public function andWithString(string $condition, ...$values): self
     {
@@ -115,18 +119,18 @@ class EasyStatement
      *
      * @param string|self $condition
      * @param mixed ...$values
-     *
      * @return self
-     * @throws \TypeError
-     * @psalm-suppress RedundantConditionGivenDocblockType
+     *
+     * @psalm-taint-source input $condition
      */
-    public function orWith($condition, ...$values): self
+    public function orWith(EasyStatement|string $condition, ...$values): self
     {
         if ($condition instanceof EasyStatement) {
+            if (!empty($values)) {
+                throw new MustBeEmpty("EasyStatement provided; must be only argument.");
+            }
+            $values = $condition->values();
             $condition = '(' . $condition . ')';
-        }
-        if (!\is_string($condition)) {
-            throw new \TypeError('An EasyStatement or string is expected for argument 1');
         }
         return $this->orWithString($condition, ...$values);
     }
@@ -138,6 +142,8 @@ class EasyStatement
      * @param mixed ...$values
      *
      * @return self
+     *
+     * @psalm-taint-source input $condition
      */
     public function orWithString(string $condition, ...$values): self
     {
@@ -158,7 +164,8 @@ class EasyStatement
      *
      * @return self
      * @throws MustBeNonEmpty
-     * @throws \TypeError
+     *
+     * @psalm-taint-source input $condition
      */
     public function in(string $condition, array $values): self
     {
@@ -174,12 +181,16 @@ class EasyStatement
      * @param array $values
      *
      * @return self
+     *
      * @throws MustBeNonEmpty
-     * @throws \TypeError
+     * @throws RuntimeException
+     * @throws TypeError
+     *
+     * @psalm-taint-source input $condition
      */
     public function andIn(string $condition, array $values): self
     {
-        if (\count($values) < 1) {
+        if (count($values) < 1) {
             if (!$this->allowEmptyInStatements) {
                 throw new MustBeNonEmpty();
             }
@@ -192,7 +203,14 @@ class EasyStatement
             ];
             return $this;
         }
-        return $this->andWith($this->unpackCondition($condition, \count($values)), ...$values);
+        try {
+            return $this->andWith(
+                $this->unpackCondition($condition, count($values)),
+                ...$values
+            );
+        } catch (MustBeEmpty $ex) {
+            throw new RuntimeException("Invalid state reached", 0, $ex);
+        }
     }
 
     /**
@@ -202,20 +220,28 @@ class EasyStatement
      *
      * @param string $condition
      * @param array $values
-     *
      * @return self
+     *
      * @throws MustBeNonEmpty
-     * @throws \TypeError
+     *
+     * @psalm-taint-source input $condition
      */
     public function orIn(string $condition, array $values): self
     {
-        if (\count($values) < 1) {
+        if (count($values) < 1) {
             if (!$this->allowEmptyInStatements) {
                 throw new MustBeNonEmpty();
             }
             return $this;
         }
-        return $this->orWith($this->unpackCondition($condition, \count($values)), ...$values);
+        try {
+            return $this->orWith(
+                $this->unpackCondition($condition, count($values)),
+                ...$values
+            );
+        } catch (MustBeEmpty $ex) {
+            throw new RuntimeException("Invalid state reached", 0, $ex);
+        }
     }
 
     /**
@@ -305,7 +331,7 @@ class EasyStatement
         if (empty($this->parts)) {
             return '1 = 1';
         }
-        return (string) \array_reduce(
+        return array_reduce(
             $this->parts,
             /**
              * @psalm-param array{type:string, condition:self|string, values?:array<int, mixed>} $part
@@ -316,7 +342,7 @@ class EasyStatement
 
                 if ($this->isGroup($condition)) {
                     // (...)
-                    if (\is_string($condition)) {
+                    if (is_string($condition)) {
                         $statement = '(' . $condition . ')';
                     } else {
                         $statement = '(' . $condition->sql() . ')';
@@ -330,32 +356,29 @@ class EasyStatement
                 $part['type'] = (string) $part['type'];
 
                 if ($sql) {
-                    switch ($part['type']) {
-                        case 'AND':
-                        case 'OR':
-                            $statement = $part['type'] . ' ' . $statement;
-                            break;
-                        default:
-                            throw new RuntimeException(
-                                \sprintf('Invalid joiner %s', $part['type'])
-                            );
-                    }
+                    $statement = match ($part['type']) {
+                        'AND', 'OR' => $part['type'] . ' ' . $statement,
+                        default => throw new RuntimeException(
+                            sprintf('Invalid joiner %s', $part['type'])
+                        ),
+                    };
                 }
 
-                return \trim($sql . ' ' . $statement);
+                /** @psalm-taint-sink sql */
+                return trim($sql . ' ' . $statement);
             },
             ''
         );
     }
 
     /**
-     * Get all of the parameters attached to this statement.
+     * Get the parameters attached to this statement.
      *
      * @return array
      */
     public function values(): array
     {
-        return (array) \array_reduce(
+        return (array) array_reduce(
             $this->parts,
             /**
              * @psalm-param array{type:string, condition:self|string, values?:array<int, mixed>} $part
@@ -364,7 +387,7 @@ class EasyStatement
                 if ($this->isGroup($part['condition'])) {
                     /** @var EasyStatement $condition */
                     $condition = $part['condition'];
-                    return \array_merge(
+                    return array_merge(
                         $values,
                         $condition->values()
                     );
@@ -372,7 +395,7 @@ class EasyStatement
                     return $values;
                 }
 
-                return \array_merge($values, $part['values']);
+                return array_merge($values, $part['values']);
             },
             []
         );
@@ -406,9 +429,9 @@ class EasyStatement
      *
      * @return bool
      */
-    protected function isGroup($condition): bool
+    protected function isGroup(mixed $condition): bool
     {
-        if (!\is_object($condition)) {
+        if (!is_object($condition)) {
             return false;
         }
 
@@ -424,11 +447,13 @@ class EasyStatement
      * @param int $count
      *
      * @return string
+     *
+     * @psalm-taint-source input $condition
      */
     private function unpackCondition(string $condition, int $count): string
     {
         // Replace a grouped placeholder with an matching count of placeholders.
-        $params = '?' . \str_repeat(', ?', $count - 1);
-        return \str_replace('?*', $params, $condition);
+        $params = '?' . str_repeat(', ?', $count - 1);
+        return str_replace('?*', $params, $condition);
     }
 }
