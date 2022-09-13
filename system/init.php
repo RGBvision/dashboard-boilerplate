@@ -18,8 +18,8 @@
 define('DASHBOARD_DIR', str_replace("\\", '/', dirname(__DIR__)));
 
 // Check PHP version
-if (PHP_VERSION_ID < 70400) {
-    exit ('This application require PHP 7.4 or higher.');
+if (PHP_VERSION_ID < 80100) {
+    exit ('This application require PHP 8.1 or higher.');
 }
 
 // DB connection config

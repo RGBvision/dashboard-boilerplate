@@ -82,7 +82,7 @@ class Response
      * @param bool $replace replace a previous similar header
      * @param int|null $status set HTTP status
      */
-    public static function setHeader(string $header, bool $replace = false, ?int $status = null): void
+    public static function setHeader(string $header, bool $replace = false, int $status = 0): void
     {
         header($header, $replace, $status);
     }

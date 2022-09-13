@@ -41,7 +41,7 @@ class Secure
      */
     public static function sanitize(string $string, bool $trim = false, bool $int = false, bool $str = false): string
     {
-        $string = filter_var($string, FILTER_SANITIZE_STRING);
+        $string = htmlspecialchars($string);
         $string = trim($string);
         $string = stripslashes($string);
         $string = strip_tags($string);

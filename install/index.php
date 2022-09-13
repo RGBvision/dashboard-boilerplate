@@ -15,8 +15,8 @@
  */
 
 // Check PHP version
-if (PHP_VERSION_ID < 70400) {
-    exit ('This application require PHP 7.4 or higher.');
+if (PHP_VERSION_ID < 80100) {
+    exit ('This application require PHP 8.1 or higher.');
 }
 
 // Dashboard root directory

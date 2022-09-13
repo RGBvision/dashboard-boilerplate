@@ -74,7 +74,7 @@ class Cookie
         }
 
 		// Cleanup domain name
-		$cookie_domain = ltrim(parse_url($cookie_domain, PHP_URL_HOST), '.');
+		$cookie_domain = ltrim(parse_url($cookie_domain, PHP_URL_HOST) ?? '', '.');
 
 		if (strpos($cookie_domain, 'www.') === 0) {
             $cookie_domain = substr($cookie_domain, 4);
