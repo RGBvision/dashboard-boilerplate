@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.2
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -80,7 +80,7 @@ class Response
      *
      * @param string $header header name
      * @param bool $replace replace a previous similar header
-     * @param int|null $status set HTTP status
+     * @param int $status set HTTP status
      */
     public static function setHeader(string $header, bool $replace = false, int $status = 0): void
     {
@@ -104,7 +104,7 @@ class Response
     /**
      * Shutdown script execution
      */
-    public static function shutDown(): void
+    public static function shutDown(): never
     {
         exit(0);
     }
