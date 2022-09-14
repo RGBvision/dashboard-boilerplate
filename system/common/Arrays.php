@@ -24,9 +24,9 @@ class Arrays
      * @param string $path key or path
      * @param string $glue path divider
      * @param null $default default value if nothing found
-     * @return array|mixed|null
+     * @return mixed
      */
-    public static function get(array &$array, string $path, string $glue = '.', $default = null)
+    public static function get(array &$array, string $path, string $glue = '.', $default = null): mixed
     {
         $path_chunks = explode($glue, $path);
         $ref = &$array;
@@ -48,10 +48,10 @@ class Arrays
      *
      * @param array $array array
      * @param string $path key or path
-     * @param array|mixed $value value
+     * @param mixed $value value
      * @param string $glue path divider
      */
-    public static function set(array &$array, string $path, $value, string $glue = '.'): void
+    public static function set(array &$array, string $path, mixed $value, string $glue = '.'): void
     {
         $path_chunks = explode($glue, $path);
         $ref = &$array;
@@ -89,11 +89,11 @@ class Arrays
     /**
      * @param array $array
      * @param callable $callback
-     * @param $userdata
+     * @param mixed $userdata
      * @param bool $delete
      * @return array
      */
-    private static function array_walk_recursive_delete(array &$array, callable $callback, $userdata = null, bool $delete = false)
+    private static function array_walk_recursive_delete(array &$array, callable $callback, mixed $userdata = null, bool $delete = false): array
     {
         foreach ($array as $key => &$value) {
 
@@ -122,7 +122,7 @@ class Arrays
     {
 
         if (!empty($key_names)) {
-            self::array_walk_recursive_delete($array, static function (&$value, &$key, $name) {
+            self::array_walk_recursive_delete($array, static function (&$value, $key, $name) {
                 return in_array($key, $name, true);
             }, $key_names, $delete);
         }
@@ -157,8 +157,8 @@ class Arrays
      */
     public static function trimAll(array &$array, string $characters = " \t\n\r\0\x0B"): void
     {
-        array_walk_recursive($array, function (&$v) {
-            $v = trim($v);
+        array_walk_recursive($array, function (&$v) use ($characters) {
+            $v = trim($v, $characters);
         });
     }
 
@@ -204,12 +204,12 @@ class Arrays
     public static function deleteKey(array &$array, string $key_name): void
     {
 
-        function _isKey(&$value, &$key, $name)
+        function _isKey(&$value, $key, $name): bool
         {
             return ($key === $name);
         }
 
-        function array_walk_recursive_delete(array &$array, callable $callback, $key_name = null)
+        function array_walk_recursive_delete(array &$array, callable $callback, $key_name = null): array
         {
             foreach ($array as $key => &$value) {
                 if (is_array($value)) {
@@ -237,12 +237,12 @@ class Arrays
     public static function deleteKeyValue(array &$array, string $key_name, string $val): void
     {
 
-        function _isKeyVal(&$value, &$key, $name, $val)
+        function _isKeyVal($value, $key, $name, $val): bool
         {
             return ($key === $name) && ($value === $val);
         }
 
-        function array_walk_recursive_delete(array &$array, callable $callback, $key_name = null, $val = null)
+        function array_walk_recursive_delete(array &$array, callable $callback, $key_name = null, $val = null): array
         {
             foreach ($array as $key => &$value) {
                 if (is_array($value)) {
@@ -263,14 +263,14 @@ class Arrays
      * Return element's path by key-value pair
      *
      * @param array $array
-     * @param $key
-     * @param $val
+     * @param int|string $key
+     * @param mixed $val
      * @param string $glue
      * @param bool $add_self_key
      * @param array $stack
-     * @return false|int|string
+     * @return bool|int|string
      */
-    public static function pathByKeyValue(array $array, $key, $val, string $glue = '.', bool $add_self_key = true, array &$stack = [])
+    public static function pathByKeyValue(array $array, int|string $key, mixed $val, string $glue = '.', bool $add_self_key = true, array &$stack = []): bool|int|string
     {
 
         foreach ($array as $k => $v) {
@@ -282,7 +282,7 @@ class Arrays
                 return $k;
             }
 
-            if (is_array($v) && $res = self::pathByKeyValue($v, $key, $val, $glue, $add_self_key, $stack)) {
+            if (is_array($v) && self::pathByKeyValue($v, $key, $val, $glue, $add_self_key, $stack)) {
                 array_unshift($stack, $k);
                 return implode($glue, $stack);
             }
@@ -294,10 +294,10 @@ class Arrays
     /**
      * Convert array to object
      *
-     * @param array|mixed $array массив для преобразования
-     * @return stdClass
+     * @param array|object $array массив для преобразования
+     * @return object
      */
-    public static function toObject($array): stdClass
+    public static function toObject(array|object $array): object
     {
         if (is_array($array)) {
             $obj = new stdClass();
@@ -317,11 +317,11 @@ class Arrays
     /**
      * Convert object to array
      *
-     * @param StdClass|mixed $object
+     * @param object|array $object
      * @return array
      * @throws ReflectionException
      */
-    public static function toArray($object): array
+    public static function toArray(object|array $object): array
     {
 
         if (is_object($object)) {
@@ -329,11 +329,9 @@ class Arrays
             $reflectionClass = new ReflectionClass(get_class($object));
             $array = [];
             foreach ($reflectionClass->getProperties() as $property) {
-                $property->setAccessible(true);
                 if ($property->isPublic()) {
                     $array[$property->getName()] = $property->getValue($object);
                 }
-                $property->setAccessible(false);
             }
             return $array;
         }
@@ -358,12 +356,12 @@ class Arrays
      * Convert array to XML file
      *
      * @param $array
-     * @param $values_to_attributes
+     * @param bool $values_to_attributes
      * @return string
      */
-    public static function toXML($array, $values_to_attributes = false): string
+    public static function toXML($array, bool $values_to_attributes = false): string
     {
-        function array_to_xml($data, &$xml_data, $values_to_attributes = false)
+        function array_to_xml($data, &$xml_data, $values_to_attributes = false): void
         {
             foreach ($data as $key => $value) {
                 if (is_numeric($key)) {
@@ -374,8 +372,8 @@ class Arrays
                     }
                 }
                 if (is_array($value)) {
-                    $subnode = $xml_data->addChild($key);
-                    array_to_xml($value, $subnode, $values_to_attributes);
+                    $sub_node = $xml_data->addChild($key);
+                    array_to_xml($value, $sub_node, $values_to_attributes);
                 } else if ($key !== '@') {
                     if ($values_to_attributes) {
                         $xml_data->addAttribute("$key", htmlspecialchars("$value"));
