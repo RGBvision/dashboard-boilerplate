@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.7
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 2.0
  */
@@ -26,7 +26,7 @@ class Json
      */
     public static function encode(array $array, int $flags = 0): string
     {
-        $json = json_encode($array, $flags); // JSON_UNESCAPED_UNICODE
+        $json = json_encode($array, $flags);
 
         if ($json === false) {
             $json = json_encode(['jsonError', json_last_error_msg()]);
@@ -46,7 +46,7 @@ class Json
      * @param bool $object to object flag
      * @return mixed
      */
-    public static function decode(string $string, bool $object = false)
+    public static function decode(string $string, bool $object = false): mixed
     {
         return json_decode($string, !$object);
     }
