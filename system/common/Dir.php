@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.1
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -26,9 +26,7 @@ class Dir
      */
     public static function create(string $dir, int $chmod = 0775): bool
     {
-		return (!self::exists($dir))
-			? @mkdir($dir, $chmod, true)
-			: true;
+		return !(!self::exists($dir)) || @mkdir($dir, $chmod, true);
 	}
 
 
@@ -78,8 +76,7 @@ class Dir
 			}
 		}
 
-		reset($elements);
-	}
+    }
 
     /**
      * Delete directory and all contents
