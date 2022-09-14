@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.1
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -39,10 +39,10 @@ class Cookie
      * Get cookie value
      *
      * @param string $key ключ
-     * @return bool|mixed|string
+     * @return mixed
      */
-    public static function get(string $key)
-	{
+    public static function get(string $key): mixed
+    {
         return $_COOKIE[$key] ?? false;
     }
 
@@ -76,7 +76,7 @@ class Cookie
 		// Cleanup domain name
 		$cookie_domain = ltrim(parse_url($cookie_domain, PHP_URL_HOST) ?? '', '.');
 
-		if (strpos($cookie_domain, 'www.') === 0) {
+		if (str_starts_with($cookie_domain, 'www.')) {
             $cookie_domain = substr($cookie_domain, 4);
         }
 
