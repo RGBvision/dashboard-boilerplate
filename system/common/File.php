@@ -9,14 +9,14 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.7
+ * @version    3.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
 class File
 {
-    private static $mime_types = array(
+    private static array $mime_types = [
         'aac' => 'audio/aac',
         'atom' => 'application/atom+xml',
         'avi' => 'video/avi',
@@ -78,41 +78,41 @@ class File
         'xls' => 'application/vnd.ms-excel',
         'xml' => 'text/xml',
         'zip' => 'application/zip',
-    );
+    ];
 
     /**
-     * Проверка существования файла
+     * Check if file exists
      *
-     * @param string $filename путь к файлу
+     * @param string $path path to file
      * @return bool
      */
-    public static function exists(string $filename): bool
+    public static function exists(string $path): bool
     {
-        return (file_exists($filename) && is_file($filename));
+        return (file_exists($path) && is_file($path));
     }
 
     /**
-     * Удалить файл(ы)
+     * Delete file(s)
      *
-     * @param array|string $filename путь к файлу или массив путей к файлам
+     * @param array|string $path path(s) to file(s)
      */
-    public static function delete($filename): void
+    public static function delete(array|string $path): void
     {
-        if (is_array($filename)) {
-            foreach ($filename as $file) {
+        if (is_array($path)) {
+            foreach ($path as $file) {
                 @unlink((string)$file);
             }
         } else {
-            @unlink((string)$filename);
+            @unlink((string)$path);
         }
 
     }
 
     /**
-     * Переименовать файл
+     * Rename file
      *
-     * @param string $from старое имя
-     * @param string $to новое имя
+     * @param string $from old name
+     * @param string $to new name
      * @return bool
      */
     public static function rename(string $from, string $to): bool
@@ -126,10 +126,10 @@ class File
     }
 
     /**
-     * Копировать файл
+     * Copies file
      *
-     * @param string $from исходный файл
-     * @param string $to путь к целевому файлу
+     * @param string $from path to source file
+     * @param string $to destination file
      * @return bool
      */
     public static function copy(string $from, string $to): bool
@@ -143,101 +143,101 @@ class File
     }
 
     /**
-     * Получить расширение файла
+     * Get file extension
      *
-     * @param string $filename имя файла
+     * @param string $path file path
      * @return string
      */
-    public static function ext(string $filename): string
+    public static function ext(string $path): string
     {
-        return pathinfo($filename, PATHINFO_EXTENSION);
+        return pathinfo($path, PATHINFO_EXTENSION);
     }
 
     /**
-     * Получить имя файла
+     * Get file name
      *
-     * @param string $filename имя файла
+     * @param string $path file path
      * @return string
      */
-    public static function name(string $filename): string
+    public static function name(string $path): string
     {
-        return pathinfo($filename, PATHINFO_FILENAME);
+        return pathinfo($path, PATHINFO_FILENAME);
     }
 
     /**
-     * Получить имя и расширение файла
+     * Get file basename
      *
-     * @param string $filename имя файла
+     * @param string $path file path
      * @return string
      */
-    public static function basename(string $filename): string
+    public static function basename(string $path): string
     {
-        return pathinfo($filename, PATHINFO_BASENAME);
+        return pathinfo($path, PATHINFO_BASENAME);
     }
 
     /**
-     * Получить путь файла
+     * Get file dir
      *
-     * @param string $filename имя файла
+     * @param string $path file path
      * @return string
      */
-    public static function path(string $filename): string
+    public static function path(string $path): string
     {
-        return pathinfo($filename, PATHINFO_DIRNAME);
+        return pathinfo($path, PATHINFO_DIRNAME);
     }
 
     /**
-     * Получить размер файла
+     * Get file size
      *
-     * @param string $filename имя файла
+     * @param string $path file path
      * @return int
      */
-    public static function size(string $filename): int
+    public static function size(string $path): int
     {
-        if (self::exists($filename)) {
-            return (int)filesize($filename);
+        if (self::exists($path)) {
+            return (int)filesize($path);
         }
         return 0;
     }
 
     /**
-     * Получить содержимое файла
+     * Get file contents
      *
-     * @param string $filename имя файла
+     * @param string $path file path
      * @return string
      */
-    public static function getContents(string $filename): string
+    public static function getContents(string $path): string
     {
-        if (self::exists($filename)) {
-            return file_get_contents($filename);
+        if (self::exists($path)) {
+            return file_get_contents($path);
         }
         return '';
     }
 
     /**
-     * Записать содержимое в файл
+     * Write string to file
      *
-     * @param string $filename имя файла
-     * @param string $content содержимое
-     * @param bool $create_file создать файл если не существует
-     * @param bool $append добавлять содержимое в конец или перезаписывать
-     * @param int $chmod установить права файлу
+     * @param string $path file path
+     * @param string $content content to write
+     * @param bool $create_file create file if not exists
+     * @param bool $append append content if file exists
+     * @param int $chmod set file mode
      * @return bool
      */
-    public static function putContents(string $filename, string $content, bool $create_file = true, bool $append = false, int $chmod = 0666): bool
+    public static function putContents(string $path, string $content, bool $create_file = true, bool $append = false, int $chmod = 0666): bool
     {
-        if (!$create_file && !File::exists($filename)) {
-            throw new RuntimeException(vsprintf("%s(): The file '$filename' doesn't exist", array(__METHOD__)));
+        if (!$create_file && !File::exists($path)) {
+            throw new RuntimeException(vsprintf("%s(): The file '$path' doesn't exist", [__METHOD__]));
         }
 
-        Dir::create(dirname($filename));
+        Dir::create(dirname($path));
 
         $handler = ($append)
-            ? @fopen($filename, 'ab')
-            : @fopen($filename, 'wb');
+            ? @fopen($path, 'ab')
+            : @fopen($path, 'wb');
 
         if ($handler === false) {
-            throw new RuntimeException(vsprintf("%s(): The file '$filename' could not be created.", array(__METHOD__)));
+            throw new RuntimeException(vsprintf("%s(): The file '$path' could not be created.", [__METHOD__]));
         }
 
         $level = error_reporting();
@@ -247,12 +247,12 @@ class File
         $write = fwrite($handler, $content);
 
         if ($write === false) {
-            throw new RuntimeException(vsprintf("%s(): The file '$filename' could not be created.", array(__METHOD__)));
+            throw new RuntimeException(vsprintf("%s(): The file '$path' could not be created.", [__METHOD__]));
         }
 
         fclose($handler);
 
-        chmod($filename, $chmod);
+        chmod($path, $chmod);
 
         error_reporting($level);
 
@@ -261,15 +261,15 @@ class File
 
 
     /**
-     * Получить время последнего изменения файла
+     * Get file modification time
      *
-     * @param string $filename имя файла
+     * @param string $path path to file
      * @return bool|int
      */
-    public static function lastChange(string $filename)
+    public static function lastChange(string $path): bool|int
     {
-        if (self::exists($filename)) {
-            return filemtime($filename);
+        if (self::exists($path)) {
+            return filemtime($path);
         }
 
         return false;
@@ -277,34 +277,34 @@ class File
 
 
     /**
-     * Получить время последнего доступа к файлу
+     * Get last access time of file
      *
-     * @param string $filename имя файла
+     * @param string $path path to file
      * @return bool|int
      */
-    public static function lastAccess(string $filename)
+    public static function lastAccess(string $path): bool|int
     {
-        if (self::exists($filename)) {
-            return fileatime($filename);
+        if (self::exists($path)) {
+            return fileatime($path);
         }
 
         return false;
     }
 
     /**
-     * Получить MIME тип файла
+     * Get file MIME type
      *
-     * @param string $file имя файла
-     * @param bool $guess использовать fallback по расширению файла
+     * @param string $path path to file
+     * @param bool $guess as fallback get MIME by extension
      * @return string|null
      */
-    public static function mime(string $file, bool $guess = true): ?string
+    public static function mime(string $path, bool $guess = true): ?string
     {
 
         if (function_exists('finfo_open')) {
             $info = finfo_open(FILEINFO_MIME_TYPE);
 
-            $mime = finfo_file($info, $file);
+            $mime = finfo_file($info, $path);
 
             finfo_close($info);
 
@@ -315,7 +315,7 @@ class File
         if ($guess === true) {
             $mime_types = self::$mime_types;
 
-            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
 
             return $mime_types[$extension] ?? null;
         }
@@ -324,7 +324,7 @@ class File
     }
 
     /**
-     * Получить расширение по MIME типу файла
+     * Get extension by MIME type
      *
      * @param string $mime
      * @return string
@@ -335,41 +335,53 @@ class File
     }
 
     /**
-     * Вывести файл для скачивания в браузер
-     *
-     * @param string $file имя файла
-     * @param string|null $content_type тип содержимого
-     * @param string|null $filename установить отображаемое имя файла
-     * @param int $kbps ограничить скорость скачивания до указанного значения
+     * @param string $file
+     * @param string|null $filename
+     * @return string|null
      */
-    public static function download(string $file, ?string $content_type = null, ?string $filename = null, int $kbps = 0): void
+    private static function checkFile(string $file, ?string $filename): ?string
     {
         if (file_exists($file) === false || is_readable($file) === false) {
-            throw new RuntimeException(vsprintf("%s(): Failed to open stream.", array(__METHOD__)));
-        }
-
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
-        if ($content_type === null) {
-            $content_type = self::mime($file);
+            throw new RuntimeException(vsprintf("%s(): Failed to open stream.", [__METHOD__]));
         }
 
         if ($filename === null) {
             $filename = basename($file);
         }
 
+        return $filename;
+    }
+
+    /**
+     * Output file for download to browser
+     *
+     * @param string $path path to file
+     * @param string|null $content_type file content type
+     * @param string|null $filename displayed file name
+     * @param int $kbps limit download speed
+     */
+    public static function download(string $path, ?string $content_type = null, ?string $filename = null, int $kbps = 0): never
+    {
+        $filename = self::checkFile($path, $filename);
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        if ($content_type === null) {
+            $content_type = self::mime($path);
+        }
+
         header('Content-type: ' . $content_type);
         header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Length: ' . filesize($file));
+        header('Content-Length: ' . filesize($path));
 
         @set_time_limit(0);
 
         if ($kbps === 0) {
-            readfile($file);
+            readfile($path);
         } else {
-            $handle = fopen($file, 'rb');
+            $handle = fopen($path, 'rb');
 
             while (!feof($handle) && !connection_aborted()) {
                 $s = microtime(true);
@@ -386,41 +398,42 @@ class File
     }
 
     /**
-     * Вывести файл в браузер
+     * Display file in browser
      *
-     * @param string $file имя файла
-     * @param string|null $content_type тип содержимого
-     * @param string|null $filename установить отображаемое имя файла
+     * @param string $path path to file
+     * @param string|null $content_type file content type
+     * @param string|null $filename displayed file name
      */
-    public static function display(string $file, ?string $content_type = null, ?string $filename = null): void
+    public static function display(string $path, ?string $content_type = null, ?string $filename = null): never
     {
 
-        if (file_exists($file) === false || is_readable($file) === false) {
-            throw new RuntimeException(vsprintf("%s(): Failed to open stream.", array(__METHOD__)));
-        }
+        $filename = self::checkFile($path, $filename);
 
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
 
         if ($content_type === null) {
-            $content_type = self::mime($file);
-        }
-
-        if ($filename === null) {
-            $filename = basename($file);
+            $content_type = self::mime($path);
         }
 
         header('Content-type: ' . $content_type);
         header('Content-Disposition: inline; filename="' . $filename . '"');
-        header('Content-Length: ' . filesize($file));
+        header('Content-Length: ' . filesize($path));
 
-        readfile($file);
+        readfile($path);
 
         exit();
     }
 
-    public static function download_url(string $url, string $content_type, string $filename): void
+    /**
+     * Output file from URL for download to browser
+     *
+     * @param string $url file URL
+     * @param string $content_type file content type
+     * @param string $filename displayed file name
+     */
+    public static function download_url(string $url, string $content_type, string $filename): never
     {
 
         $content = @file_get_contents($url);
@@ -440,7 +453,14 @@ class File
         exit();
     }
 
-    public static function download_string(string $content, string $content_type, string $filename): void
+    /**
+     * Output string for download as file to browser
+     *
+     * @param string $content data to download
+     * @param string $content_type file content type
+     * @param string $filename displayed file name
+     */
+    public static function download_string(string $content, string $content_type, string $filename): never
     {
 
         if (!empty($content)) {
@@ -458,7 +478,14 @@ class File
         exit();
     }
 
-    public static function display_string(string $content, string $content_type, string $filename): void
+    /**
+     * Output string as file to browser
+     *
+     * @param string $content data to download
+     * @param string $content_type file content type
+     * @param string $filename displayed file name
+     */
+    public static function display_string(string $content, string $content_type, string $filename): never
     {
 
         if (!empty($content)) {
@@ -477,30 +504,30 @@ class File
     }
 
     /**
-     * Проверить файл на возможность записи
+     * Check if file writable
      *
-     * @param string $file имя файла
+     * @param string $path path to file
      * @return bool
      */
-    public static function writable(string $file): bool
+    public static function writable(string $path): bool
     {
 
-        if (!file_exists($file)) {
-            throw new RuntimeException(vsprintf("%s(): The file '{$file}' doesn't exist", array(__METHOD__)));
+        if (!file_exists($path)) {
+            throw new RuntimeException(vsprintf("%s(): The file '{$path}' doesn't exist", [__METHOD__]));
         }
 
-        $perms = fileperms($file);
+        $perms = fileperms($path);
 
-        return (is_writable($file) || ($perms & 0x0080) || ($perms & 0x0010) || ($perms & 0x0002));
+        return (is_writable($path) || ($perms & 0x0080) || ($perms & 0x0010) || ($perms & 0x0002));
     }
 
     /**
-     * Загрузить файл из формы
+     * Upload file from form
      *
-     * @param string $key Ключ файла из формы
-     * @param string $target Целевой полный путь и имя файла на сервере
-     * @param array|null $allowed_mime_types Допустимые типы файлов
-     * @param bool $rewrite Перезаписать файл, если такой уже существует. Если установлено значение `false` и файл существует, то функция не загрузит файл и вернет `false`.
+     * @param string $key file key from form
+     * @param string $target destination file
+     * @param array|null $allowed_mime_types allowed mime types for upload
+     * @param bool $rewrite Overwrite target file if already exists. If set to `false` and the file exists, function will not load the file and returns `false`.
      * @return bool
      */
     public static function upload(string $key, string $target, ?array $allowed_mime_types = null, bool $rewrite = false): bool
@@ -527,6 +554,12 @@ class File
         return false;
     }
 
+    /**
+     * Find files by mask
+     *
+     * @param string $mask mask
+     * @return array|null
+     */
     public static function find(string $mask): ?array
     {
         $res = [];
