@@ -15,8 +15,8 @@
  */
 
 // Check PHP version
-if (PHP_VERSION_ID < 80100) {
-    exit ('This application require PHP 8.1 or higher.');
+if (PHP_VERSION_ID < 80101) {
+    exit ('This application require PHP 8.1.1 or higher.');
 }
 
 // Dashboard root directory
@@ -74,11 +74,11 @@ const SMARTY_USE_SUB_DIRS = true;
 const SMARTY_DEBUGGING = false;
 
 // Minimum system requirements
-const PHP_version = '7.4.2';
+const PHP_version = '8.1.1';
 const MySQL_version = '5.7.0';
 const Data_limit = '2'; // Mb
 const TIME_limit = '30'; // Sec
-const DISC_space = '50'; // Mb
+const DISC_space = '75'; // Mb
 const RAM_space = '32M'; // Mb
 
 // Template engine instance
@@ -90,7 +90,7 @@ $Template->_load(DASHBOARD_DIR . '/install/i18n/' . i18n::$active_language . '.i
 $Template->assign('current_language', i18n::$active_language);
 $Template->display(DASHBOARD_DIR . '/install/view/index.tpl');
 
-if ($_POST['action'] && $_POST['action'] === 'install') {
+if (!empty($_POST['action']) && $_POST['action'] === 'install') {
 
     $config = [
         'dbengine' => $_POST['dbengine'],
