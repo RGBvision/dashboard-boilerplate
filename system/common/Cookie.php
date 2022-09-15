@@ -61,9 +61,10 @@ class Cookie
     /**
      * Set cookies domain
      *
-     * @param string $cookie_domain domain
+     * @param string $cookie_domain
+     * @return string
      */
-    public static function setDomain(string $cookie_domain = ''): void
+    public static function setDomain(string $cookie_domain = ''): string
     {
         if (empty($cookie_domain)) {
             if (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN) {
@@ -86,8 +87,8 @@ class Cookie
             ini_set('session.cookie_domain', $cookie_domain);
         }
 
-		Core::$cookie_domain = $cookie_domain;
-
 		ini_set('session.cookie_path', ABS_PATH);
+        return $cookie_domain;
+
 	}
 }

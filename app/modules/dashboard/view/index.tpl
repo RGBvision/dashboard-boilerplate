@@ -59,7 +59,6 @@
                            class="btn w-100 btn-danger mb-2 {if !Permission::check('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

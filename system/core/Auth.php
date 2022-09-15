@@ -135,7 +135,7 @@ class Auth
         $user_id = (int)DB::cell($sql, Secure::sanitize(Cookie::get('auth')), Secure::sanitize($_SERVER['HTTP_USER_AGENT']));
 
         if ($user_id === 0) {
-            Cookie::set('auth', '', 0, Core::$cookie_domain, ABS_PATH);
+            Cookie::set('auth', '', 0, Core::getCookieDomain(), ABS_PATH);
             return false;
         }
 
@@ -175,7 +175,7 @@ class Auth
                 DB::delete("users_session", ["hash" => Secure::sanitize(Cookie::get('auth'))]);
             }
 
-            Cookie::set('auth', '', 0, ABS_PATH, Core::$cookie_domain);
+            Cookie::set('auth', '', 0, ABS_PATH, Core::getCookieDomain());
             return false;
         }
 
@@ -210,7 +210,7 @@ class Auth
         DB::delete("users_session", ["user_id" => UID]);
         DB::delete("sessions", ["user_id" => UID]);
 
-        Cookie::set('auth', '', 0, Core::$cookie_domain, ABS_PATH);
+        Cookie::set('auth', '', 0, Core::getCookieDomain(), ABS_PATH);
 
         Session::destroy();
 
@@ -311,7 +311,7 @@ class Auth
             "last_activity" => date('Y-m-d H:i:s', $time),
         ]);
 
-        Cookie::set('auth', $auth, $expire, Core::$cookie_domain, ABS_PATH);
+        Cookie::set('auth', $auth, $expire, Core::getCookieDomain(), ABS_PATH);
 
         Log::log(Log::INFO, 'System\Auth', "User ($user->user_id) logged in");
 
