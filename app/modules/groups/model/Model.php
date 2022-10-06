@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelGroups extends Model
+class GroupsModel extends Model
 {
 
     public function getGroups($exclude = '')

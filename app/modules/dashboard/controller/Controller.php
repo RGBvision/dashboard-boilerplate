@@ -9,12 +9,12 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.2
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
-class ControllerDashboard extends Controller
+class DashboardController extends Controller
 {
 
     /**
@@ -28,15 +28,15 @@ class ControllerDashboard extends Controller
         // Check if user has permission at least to view module default page
         if (!Permission::check('dashboard_view')) {
             // Redirect to login page because dashboard is default module for authorized users
-            // So we assume that user is not logged in if user has no access to this module
+            // So we assume user is not logged in if user has no access to this module
             Router::response(false, '', ABS_PATH . 'login');
         }
 
-        // Add JS dependencies
+        // Add dependencies
         $files = [
             ABS_PATH . 'assets/vendors/apexcharts/apexcharts.min.js',
             ABS_PATH . 'assets/vendors/progressbar.js/progressbar.min.js',
-            ABS_PATH . 'app/modules/dashboard/js/dashboard.js',
+            ABS_PATH . ltrim(MODULES_DIR, '/') . DS . $this->module . '/js/dashboard.js',
         ];
 
         foreach ($files as $i => $file) {
@@ -50,14 +50,14 @@ class ControllerDashboard extends Controller
     /**
      * Default page
      */
-    public static function index()
+    public function index()
     {
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/dashboard/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load(DASHBOARD_DIR . MODULES_DIR . DS . $this->module . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $data = [
 
@@ -87,42 +87,42 @@ class ControllerDashboard extends Controller
         // Push data to template engine
         $Template
             ->assign('data', $data)
-            ->assign('visits', self::$model->getVisits())
-            ->assign('storage_size', self::$model->getStorageSize())
-            ->assign('storage_usage', self::$model->getStorageUsage())
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/dashboard/view/index.tpl'));
+            ->assign('visits', $this->model->getVisits())
+            ->assign('storage_size', $this->model->getStorageSize())
+            ->assign('storage_usage', $this->model->getStorageUsage())
+            ->assign('content', $Template->fetch(DASHBOARD_DIR . MODULES_DIR . DS . $this->module . '/view/index.tpl'));
     }
 
     /**
      * Backup database
      */
-    public static function backup_db()
+    public function backup_db()
     {
         $status = false;
         if (Permission::check('dashboard_backup_db')) {
             $status = DB::backup();
             Response::setStatus($status ? 200 : 503);
         }
-        Json::show(['success' => $status], true);
+        Json::output(['success' => $status], true);
     }
 
     /**
      * Clear cache: delete SMARTY cache files
      */
-    public static function clear_cache()
+    public function clear_cache()
     {
         if (Permission::check('dashboard_clear_cache')) {
             Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/smarty');
-            Json::show(['success' => true], true);
+            Json::output(['success' => true], true);
         }
-        Json::show(['success' => false], true);
+        Json::output(['success' => false], true);
     }
 
 
     /**
      * Generate new module
      */
-    public static function generate()
+    public function generate()
     {
 
         $success = false;
@@ -133,7 +133,7 @@ class ControllerDashboard extends Controller
             ($dir_name = preg_replace('/\s+/', '', strtolower($name))) &&
             (!Dir::exists(DASHBOARD_DIR . "/app/modules/$dir_name"))
         ) {
-            self::$model->copy_template(DASHBOARD_DIR . "/tmp/module_template", DASHBOARD_DIR . "/app/modules/$dir_name", $name);
+            $this->model->copy_template(DASHBOARD_DIR . "/tmp/module_template", DASHBOARD_DIR . "/app/modules/$dir_name", $name);
             $success = Dir::exists(DASHBOARD_DIR . "/app/modules/$dir_name");
         }
 

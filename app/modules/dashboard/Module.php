@@ -9,28 +9,33 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.2
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
-class ModuleDashboard extends Module
+class DashboardModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '3.2';
+    const ID = 'dashboard';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '01.11.2021';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'dashboard';
+    const DATE = '07.10.2022';
+
+    /**
+     * Module permissions
+     */
+    const PERMISSIONS = ['dashboard_view', 'dashboard_backup_db', 'dashboard_clear_cache'];
 
     /**
      * Constructor
@@ -41,23 +46,26 @@ class ModuleDashboard extends Module
         // Parent
         parent::__construct();
 
+        // Router aliases
+        Router::addAlias(ABS_PATH, static::ID, 'index');
+
         // Module permissions
-        Permission::add('dashboard', ['dashboard_view', 'dashboard_backup_db', 'dashboard_clear_cache'], 'mdi mdi-view-dashboard', 1);
+        Permission::add(static::ID, static::PERMISSIONS, 'mdi mdi-view-dashboard', 1);
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/dashboard/i18n/' . Session::getvar('current_language') . '.ini', 'name');
-        $Template->_load(DASHBOARD_DIR . '/app/modules/dashboard/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'name');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
 
         // Add navigation entry
         Navigation::add(
             10,
             $Template->_get('dashboard_menu_name'),
             'mdi mdi-view-dashboard',
-            ABS_PATH . 'dashboard',
-            'dashboard',
+            ABS_PATH . static::ID,
+            static::ID,
             Navigation::SIDEBAR,
             Navigation::SIDEBAR_MAIN,
             '',

@@ -1,12 +1,12 @@
 <?php
 
 
-class ControllerSettings extends Controller
+class SettingsController extends Controller
 {
 
     /*
      |--------------------------------------------------------------------------------------
-     | ControllerSettings конструктор
+     | SettingsController конструктор
      |--------------------------------------------------------------------------------------
      | Сразу назначаем Model из Router
      |

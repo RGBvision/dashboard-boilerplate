@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ControllerLogin extends Controller
+class LoginController extends Controller
 {
 
     /**

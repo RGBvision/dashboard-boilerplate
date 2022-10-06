@@ -27,7 +27,7 @@ var Eventlog = {
             serverSide: true,
             searchDelay: 500,
             ajax: {
-                url: "/eventlog/get",
+                url: "/event_log/get",
                 type: "POST",
                 data: function (d) {
                     d.search.value = eventlogFilter;

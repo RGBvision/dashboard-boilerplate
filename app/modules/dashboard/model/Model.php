@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelDashboard extends Model
+class DashboardModel extends Model
 {
 
     /**
@@ -48,7 +48,7 @@ class ModelDashboard extends Model
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/dashboard/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . MODULES_DIR . DS . $this->module . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
         $details = [
             $Template->_get('dashboard_storage_db') => DB::getSize(),

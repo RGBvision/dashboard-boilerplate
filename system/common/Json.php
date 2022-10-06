@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 2.0
  */
@@ -57,22 +57,43 @@ class Json
      * @param array $array data to output
      * @param bool $shutdown shutdown after output
      */
-    public static function show(array $array, bool $shutdown = false): void
+    public static function output(array $array, bool $shutdown = false): void
     {
         $headers = [
-            'Pragma: no-cache',
-            'Cache-Control: private, no-cache',
             'Content-Disposition: inline; filename="response.json"',
             'Vary: Accept',
             'Content-type: application/json; charset=utf-8',
-            'Expires: ' . gmdate('r', time() + (OUTPUT_EXPIRE ? OUTPUT_EXPIRE_OFFSET : 0)),
         ];
+
+        if (OUTPUT_EXPIRE && !defined('NO_CACHE')) {
+            $headers[] = 'Cache-Control: private';
+            $headers[] = 'Expires: ' . gmdate('r', time() + OUTPUT_EXPIRE_OFFSET);
+        } else {
+            // Disable browser caching
+            $headers[] = 'Cache-Control: private, no-store, no-cache, must-revalidate';
+            $headers[] = 'Expires: ' . gmdate('r');
+        }
+
+        $Gzip = str_contains($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip');
+
+        $json = self::encode($array);
+
+        // Use GZIP compression if accepted
+        if ($Gzip && GZIP_COMPRESSION) {
+            ob_start('ob_gzhandler');
+            $json = gzencode($json, 9);
+            $headers[] = 'Content-Encoding: gzip';
+        } else {
+            ob_start();
+        }
 
         Response::setHeaders($headers);
 
-        $json = self::encode($array, 0);
-
         echo $json;
+
+        $output = ob_get_clean();
+
+        echo $output;
 
         if ($shutdown) {
             Response::shutDown();

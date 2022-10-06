@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ControllerGroups extends Controller
+class GroupsController extends Controller
 {
 
     /**

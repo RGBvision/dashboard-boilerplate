@@ -1,27 +1,26 @@
 <?php
 
 /**
- * This source file is part of the AVE.cms. More information,
- * documentation and tutorials can be found at http://www.ave-cms.ru
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * @package      AVE.cms
- * @file         admin/modules/mailer/module.php
- * @author       AVE.cms <support@ave-cms.ru>
- * @copyright    2007-2017 (c) AVE.cms
- * @link         http://www.ave-cms.ru
- * @version      4.0
- * @since        $date$
- * @license      license GPL v.2 http://www.ave-cms.ru/license.txt
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2022, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    4.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
  */
 
-
-class ModuleMailer extends Module
+class MailerModule extends Module
 {
     //-- Версия модуля
-    public static string $version = '1.0';
+    public static string $version = '4.0';
 
     //-- Дата
-    public static string $date = '18.12.2017';
+    public static string $date = '07.10.2022';
 
     //-- Системное имя модуля
     public static string $moduleName = 'mailer';

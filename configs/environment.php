@@ -8,6 +8,18 @@ const LOGIN_USER_IP = false;
 
 const PWD_PEPPER = 'uI50XZoFT7sajhwa';
 
+const AUTH_TOKEN_LIFETIME = 3600;
+
+const REFRESH_TOKEN_LIFETIME = 604800;
+
+const MODULES_DIR = '/app/modules';
+
+const CLASSES_DIR = '/app/classes';
+
+const API_URI_PREFIX = 'api';
+
+const API_DIR = '/app/api';
+
 const TEMP_DIR = '/tmp';
 
 const ATTACH_DIR = '/tmp/attachments';
@@ -50,11 +62,11 @@ const SQL_PROFILING = false;
 
 const PROFILING = false;
 
-const HTML_COMPRESSION = false;
+const HTML_COMPRESSION = true;
 
 const GZIP_COMPRESSION = true;
 
-const OUTPUT_EXPIRE = false;
+const OUTPUT_EXPIRE = true;
 
 const OUTPUT_EXPIRE_OFFSET = 3600;
 

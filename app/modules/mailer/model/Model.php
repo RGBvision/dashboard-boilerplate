@@ -16,7 +16,7 @@
  */
 
 
-class ModelMailer extends Model
+class MailerModel extends Model
 {
     public static function saveMailer()
     {

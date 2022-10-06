@@ -1,7 +1,7 @@
 <?php
 
 
-class ModelRoutes extends Model
+class RoutesModel extends Model
 {
 
 }

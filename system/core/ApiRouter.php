@@ -51,7 +51,7 @@ class ApiRouter
     public static function execute(): array
     {
 
-        if (strpos(self::$method, '__') === 0) {
+        if (str_starts_with(self::$method, '__')) {
             return ['message' => i18n::_('router.error.magic_method')];
         }
 
@@ -154,6 +154,6 @@ class ApiRouter
         }
 
         Arrays::filterKeys($data, ['success'], true);
-        Json::show($data, true);
+        Json::output($data, true);
     }
 }

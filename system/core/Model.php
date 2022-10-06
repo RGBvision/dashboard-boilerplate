@@ -9,15 +9,24 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
 abstract class Model
 {
-	public function __construct()
-	{
 
-	}
+    /**
+     * @var string Module name
+     */
+    public string $module;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->module = Router::getModule();
+    }
 }

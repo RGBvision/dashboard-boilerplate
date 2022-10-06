@@ -15,12 +15,12 @@
  */
 
 
-class ControllerMailer extends Controller
+class MailerController extends Controller
 {
 
     /*
      |--------------------------------------------------------------------------------------
-     | ControllerMailer конструктор
+     | MailerController конструктор
      |--------------------------------------------------------------------------------------
      |
      */

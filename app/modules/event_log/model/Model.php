@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelEventlog extends Model
+class EventlogModel extends Model
 {
 
 }

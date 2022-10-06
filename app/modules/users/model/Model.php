@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelUsers extends Model
+class UsersModel extends Model
 {
 
     public static function isDeletable($user_id, $user_group_id): bool

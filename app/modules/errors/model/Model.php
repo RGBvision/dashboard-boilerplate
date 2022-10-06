@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelErrors extends Model
+class ErrorsModel extends Model
 {
 
 }

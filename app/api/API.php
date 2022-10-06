@@ -1,12 +1,26 @@
 <?php
 
+/**
+ * This file is part of the dashboard.rgbvision.net package.
+ *
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2022, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    4.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 2.0
+ */
+
 class API
 {
 
     /**
-     * @var string|null User Auth token
+     * @var string|null User Authorization token
      */
-    static private ?string $auth = null;
+    static private ?string $authorization_token = null;
 
     /**
      * @var int|null User ID
@@ -21,25 +35,24 @@ class API
     {
 
         if (
-            ($auth = $_SERVER['HTTP_AUTH']) &&
-            ($user_id = (int)DB::cell("SELECT users.user_id FROM api_users INNER JOIN users ON api_users.user_id = users.user_id AND users.active = 1 WHERE api_users.token = ? LIMIT 1", $auth))
+            ($auth = $_SERVER['HTTP_AUTHORIZATION']) &&
+            ($user_id = (int)DB::cell("SELECT users.user_id FROM api_users INNER JOIN users ON api_users.user_id = users.user_id AND users.active = 1 WHERE api_users.auth_token = ? AND api_users.auth_token_expire > ?", $auth, date('Y-m-d H:i:s')))
         ) {
-            self::$auth = $auth;
+            self::$authorization_token = $auth;
             self::$user_id = $user_id;
-            DB::update("users", ["last_activity" => time()], ["user_id" => $user_id]);
+            DB::update("users", ["last_activity" => date('Y-m-d H:i:s')], ["user_id" => $user_id]);
         }
 
     }
 
     /**
-     * Auth API user by email and password
+     * Auth user by email and password
      *
      * @param string $email
      * @param string $password
-     * @param string $fcm_token FCM token for Push notifications
      * @return array
      */
-    public static function get_auth(string $email, string $password, string $fcm_token = ''): array
+    public static function post_auth(string $email, string $password): array
     {
 
         if (
@@ -49,14 +62,31 @@ class API
 
             DB::delete("crm_app_users", ["user_id" => $user['user_id']]);
 
+            $auth_token = null;
+            $refresh_token = null;
+
             do {
-                $token = md5($email . microtime());
-            } while ((int)DB::cell("SELECT COUNT(*) FROM api_users WHERE token = ?", $token) > 0);
 
-            // Additionally save device locale
-            DB::insert("crm_app_users", ["user_id" => $user['user_id'], "token" => $token, "firebase_token" => $fcm_token, "locale" => Session::getvar('current_language')]);
+                try {
+                    $auth_token = bin2hex(random_bytes(32));
+                    $refresh_token = bin2hex(random_bytes(32));
+                } catch (Exception $e) {
+                }
 
-            return ['success' => true, 'token' => $token];
+            } while (!$auth_token || !$refresh_token || ((int)DB::cell("SELECT COUNT(*) FROM api_users WHERE auth_token = ? OR refresh_token = ?", $auth_token, $refresh_token) > 0));
+
+            DB::insert(
+                "crm_app_users",
+                [
+                    "user_id" => $user['user_id'],
+                    "auth_token" => $auth_token,
+                    "auth_token_expire" => date('Y-m-d H:i:s', time() + AUTH_TOKEN_LIFETIME),
+                    "refresh_token" => $refresh_token,
+                    "refresh_token_expire" => date('Y-m-d H:i:s', time() + REFRESH_TOKEN_LIFETIME),
+                ]
+            );
+
+            return ['success' => true, 'auth_token' => $auth_token];
         }
 
         return ['message' => i18n::_('api.auth.fail')];
@@ -64,18 +94,18 @@ class API
     }
 
     /**
-     * Save user photo (avatar)
+     * Save user avatar
      *
      * @param string $base64_image
      * @return array
      */
-    public static function put_user_photo(string $base64_image): array
+    public static function put_user_avatar(string $base64_image): array
     {
 
-        if (self::$auth && self::$user_id) {
+        if (self::$authorization_token && self::$user_id) {
 
             if (User::saveAvatar(self::$user_id, $base64_image)) {
-                return ['success' => true, 'photo' => User::getAvatar(self::$user_id)];
+                return ['success' => true, 'avatar' => User::getAvatar(self::$user_id)];
             }
 
             return ['message' => i18n::_('api.file.wrong_data')];

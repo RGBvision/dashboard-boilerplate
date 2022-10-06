@@ -4,7 +4,7 @@
             <div class="card-header">
                 <div class="row justify-content-between align-items-center">
                     <div class="col">
-                        <h6 class="card-title mb-0">{#eventlog_page_title#}</h6>
+                        <h6 class="card-title mb-0">{#event_log_page_title#}</h6>
                     </div>
                     <div class="col-12 col-sm-6 col-xl-4 mt-2 mt-sm-0">
                         <div class="input-group">
@@ -19,12 +19,12 @@
                 <table id="eventlogControlTable" class="table table-hover text-nowrap align-middle">
                     <thead>
                     <tr>
-                        <th class="text-start">{#eventlog_dt#}</th>
-                        <th class="text-start">{#eventlog_type#}</th>
-                        <th class="text-start">{#eventlog_module#}</th>
-                        <th class="text-start">{#eventlog_user#}</th>
-                        <th class="text-start">{#eventlog_ip#}</th>
-                        <th class="text-start">{#eventlog_description#}</th>
+                        <th class="text-start">{#event_log_dt#}</th>
+                        <th class="text-start">{#event_log_type#}</th>
+                        <th class="text-start">{#event_log_module#}</th>
+                        <th class="text-start">{#event_log_user#}</th>
+                        <th class="text-start">{#event_log_ip#}</th>
+                        <th class="text-start">{#event_log_description#}</th>
                     </tr>
                     </thead>
                     <tbody>

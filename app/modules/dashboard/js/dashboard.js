@@ -64,8 +64,6 @@ const Dashboard = {
                     chartValues.push(value);
                 }
 
-                console.dir(chartKeys, chartValues);
-
                 const options = {
                     chart: {
                         locales: [apex_i18n],

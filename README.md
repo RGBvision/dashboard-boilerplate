@@ -16,8 +16,7 @@
 - Easy to set up and customize
 - Easy to extend
 - Ready to use as API
-- Automatic timezone handling
-- Multilanguage support
+- Multilingual
 
 ### Front-end
 - Bootstrap 5.1.1
@@ -28,7 +27,7 @@
 
 ## Requirements
 
-- PHP 7.4+
+- PHP 8.1
 - MySQL 5.7.8+ / MariaDB 10.2.7+
 
 ## Project structure

@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ControllerEventlog extends Controller
+class EventlogController extends Controller
 {
 
     /**
@@ -26,7 +26,7 @@ class ControllerEventlog extends Controller
         parent::__construct();
 
         // Check if user has permission at least to view module default page
-        if (!Permission::check('eventlog_view')) {
+        if (!Permission::check('event_log_view')) {
             Router::response(false, '', ABS_PATH);
         }
 
@@ -35,7 +35,7 @@ class ControllerEventlog extends Controller
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css',
             ABS_PATH . 'assets/vendors/datatables.net/jquery.dataTables.js',
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js',
-            ABS_PATH . 'app/modules/eventlog/js/eventlog.js',
+            ABS_PATH . 'app/modules/event_log/js/event_log.js',
         ];
 
         foreach ($files as $i => $file) {
@@ -56,18 +56,18 @@ class ControllerEventlog extends Controller
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/eventlog/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/event_log/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $data = [
 
             // Page ID
-            'page' => 'eventlog',
+            'page' => 'event_log',
 
             // Page Title
-            'page_title' => $Template->_get('eventlog_page_title'),
+            'page_title' => $Template->_get('event_log_page_title'),
 
             // Page Header
-            'header' => $Template->_get('eventlog_page_header'),
+            'header' => $Template->_get('event_log_page_header'),
 
             // Breadcrumbs
             'breadcrumbs' => [
@@ -78,7 +78,7 @@ class ControllerEventlog extends Controller
                     'active' => false,
                 ],
                 [
-                    'text' => $Template->_get('eventlog_breadcrumb'),
+                    'text' => $Template->_get('event_log_breadcrumb'),
                     'href' => '',
                     'page' => '',
                     'active' => true,
@@ -87,12 +87,12 @@ class ControllerEventlog extends Controller
         ];
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/eventlog/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/event_log/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
         // Push data to template engine
         $Template
             ->assign('data', $data)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/eventlog/view/index.tpl'));
+            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/event_log/view/index.tpl'));
 
     }
 
@@ -102,17 +102,17 @@ class ControllerEventlog extends Controller
     public static function get()
     {
 
-        $eventlog = Log::get(Log::SORTABLE[(int)Request::post('order.0.column')], Request::post('order.0.dir'), (int)Request::post('length'), (int)Request::post('start'), Request::post('search.value'));
+        $event_log = Log::get(Log::SORTABLE[(int)Request::post('order.0.column')], Request::post('order.0.dir'), (int)Request::post('length'), (int)Request::post('start'), Request::post('search.value'));
 
         $res = [
             'draw' => (int)Request::post('draw'),
             'recordsTotal' => Log::total(),
             'recordsFiltered' => Log::total(Request::post('search.value')),
             'search_value' => Request::post('search.value'),
-            'data' => $eventlog,
+            'data' => $event_log,
         ];
 
-        Json::show($res, true);
+        Json::output($res, true);
 
     }
 

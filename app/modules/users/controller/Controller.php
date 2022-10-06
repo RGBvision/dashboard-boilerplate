@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ControllerUsers extends Controller
+class UsersController extends Controller
 {
 
     /**
@@ -121,7 +121,9 @@ class ControllerUsers extends Controller
             'data' => $users,
         ];
 
-        Json::show($res, true);
+        define('NO_CACHE', true);
+
+        Json::output($res, true);
 
     }
 
@@ -140,7 +142,7 @@ class ControllerUsers extends Controller
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/' . self::$route_id . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/' . self::$module . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
         $data = [
 
@@ -201,7 +203,7 @@ class ControllerUsers extends Controller
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/' . self::$route_id . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/' . self::$module . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
         $data = [
 

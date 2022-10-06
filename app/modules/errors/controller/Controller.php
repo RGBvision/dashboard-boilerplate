@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ControllerErrors extends Controller
+class ErrorsController extends Controller
 {
 
     /**

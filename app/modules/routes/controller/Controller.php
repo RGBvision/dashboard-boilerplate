@@ -1,7 +1,7 @@
 <?php
 
 
-class ControllerRoutes extends Controller
+class RoutesController extends Controller
 {
 
     public function __construct()
@@ -80,7 +80,7 @@ class ControllerRoutes extends Controller
             'data' => $routes,
         ];
 
-        Json::show($res, true);
+        Json::output($res, true);
 
     }
 

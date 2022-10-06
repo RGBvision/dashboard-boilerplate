@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.8
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -33,12 +33,12 @@ class Navigation
     public const SIDEBAR_INFO = 5;
 
     // i18n sidebar navigation rubrics names
-    public static array $sidebar_headers = [
-        1 => 'sidebar_header_1',
-        2 => 'sidebar_header_2',
-        3 => 'sidebar_header_3',
-        4 => 'sidebar_header_4',
-        5 => 'sidebar_header_5',
+    public const RUBRICS = [
+        self::SIDEBAR_MAIN => 'sidebar_header_main',
+        self::SIDEBAR_CONTROL => 'sidebar_header_control',
+        self::SIDEBAR_CONTENT => 'sidebar_header_content',
+        self::SIDEBAR_SETTINGS => 'sidebar_header_settings',
+        self::SIDEBAR_INFO => 'sidebar_header_info',
     ];
 
     /**
@@ -84,7 +84,7 @@ class Navigation
 
         $nav_sort = [];
 
-        foreach (self::$items as $key => $nav) {
+        foreach (self::$items as $nav) {
 
             if (($nav['link'] !== '') && !Permission::check($nav['id'] . '_view')) {
                 continue;
@@ -121,7 +121,7 @@ class Navigation
                 foreach ($navigation[$key] as $k => $sub) {
                     if (isset($sub['submenu'])) {
                         $navigation[$key][$k]['submenu'] = Arrays::multiSort($sub['submenu'], 'sorting');
-                    } else if (!isset($sub['submenu']) && empty($navigation[$key][$k]['link'])) {
+                    } else if (empty($navigation[$key][$k]['link'])) {
                         unset($navigation[$key][$k]);
                     }
                 }

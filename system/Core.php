@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -128,14 +128,6 @@ class Core
         // Router initialization
         Router::init();
 
-        // Router aliases
-        $routes = [];
-        include_once(DASHBOARD_DIR . '/configs/routes.php');
-
-        foreach ($routes as $alias) {
-            Router::addAlias(ABS_PATH . $alias[0], $alias[1], $alias[2]);
-        }
-
         // Response HEADERS
         Response::setHeaders($headers);
 
@@ -185,10 +177,7 @@ class Core
      */
     protected static function absPath(): void
     {
-        $abs_path = dirname(
-            ((strpos($_SERVER['PHP_SELF'], $_SERVER['SCRIPT_NAME']) === false) && (PHP_SAPI === 'cgi'))
-                ? $_SERVER['PHP_SELF']
-                : $_SERVER['SCRIPT_NAME']);
+        $abs_path = dirname(((!str_contains($_SERVER['PHP_SELF'], $_SERVER['SCRIPT_NAME'])) && (PHP_SAPI === 'cgi')) ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME']);
 
         if (defined('DASHBOARD_DIR')) {
             $abs_path = dirname($abs_path);
@@ -337,9 +326,4 @@ class Core
         return self::$instance;
     }
 
-
-    protected function __clone()
-    {
-        //---
-    }
 }

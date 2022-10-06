@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelLogin extends Model
+class LoginModel extends Model
 {
 
     /**

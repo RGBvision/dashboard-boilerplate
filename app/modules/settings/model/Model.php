@@ -1,6 +1,6 @@
 <?php
 
-class ModelSettings extends Model
+class SettingsModel extends Model
 {
 
     private static function generate_timezone_list()
@@ -90,9 +90,7 @@ class ModelSettings extends Model
 
             if (!empty($settings))
                 foreach ($default as $key => $constant) {
-                    $input = isset($settings[$key])
-                        ? $settings[$key]
-                        : $constant['DEFAULT'];
+                    $input = $settings[$key] ?? $constant['DEFAULT'];
 
                     $set .= "\r\n\t";
                     $set .= '//--- ' . $Smarty->_get($constant['LANG']);
@@ -114,7 +112,7 @@ class ModelSettings extends Model
                     $set .= "\r\n";
                 }
 
-            $result = file_put_contents(CP_DIR . '/configs/environment.php', $set);
+            $result = file_put_contents(DASHBOARD_DIR . '/configs/environment.php', $set);
 
             if ($result > 0) {
                 $message = $Smarty->_get('admin_settings_message_edit_success');
