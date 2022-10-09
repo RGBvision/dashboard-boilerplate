@@ -41,7 +41,7 @@
             <div class="card-body">
                 {foreach from=$storage_usage.details key=key item=item name=foo}
                     <div class="row py-2 bg-highlight-hover {if !$smarty.foreach.foo.last} border-bottom {/if}">
-                        <div class="col">{$key}</div>
+                        <div class="col">{#$key#}</div>
                         <div class="col text-end">{Number::formatSize($item)}</div>
                     </div>
                 {/foreach}
@@ -51,12 +51,12 @@
                     <div class="col-12 col-md-6">
                         <a id="backupDB"
                            href="{$ABS_PATH}dashboard/backup_db"
-                           class="btn w-100 btn-success mb-2 {if !Permission::check('dashboard_backup_db')}disabled{/if}">{#dashboard_make_db_backup#}</a>
+                           class="btn w-100 btn-success mb-2 {if !Permission::has('dashboard_backup_db')}disabled{/if}">{#dashboard_make_db_backup#}</a>
                     </div>
                     <div class="col-12 col-md-6">
                         <a id="clearCache"
                            href="{$ABS_PATH}dashboard/clear_cache"
-                           class="btn w-100 btn-danger mb-2 {if !Permission::check('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
+                           class="btn w-100 btn-danger mb-2 {if !Permission::has('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
                     </div>
                 </div>
             </div>

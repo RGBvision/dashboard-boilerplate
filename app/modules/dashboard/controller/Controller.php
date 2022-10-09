@@ -26,7 +26,7 @@ class DashboardController extends Controller
         parent::__construct();
 
         // Check if user has permission at least to view module default page
-        if (!Permission::check('dashboard_view')) {
+        if (!Permission::has('dashboard_view')) {
             // Redirect to login page because dashboard is default module for authorized users
             // So we assume user is not logged in if user has no access to this module
             Router::response(false, '', ABS_PATH . 'login');
@@ -36,7 +36,7 @@ class DashboardController extends Controller
         $files = [
             ABS_PATH . 'assets/vendors/apexcharts/apexcharts.min.js',
             ABS_PATH . 'assets/vendors/progressbar.js/progressbar.min.js',
-            ABS_PATH . ltrim(MODULES_DIR, '/') . DS . $this->module . '/js/dashboard.js',
+            $this->module->uri . '/js/dashboard.js',
         ];
 
         foreach ($files as $i => $file) {
@@ -57,7 +57,7 @@ class DashboardController extends Controller
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . MODULES_DIR . DS . $this->module . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         $data = [
 
@@ -82,7 +82,7 @@ class DashboardController extends Controller
         ];
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/dashboard/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
         // Push data to template engine
         $Template
@@ -90,7 +90,7 @@ class DashboardController extends Controller
             ->assign('visits', $this->model->getVisits())
             ->assign('storage_size', $this->model->getStorageSize())
             ->assign('storage_usage', $this->model->getStorageUsage())
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . MODULES_DIR . DS . $this->module . '/view/index.tpl'));
+            ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
     }
 
     /**
@@ -99,7 +99,7 @@ class DashboardController extends Controller
     public function backup_db()
     {
         $status = false;
-        if (Permission::check('dashboard_backup_db')) {
+        if (Permission::has('dashboard_backup_db')) {
             $status = DB::backup();
             Response::setStatus($status ? 200 : 503);
         }
@@ -111,7 +111,7 @@ class DashboardController extends Controller
      */
     public function clear_cache()
     {
-        if (Permission::check('dashboard_clear_cache')) {
+        if (Permission::has('dashboard_clear_cache')) {
             Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/smarty');
             Json::output(['success' => true], true);
         }
@@ -131,10 +131,10 @@ class DashboardController extends Controller
             (UID === 1) &&
             ($name = preg_replace('/[^a-z ]/i', '', Request::post('module'))) &&
             ($dir_name = preg_replace('/\s+/', '', strtolower($name))) &&
-            (!Dir::exists(DASHBOARD_DIR . "/app/modules/$dir_name"))
+            (!Dir::exists(DASHBOARD_DIR . MODULES_DIR . DS . $dir_name))
         ) {
-            $this->model->copy_template(DASHBOARD_DIR . "/tmp/module_template", DASHBOARD_DIR . "/app/modules/$dir_name", $name);
-            $success = Dir::exists(DASHBOARD_DIR . "/app/modules/$dir_name");
+            $this->model->copy_template(DASHBOARD_DIR . "/tmp/module_template", DASHBOARD_DIR . MODULES_DIR . DS . $dir_name, $name);
+            $success = Dir::exists(DASHBOARD_DIR . MODULES_DIR . DS . $dir_name);
         }
 
         Router::response($success, '', Request::referrer());

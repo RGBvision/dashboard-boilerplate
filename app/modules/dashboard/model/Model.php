@@ -46,16 +46,12 @@ class DashboardModel extends Model
     public function getStorageUsage(): array
     {
 
-        $Template = Template::getInstance();
-
-        $Template->_load(DASHBOARD_DIR . MODULES_DIR . DS . $this->module . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
-
         $details = [
-            $Template->_get('dashboard_storage_db') => DB::getSize(),
-            $Template->_get('dashboard_storage_db_backups') => Dir::size(DASHBOARD_DIR . '/tmp/backup/'),
-            $Template->_get('dashboard_storage_cache') => Dir::size(DASHBOARD_DIR . '/tmp/cache/'),
-            $Template->_get('dashboard_storage_log') => Dir::size(DASHBOARD_DIR . '/tmp/logs/'),
-            $Template->_get('dashboard_storage_user_files') => Dir::size(DASHBOARD_DIR . '/uploads/'),
+            'dashboard_storage_db' => DB::getSize(),
+            'dashboard_storage_db_backups' => Dir::size(DASHBOARD_DIR . '/tmp/backup/'),
+            'dashboard_storage_cache' => Dir::size(DASHBOARD_DIR . '/tmp/cache/'),
+            'dashboard_storage_log' => Dir::size(DASHBOARD_DIR . '/tmp/logs/'),
+            'dashboard_storage_user_files' => Dir::size(DASHBOARD_DIR . '/uploads/'),
         ];
 
         $size = array_sum($details);

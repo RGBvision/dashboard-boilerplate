@@ -33,6 +33,11 @@ class DashboardModule extends Module
     const DATE = '07.10.2022';
 
     /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-view-dashboard';
+
+    /**
      * Module permissions
      */
     const PERMISSIONS = ['dashboard_view', 'dashboard_backup_db', 'dashboard_clear_cache'];
@@ -50,20 +55,20 @@ class DashboardModule extends Module
         Router::addAlias(ABS_PATH, static::ID, 'index');
 
         // Module permissions
-        Permission::add(static::ID, static::PERMISSIONS, 'mdi mdi-view-dashboard', 1);
+        Permission::add(static::ID, static::PERMISSIONS, static::ICON, 1);
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'name');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
         $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
 
         // Add navigation entry
         Navigation::add(
             10,
             $Template->_get('dashboard_menu_name'),
-            'mdi mdi-view-dashboard',
+            static::ICON,
             ABS_PATH . static::ID,
             static::ID,
             Navigation::SIDEBAR,
