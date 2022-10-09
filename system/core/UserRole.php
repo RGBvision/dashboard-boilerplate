@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class UserGroup
+class UserRole
 {
 
     const SUPERADMIN = 1;
@@ -22,22 +22,22 @@ class UserGroup
 
     protected static array $sortable_fields = ['id', 'name', 'users'];
 
-    public static function isDeletable($user_group_id, $count)
+    public static function isDeletable($user_role_id, $count)
     {
         return !(
-            ($user_group_id == 1) ||
-            ($user_group_id == 2) ||
+            ($user_role_id == 1) ||
+            ($user_role_id == 2) ||
             ($count > 0) ||
-            !Permission::perm('groups_delete')
+            !Permission::has('roles_delete')
         );
     }
 
-    public static function isEditable($user_group_id)
+    public static function isEditable($user_role_id)
     {
         return (
-            ((UGROUP != 1) && ($user_group_id == 1)) ||
-            ((UGROUP != 1) && ($user_group_id == 2)) ||
-            Permission::perm('groups_edit')
+            ((UROLE != 1) && ($user_role_id == 1)) ||
+            ((UROLE != 1) && ($user_role_id == 2)) ||
+            Permission::has('roles_edit')
         );
     }
 
@@ -57,36 +57,36 @@ class UserGroup
         $like = '';
 
         if ($search) {
-            $_like = DB::buildSearch(['grp.name'], $search);
+            $_like = DB::buildSearch(['role.name'], $search);
             $like = ($_like) ? " AND ($_like)" : '';
         }
 
-        $where = 'grp.user_group_id != ' . self::ANONYMOUS;
+        $where = 'role.user_role_id != ' . self::ANONYMOUS;
 
-        if (UGROUP !== self::SUPERADMIN) {
-            $where = 'grp.user_group_id NOT IN (' . self::ANONYMOUS . ',' . self::SUPERADMIN . ')';
+        if (UROLE !== self::SUPERADMIN) {
+            $where = 'role.user_role_id NOT IN (' . self::ANONYMOUS . ',' . self::SUPERADMIN . ')';
         }
 
         $res = [];
 
         $rows = DB::Query("
             SELECT 
-                grp.*, grp.user_group_id AS id,
+                role.*, role.user_role_id AS id,
 				COUNT(usr.user_id) AS users
             FROM
-                user_groups grp
+                user_roles role
             LEFT JOIN
                 users AS usr
-                ON usr.user_group_id = grp.user_group_id AND usr.deleted = 0            
+                ON usr.user_role_id = role.user_role_id AND usr.deleted = 0            
             WHERE $where $like
-            GROUP BY grp.user_group_id
-            ORDER BY $sort $order, grp.user_group_id ASC
+            GROUP BY role.user_role_id
+            ORDER BY $sort $order, role.user_role_id ASC
             $limits
         ");
 
         foreach ($rows as $row) {
-            $row['deletable'] = self::isDeletable($row['user_group_id'], $row['users']);
-            $row['editable'] = self::isEditable($row['user_group_id']);
+            $row['deletable'] = self::isDeletable($row['user_role_id'], $row['users']);
+            $row['editable'] = self::isEditable($row['user_role_id']);
             $res[] = $row;
         }
 

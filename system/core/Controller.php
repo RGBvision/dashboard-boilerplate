@@ -18,9 +18,9 @@ abstract class Controller
 {
 
     /**
-     * @var string Module name
+     * @var Module Module class
      */
-    public string $module;
+    public Module $module;
 
     /**
      * @var Model Model class

@@ -33,6 +33,11 @@ abstract class Module
     const DATE = null;
 
     /**
+     * Module icon
+     */
+    const ICON = '';
+
+    /**
      * Module permissions
      */
     const PERMISSIONS = [];

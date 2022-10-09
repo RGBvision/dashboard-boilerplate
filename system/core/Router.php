@@ -17,7 +17,7 @@
 class Router
 {
 
-    private static string $module;
+    private static ?Module $module = null;
     private static string $method;
     private static array $aliases = [];
     protected static ?Router $instance = null;
@@ -47,9 +47,9 @@ class Router
     /**
      * Get module
      *
-     * @return string
+     * @return Module
      */
-    public static function getModule(): string
+    public static function getModule(): Module
     {
         return self::$module;
     }
@@ -61,7 +61,7 @@ class Router
      */
     public static function getModel(): Model
     {
-        $model = snakeToPascalCase(self::$module) . 'Model';
+        $model = snakeToPascalCase(static::$module::ID) . 'Model';
         return new $model();
     }
 
@@ -86,9 +86,7 @@ class Router
         foreach (self::$aliases as $regex => $callback) {
             if ((preg_match('/^' . str_replace('/', '\/', $regex) . '$/', $route, $matches) === 1)) {
 
-                if ($callback['module']) {
-
-                    self::$module = $callback['module'];
+                if ($callback['module'] && (self::$module = Loader::getModule($callback['module']))) {
 
                     if (!$controller = Loader::loadModule($callback['module'])) {
                         Request::redirect(ABS_PATH . 'errors/controller?controller=' . $callback['module']);
@@ -119,19 +117,18 @@ class Router
 
             $_module = preg_replace('/[^a-z0-9_]/i', '', array_shift($parts));
 
-            $file = DASHBOARD_DIR . MODULES_DIR . DS . $_module . '/controller/Controller.php';
-
-            if (is_file($file)) {
-                self::$module = $_module;
+            if (self::$module = Loader::getModule($_module)) {
+                // Default method: index()
+                self::$method = array_shift($parts) ?? 'index';
+            } else {
+                // Module not found
+                Request::redirect(ABS_PATH . "errors/module/$_module");
+                return false;
             }
 
-            // Default method: index()
-            self::$method = array_shift($parts) ?? 'index';
-
-        }
-
-        if (!isset(self::$module)) {
-            Request::redirect(ABS_PATH . 'errors/controller?controller=' . trim($route, '/'));
+        } else {
+            // Default module and/or method should be set as alias. Display error if not.
+            Request::redirect(ABS_PATH . "errors/default_route");
             return false;
         }
 
@@ -139,8 +136,8 @@ class Router
             return new \Exception('Error: Calls to magic methods are not allowed!');
         }
 
-        if (!$controller = Loader::loadModule(preg_replace('/[^a-z0-9_]/i', '', self::$module))) {
-            Request::redirect(ABS_PATH . 'errors/controller?controller=' . self::$module);
+        if (!$controller = Loader::loadModule(preg_replace('/[^a-z0-9_]/i', '', static::$module::ID))) {
+            Request::redirect(ABS_PATH . 'errors/controller/' . static::$module::ID);
             return false;
         }
 
@@ -219,11 +216,9 @@ class Router
 
         } catch (ReflectionException $e) {
 
-            Request::redirect(ABS_PATH . 'errors/controller?controller=' . self::$module);
-
         }
 
-        Request::redirect(ABS_PATH . 'errors/method?method=' . self::$module . '/' . self::$method);
+        Request::redirect(ABS_PATH . 'errors/method/' . static::$module::ID . '/' . self::$method);
 
         return false;
     }

@@ -94,8 +94,9 @@ class Loader
 
                 $module_name = snakeToPascalCase($entry) . 'Module';
 
-                new $module_name();
-                self::$modules[$entry] = $module_dir;
+                // new $module_name();
+                // self::$modules[$entry] = $module_dir;
+                self::$modules[$entry] = new $module_name();
 
             } else {
                 // ToDo: Log errors
@@ -120,7 +121,7 @@ class Loader
         if (self::$modules[$name]) {
 
             // Model
-            $file = self::$modules[$name] . '/model/Model.php';
+            $file = self::$modules[$name]->path . '/model/Model.php';
             $model = snakeToPascalCase($name) . 'Model';
 
             if (is_file($file)) {
@@ -130,7 +131,7 @@ class Loader
             }
 
             // Controller
-            $file = self::$modules[$name] . '/controller/Controller.php';
+            $file = self::$modules[$name]->path . '/controller/Controller.php';
             $controller = snakeToPascalCase($name) . 'Controller';
 
             if (is_file($file)) {
@@ -146,6 +147,11 @@ class Loader
 
         return null;
 
+    }
+
+    public static function getModule(string $name): ?Module
+    {
+        return self::$modules[$name] ?? null;
     }
 
     /**

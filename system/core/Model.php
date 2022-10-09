@@ -18,9 +18,9 @@ abstract class Model
 {
 
     /**
-     * @var string Module name
+     * @var Module Module class
      */
-    public string $module;
+    public Module $module;
 
     /**
      * Constructor

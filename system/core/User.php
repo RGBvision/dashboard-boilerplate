@@ -19,24 +19,24 @@ class User
 
     const SUPERUSER = 1;
 
-    protected static array $sortable_fields = ['lastname', 'phone', 'email', 'group_name', 'last_activity'];
+    protected static array $sortable_fields = ['lastname', 'phone', 'email', 'role_name', 'last_activity'];
 
-    public static function isDeletable($user_id, $user_group_id): bool
+    public static function isDeletable($user_id, $user_role_id): bool
     {
         return (
-            ($user_group_id !== UserGroup::SUPERADMIN) &&
+            ($user_role_id !== UserRole::SUPERADMIN) &&
             ($user_id !== UID) &&
-            Permission::perm('users_delete')
+            Permission::has('users_delete')
         );
     }
 
-    public static function isEditable($user_id, $user_group_id): bool
+    public static function isEditable($user_id, $user_role_id): bool
     {
         return (
-            ((UGROUP != 1) && (UGROUP == $user_group_id)) ||
-            ((UGROUP != 1) && ($user_group_id == 1)) ||
-            ((UGROUP != 1) && ($user_group_id == 2)) ||
-            Permission::perm('users_edit')
+            ((UROLE != 1) && (UROLE == $user_role_id)) ||
+            ((UROLE != 1) && ($user_role_id == 1)) ||
+            ((UROLE != 1) && ($user_role_id == 2)) ||
+            Permission::has('users_edit')
         );
     }
 
@@ -62,20 +62,20 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UGROUP !== UserGroup::SUPERADMIN) {
-            $where = 'grp.user_group_id != ' . UserGroup::SUPERADMIN;
+        if (UROLE !== UserRole::SUPERADMIN) {
+            $where = 'grp.user_role_id != ' . UserRole::SUPERADMIN;
         }
 
         $rows = DB::Query("
 				SELECT
 					usr.user_id, usr.country_code, usr.phone, usr.email, usr.firstname, usr.lastname, usr.active, usr.last_activity, usr.deleted, usr.del_time, usr.settings,
-				    grp.user_group_id AS group_id,
-					grp.name AS group_name
+				    grp.user_role_id AS role_id,
+					grp.name AS role_name
 				FROM
 					users AS usr
 				LEFT JOIN
-					user_groups AS grp
-					ON usr.user_group_id = grp.user_group_id
+					user_roles AS grp
+					ON usr.user_role_id = grp.user_role_id
 				WHERE $where $like				
 				ORDER BY $sort $order, usr.lastname
                 $limits
@@ -87,8 +87,8 @@ class User
 
             $row['phone'] = Valid::internationalPhone($row['phone'], $row['country_code']);
 
-            $row['deletable'] = self::isDeletable($row['user_id'], $row['group_id']) and ($row['owner'] != '1');
-            $row['editable'] = self::isEditable($row['user_id'], $row['group_id']);
+            $row['deletable'] = self::isDeletable($row['user_id'], $row['role_id']) and ($row['owner'] != '1');
+            $row['editable'] = self::isEditable($row['user_id'], $row['role_id']);
             $row['avatar'] = self::getAvatar((int)$row['user_id']);
 
             array_push($users, $row);
@@ -109,14 +109,14 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UGROUP !== UserGroup::SUPERADMIN) {
-            $where = 'grp.user_group_id != ' . UserGroup::SUPERADMIN;
+        if (UROLE !== UserRole::SUPERADMIN) {
+            $where = 'grp.user_role_id != ' . UserRole::SUPERADMIN;
         }
 
         return (int)DB::cell("
             SELECT COUNT(usr.user_id) 
             FROM users AS usr
-			LEFT JOIN user_groups AS grp ON usr.user_group_id = grp.user_group_id
+			LEFT JOIN user_roles AS grp ON usr.user_role_id = grp.user_role_id
 			WHERE $where $like
         ");
     }
@@ -171,7 +171,7 @@ class User
 
     }
 
-    public static function saveUser(?int $id, string $firstname, string $lastname, string $country_code, string $phone, string $email, ?string $pass = null, int $group = 2, ?string $photo = null, bool $send_email = false): bool
+    public static function saveUser(?int $id, string $firstname, string $lastname, string $country_code, string $phone, string $email, ?string $pass = null, int $role = 2, ?string $photo = null, bool $send_email = false): bool
     {
 
         if ($id) { // Save
@@ -189,7 +189,7 @@ class User
                     "country_code" => $country_code,
                     "phone" => $phone,
                     "email" => $email,
-                    "user_group_id" => $group,
+                    "user_role_id" => $role,
                 ],
                 [
                     "user_id" => $id
@@ -232,7 +232,7 @@ class User
             $id = DB::insertGet(
                 "users",
                 [
-                    "user_group_id" => $group,
+                    "user_role_id" => $role,
                     "email" => $email,
                     "country_code" => $country_code,
                     "phone" => $phone,

@@ -22,10 +22,10 @@ class Auth
         //
     }
 
-    protected static function setConstants(int $uid, int $group, string $template): void
+    protected static function setConstants(int $uid, int $role, string $template): void
     {
         define('UID', $uid);
-        define('UGROUP', $group);
+        define('UROLE', $role);
         define('TPL_DIR', $template);
     }
 
@@ -35,7 +35,7 @@ class Auth
         Session::setvar('user_firstname', $user->firstname);
         Session::setvar('user_lastname', $user->lastname);
         Session::setvar('user_password', $user->password);
-        Session::setvar('user_group', (int)$user->user_group_id);
+        Session::setvar('user_role', (int)$user->user_role_id);
         Session::setvar('user_email', $user->email);
         Session::setvar('user_ip', IP::getIp());
         Session::setvar('user_avatar', User::getAvatar((int)$user->user_id));
@@ -64,7 +64,7 @@ class Auth
         if (!self::authSessions() && !self::authCookie()) {
             // Clear Session Data
             Session::delvar('user_id', 'user_password', 'permissions');
-            define('UGROUP', 2);
+            define('UROLE', 2);
         }
 
     }
@@ -109,7 +109,7 @@ class Auth
         DB::update("users", ["last_activity" => date('Y-m-d H:i:s')], ["user_id" => (int)Session::getvar('user_id')]);
         DB::update("users_session", ["last_activity" => date('Y-m-d H:i:s'), "ip" => IP::getIp()], ["user_id" => (int)Session::getvar('user_id')]);
 
-        self::setConstants(Session::getvar('user_id'), Session::getvar('user_group'), Session::getvar('tpl_dir'));
+        self::setConstants(Session::getvar('user_id'), Session::getvar('user_role'), Session::getvar('tpl_dir'));
 
         return true;
     }
@@ -142,7 +142,7 @@ class Auth
         $sql = "
 				SELECT
 				    usr.user_id,
-					usr.user_group_id,
+					usr.user_role_id,
 					usr.password,
 					usr.firstname,
 					usr.lastname,
@@ -154,8 +154,8 @@ class Auth
 				FROM
 					users AS usr
 				LEFT JOIN
-					user_groups AS grp
-					ON grp.user_group_id = usr.user_group_id
+					user_roles AS grp
+					ON grp.user_role_id = usr.user_role_id
 				LEFT JOIN
 					users_session AS usrs
 					ON usr.user_id = usrs.user_id
@@ -183,9 +183,9 @@ class Auth
         DB::update("users_session", ["last_activity" => date('Y-m-d H:i:s'), "ip" => IP::getIp()], ["user_id" => $user_id]);
 
         self::setSessionVars($user);
-        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->template);
+        self::setConstants((int)$user->user_id, (int)$user->user_role_id, $user->template);
 
-        Permission::set($user->permissions);
+        Permission::set(Json::decode($user->permissions ?? '[]'));
 
         return true;
     }
@@ -246,7 +246,7 @@ class Auth
         $sql = "
 				SELECT
 					usr.user_id,
-					usr.user_group_id,
+					usr.user_role_id,
 					usr.firstname,
 					usr.lastname,
 					usr.email,
@@ -260,8 +260,8 @@ class Auth
 				FROM
 					users AS usr
 				INNER JOIN
-					user_groups AS grp
-					ON grp.user_group_id = usr.user_group_id
+					user_roles AS grp
+					ON grp.user_role_id = usr.user_role_id
 				WHERE
 					usr.email = ?
 				LIMIT 1
@@ -293,9 +293,9 @@ class Auth
         ], ["user_id" => $user->user_id]);
 
         self::setSessionVars($user);
-        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->template);
+        self::setConstants((int)$user->user_id, (int)$user->user_role_id, $user->template);
 
-        Permission::set($user->permissions);
+        Permission::set(Json::decode($user->permissions ?? '[]'));
 
         $expire = $keep_in ? ($time + COOKIE_LIFETIME) : 0;
 
