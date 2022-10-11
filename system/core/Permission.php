@@ -66,8 +66,7 @@ class Permission
      */
     public static function has(string $perm): bool
     {
-        $permissions = Session::getvar('permissions');
-        return in_array('all_permissions', $permissions) || in_array($perm, $permissions);
+        return ($permissions = Session::getvar('permissions')) && (in_array('all_permissions', $permissions) || in_array($perm, $permissions));
     }
 
     /**
