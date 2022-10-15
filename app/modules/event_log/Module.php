@@ -18,19 +18,29 @@ class EventLogModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '4.0';
+    const ID = 'event_log';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '07.10.2022';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'event_log';
+    const DATE = '07.10.2022';
+
+    /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-script-text-outline';
+
+    /**
+     * Module permissions
+     */
+    const PERMISSIONS = ['event_log_view', 'event_log_edit', 'event_log_delete'];
 
     /**
      * Constructor
@@ -42,22 +52,22 @@ class EventLogModule extends Module
         parent::__construct();
 
         // Module permissions
-        Permission::add('event_log', ['event_log_view', 'event_log_edit', 'event_log_delete'], 'mdi mdi-script-text-outline', 5010);
+        Permission::add(static::ID, static::PERMISSIONS, static::ICON, 5010);
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/event_log/i18n/' . Session::getvar('current_language') . '.ini', 'name');
-        $Template->_load(DASHBOARD_DIR . '/app/modules/event_log/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
 
         // Add navigation entry
         Navigation::add(
             10,
             $Template->_get('event_log_menu_name'),
-            'mdi mdi-script-text-outline',
-            ABS_PATH . 'event_log',
-            'event_log',
+            static::ICON,
+            ABS_PATH . static::ID,
+            static::ID,
             Navigation::SIDEBAR,
             Navigation::SIDEBAR_INFO,
             '',

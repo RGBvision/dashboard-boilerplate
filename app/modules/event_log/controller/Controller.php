@@ -9,12 +9,12 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.3
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
-class EventlogController extends Controller
+class EventLogController extends Controller
 {
 
     /**
@@ -26,7 +26,7 @@ class EventlogController extends Controller
         parent::__construct();
 
         // Check if user has permission at least to view module default page
-        if (!Permission::check('event_log_view')) {
+        if (!Permission::has('event_log_view')) {
             Router::response(false, '', ABS_PATH);
         }
 
@@ -35,7 +35,7 @@ class EventlogController extends Controller
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css',
             ABS_PATH . 'assets/vendors/datatables.net/jquery.dataTables.js',
             ABS_PATH . 'assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js',
-            ABS_PATH . 'app/modules/event_log/js/event_log.js',
+            $this->module->uri . '/js/event_log.js',
         ];
 
         foreach ($files as $i => $file) {
@@ -49,14 +49,14 @@ class EventlogController extends Controller
     /**
      * Display event log
      */
-    public static function index()
+    public function index()
     {
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/event_log/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         $data = [
 
@@ -87,22 +87,24 @@ class EventlogController extends Controller
         ];
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/event_log/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
         // Push data to template engine
         $Template
             ->assign('data', $data)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/event_log/view/index.tpl'));
+            ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
 
     }
 
     /**
      * Get log data
      */
-    public static function get()
+    public function get()
     {
 
-        $event_log = Log::get(Log::SORTABLE[(int)Request::post('order.0.column')], Request::post('order.0.dir'), (int)Request::post('length'), (int)Request::post('start'), Request::post('search.value'));
+        $_sortable_index = Arrays::search(Log::SORTABLE, Request::post('columns.' . (int)Request::post('order.0.column') . '.data'), 0);
+
+        $event_log = Log::get(Log::SORTABLE[$_sortable_index], Request::post('order.0.dir'), (int)Request::post('length'), (int)Request::post('start'), Request::post('search.value'));
 
         $res = [
             'draw' => (int)Request::post('draw'),
