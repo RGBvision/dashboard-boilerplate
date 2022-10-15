@@ -23,10 +23,10 @@ class Arrays
      * @param array $array array to search in
      * @param string $path key or path
      * @param string $glue path divider
-     * @param null $default default value if nothing found
+     * @param mixed|null $default default value if nothing found
      * @return mixed
      */
-    public static function get(array &$array, string $path, string $glue = '.', $default = null): mixed
+    public static function get(array &$array, string $path, string $glue = '.', mixed $default = null): mixed
     {
         $path_chunks = explode($glue, $path);
         $ref = &$array;
@@ -40,6 +40,20 @@ class Arrays
         }
 
         return $ref;
+    }
+
+    /**
+     * Searches the array for a given value and returns the first corresponding key if successful
+     *
+     * @param array $array
+     * @param mixed $value
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public static function search(array $array, mixed $value, mixed $default = null): mixed
+    {
+        $key = array_search($value, $array, true);
+        return ($key === false) ? $default : $key;
     }
 
 
