@@ -18,19 +18,24 @@ class LoginModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '4.0';
+    const ID = 'login';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '07.10.2022';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'login';
+    const DATE = '07.10.2022';
+
+    /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-email-outline';
 
     /**
      * Constructor
@@ -42,16 +47,14 @@ class LoginModule extends Module
         parent::__construct();
 
         // Router aliases
-        Router::addAlias(ABS_PATH . 'logout', self::$moduleName, 'logout');
-
-        // Module permissions
-        Permission::add('login', ['login_view', 'logout_view'], 'mdi mdi-account-circle-outline', 10);
+        Router::addAlias(ABS_PATH . 'logout', static::ID, 'logout');
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/login/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
         // Add navigation entry
         Navigation::add(

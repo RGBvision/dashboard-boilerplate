@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.1
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -26,50 +26,33 @@ class LoginModel extends Model
     }
 
     /**
-     * Generate password change link and send it to user's email
+     * Save verification hash
      *
-     * @param int $user_id user ID
      * @param string $email user email
-     * @throws Exception
+     * @param string $hash verification hash to change password
+     * @param string $expired hash valid until
+     * @return bool
      */
-    public function preparePassChange(int $user_id, string $email):void
+    public function preparePassChange(string $email, string $hash, string $expired): bool
     {
-
-        $Template = Template::getInstance();
-        $Template->_load(DASHBOARD_DIR . '/app/modules/login/i18n/' . Session::getvar('current_language') . '.ini', 'main');
-
-        $expired = date('Y-m-d H:i:s', strtotime('+4 hours'));
-
-        $hash = md5($user_id . $email) . md5($user_id . strtotime($expired));
-
-        DB::update("users", ["hash" => $hash, "hash_expire" => $expired], ["email" => $email]);
-
-        $body = sprintf($Template->_get('login_reset_mail_body'), IP::getIp(), HOST, ABS_PATH, $hash, HOST, ABS_PATH, $hash, $expired);
-
-        Mailer::send(
-            $email,
-            $body,
-            $Template->_get('login_reset_mail_title'),
-            '',
-            '',
-            'text/html'
-        );
+        return DB::update('users', ['hash' => $hash, 'hash_expire' => $expired], ['email' => $email]) > 0;
     }
 
     /**
-     * Change user's password
+     * Change user password
      *
      * @param string $email user email
      * @param string $hash verification hash
      * @param string $pass new password
+     * @return bool
      */
-    public function doPassChange(string $email, string $hash, string $pass):void
+    public function doPassChange(string $email, string $hash, string $pass): bool
     {
 
         $salt = Secure::randomString();
         $password_hash = Auth::getPasswordHash($pass, $salt);
 
-        DB::update("users", ["password" => $password_hash, "salt" => $salt, "hash" => "", "hash_expire" => null], ["email" => $email, "hash" => $hash]);
+        return DB::update('users', ['password' => $password_hash, 'salt' => $salt, 'hash' => '', 'hash_expire' => null], DB::statement()->with('email = ?', $email)->andWith('hash = ?', $hash)->andWith('hash_expire >= ?', date('Y-m-d H:i:s'))) > 0;
 
     }
 
