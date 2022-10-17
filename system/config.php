@@ -149,18 +149,6 @@ $config_defaults['SMARTY_USE_SUB_DIRS'] = [
     'VARIANT' => '',
 ];
 
-$config_defaults['CACHE_DOC_TPL'] = [
-    'DEFAULT' => true,
-    'TYPE' => 'bool',
-    'VARIANT' => '',
-];
-
-$config_defaults['CACHE_LIFETIME'] = [
-    'DEFAULT' => 60 * 60 * 24 * 14,
-    'TYPE' => 'integer',
-    'VARIANT' => '',
-];
-
 $config_defaults['SYSTEM_CACHE_LIFETIME'] = [
     'DEFAULT' => 0,
     'TYPE' => 'integer',
@@ -207,6 +195,18 @@ $config_defaults['SEND_SQL_ERROR'] = [
 $config_defaults['SQL_PROFILING'] = [
     'DEFAULT' => false,
     'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['SQL_CACHE'] = [
+    'DEFAULT' => false,
+    'TYPE' => 'bool',
+    'VARIANT' => '',
+];
+
+$config_defaults['SQL_CACHE_LIFETIME'] = [
+    'DEFAULT' => 60 * 60,
+    'TYPE' => 'integer',
     'VARIANT' => '',
 ];
 

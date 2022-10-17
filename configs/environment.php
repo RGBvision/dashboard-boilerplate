@@ -40,10 +40,6 @@ const SMARTY_COMPILE_CHECK = true;
 
 const SMARTY_USE_SUB_DIRS = true;
 
-const CACHE_DOC_TPL = false;
-
-const CACHE_LIFETIME = 3600;
-
 const SYSTEM_CACHE_LIFETIME = 300;
 
 const PHP_DEBUGGING = false;
@@ -59,6 +55,10 @@ const SQL_ERRORS_STOP = false;
 const SEND_SQL_ERROR = false;
 
 const SQL_PROFILING = false;
+
+const SQL_CACHE = false;
+
+const SQL_CACHE_LIFETIME = 3600;
 
 const PROFILING = false;
 
