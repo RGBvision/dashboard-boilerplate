@@ -93,9 +93,6 @@ class Loader
             if (is_file($module_dir . '/Module.php') && include_once($module_dir . '/Module.php')) {
 
                 $module_name = snakeToPascalCase($entry) . 'Module';
-
-                // new $module_name();
-                // self::$modules[$entry] = $module_dir;
                 self::$modules[$entry] = new $module_name();
 
             } else {
