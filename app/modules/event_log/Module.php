@@ -59,7 +59,6 @@ class EventLogModule extends Module
 
         // Load i18n variables
         $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
-        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
 
         // Add navigation entry
         Navigation::add(

@@ -1,6 +1,6 @@
-let eventlogTable, eventlogFilter = '', eventlogFilterTimerId;
+let eventLogTable, eventLogFilter = '', eventLogFilterTimerId;
 
-var Eventlog = {
+const EventLog = {
 
     initialize: function () {
         this.build();
@@ -12,13 +12,13 @@ var Eventlog = {
     },
 
     events: function () {
-        this.onEventlogFilter();
-        this.onEventlogFilterClear();
+        this.onEventLogFilter();
+        this.onEventLogFilterClear();
     },
 
     setDataTable: function () {
 
-        eventlogTable = $('#eventlogControlTable').DataTable({
+        eventLogTable = $('#eventLogControlTable').DataTable({
             processing: true,
             language: dataTable_i18n,
             dom: '<"table-responsive mb-3"t>rp',
@@ -30,7 +30,7 @@ var Eventlog = {
                 url: "/event_log/get",
                 type: "POST",
                 data: function (d) {
-                    d.search.value = eventlogFilter;
+                    d.search.value = eventLogFilter;
                 }
             },
             columns: [
@@ -60,7 +60,7 @@ var Eventlog = {
             order: [[0, "desc"]]
         });
 
-        eventlogTable.on('page.dt', function () {
+        eventLogTable.on('page.dt', function () {
             $(':focus').blur();
             $('html, body').animate({
                 scrollTop: 0
@@ -68,30 +68,30 @@ var Eventlog = {
         });
     },
 
-    onEventlogFilter() {
+    onEventLogFilter() {
         $('#tableFilter').on('input', () => {
-            clearTimeout(eventlogFilterTimerId);
-            eventlogFilterTimerId = setTimeout(
+            clearTimeout(eventLogFilterTimerId);
+            eventLogFilterTimerId = setTimeout(
                 () => {
-                    eventlogFilter = $('#tableFilter').val();
-                    eventlogTable.ajax.reload();
+                    eventLogFilter = $('#tableFilter').val();
+                    eventLogTable.ajax.reload();
                 },
                 500
             );
         });
     },
 
-    onEventlogFilterClear() {
+    onEventLogFilterClear() {
         $('#tableFilterClear').on('click', () => {
-            clearTimeout(eventlogFilterTimerId);
+            clearTimeout(eventLogFilterTimerId);
             $('#tableFilter').val('')
-            eventlogFilter = '';
-            eventlogTable.ajax.reload();
+            eventLogFilter = '';
+            eventLogTable.ajax.reload();
         });
     },
 
 };
 
 $(document).ready(function () {
-    Eventlog.initialize();
+    EventLog.initialize();
 });
