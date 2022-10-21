@@ -1,4 +1,4 @@
-let colorScheme;
+let colorScheme, storageProgressChart, apexBarChart;
 
 const fontFamily = "'Roboto', Helvetica, sans-serif";
 
@@ -19,6 +19,7 @@ const Dashboard = {
         this.onBackupDB();
         this.onGetBackup();
         this.onClearCache();
+        this.onThemeChange();
     },
 
     setColorScheme() {
@@ -26,24 +27,20 @@ const Dashboard = {
         colorScheme = {
             gridLineColor: $body.data('theme') === 'dark' ? "#1a2835" : "#f0f0f0",
             colors: {
-                primary: "#0095ff",
-                secondary: "#545454",
-                success: "#1bb322",
-                info: "#0dcaf0",
-                warning: "#ffc107",
-                danger: "#de3131",
-                light: "#f0f0f0",
-                dark: "#15202B",
-                muted: $body.data('theme') === 'dark' ? "#cccccc" : "#888888",
-                bodyColor: $body.data('theme') === 'dark' ? "#f0f0f0" : "#15202B",
-                cardBg: $body.data('theme') === 'dark' ? "#15202B" : "#ffffff",
-                gridBorder: $body.data('theme') === 'dark' ? "#1a2835" : "#f0f0f0",
+                primary: '#0095ff',
+                secondary: '#545454',
+                success: '#1bb322',
+                info: '#0dcaf0',
+                warning: '#ffc107',
+                danger: '#de3131',
+                light: '#f0f0f0',
+                dark: '#15202B',
+                muted: $body.data('theme') === 'dark' ? '#cccccc' : '#888888',
+                bodyColor: $body.data('theme') === 'dark' ? '#f0f0f0' : '#15202B',
+                cardBg: $body.data('theme') === 'dark' ? '#15202B' : '#ffffff',
+                gridBorder: $body.data('theme') === 'dark' ? '#1a2835' : '#f0f0f0',
             }
         }
-
-        $window.on('themechange', () => {
-            this.setColorScheme();
-        });
 
     },
 
@@ -52,7 +49,7 @@ const Dashboard = {
 
             const _chartData = $('#dailyVisitsChart').data('chart');
 
-            const chartData = (typeof _chartData == "object") ? _chartData : JSON.parse(_chartData);
+            const chartData = (typeof _chartData == 'object') ? _chartData : JSON.parse(_chartData);
 
             if (Object.keys(chartData).length) {
 
@@ -158,7 +155,7 @@ const Dashboard = {
                     },
                     plotOptions: {
                         bar: {
-                            columnWidth: "50%",
+                            columnWidth: '50%',
                             borderRadius: 4,
                             dataLabels: {
                                 position: 'top',
@@ -168,15 +165,8 @@ const Dashboard = {
                     },
                 };
 
-                const apexBarChart = new ApexCharts(document.querySelector("#dailyVisitsChart"), options);
+                apexBarChart = new ApexCharts(document.querySelector('#dailyVisitsChart'), options);
                 apexBarChart.render();
-
-                $window.on('themechange', () => {
-                    setTimeout(() => {
-                        apexBarChart.destroy();
-                        this.visitsChart();
-                    }, 10);
-                });
 
             }
 
@@ -185,7 +175,8 @@ const Dashboard = {
 
     storageChart() {
         if ($('#storageChart').length) {
-            const bar = new ProgressBar.Circle(storageChart, {
+
+            storageProgressChart = new ProgressBar.Circle('#storageChart', {
                 color: colorScheme.colors.primary,
                 trailColor: colorScheme.gridLineColor,
                 // This has to be the same size as the maximum width to
@@ -209,17 +200,11 @@ const Dashboard = {
 
                 }
             });
-            bar.text.style.fontFamily = "'Roboto', sans-serif;";
-            bar.text.style.fontSize = '3rem';
 
-            bar.animate(parseFloat($('#storageChart').data('usage')));
+            storageProgressChart.text.style.fontFamily = "'Roboto', sans-serif;";
+            storageProgressChart.text.style.fontSize = '3rem';
 
-            $window.on('themechange', () => {
-                setTimeout(() => {
-                    bar.destroy();
-                    this.storageChart();
-                }, 10);
-            });
+            storageProgressChart.animate(parseFloat($('#storageChart').data('usage')));
 
         }
     },
@@ -228,9 +213,9 @@ const Dashboard = {
         $(document).on('click', '#backupDB', (event) => {
             event.preventDefault();
             $.ajax({
-                method: "POST",
+                method: 'POST',
                 url: $('#backupDB').attr('href'),
-                dataType: "JSON",
+                dataType: 'JSON',
                 timeout: 5000
             })
                 .done((data) => {
@@ -268,9 +253,9 @@ const Dashboard = {
         $(document).on('click', '#getBackup', (event) => {
             event.preventDefault();
             $.ajax({
-                method: "POST",
+                method: 'POST',
                 url: $('#getBackup').attr('href'),
-                dataType: "JSON",
+                dataType: 'JSON',
                 timeout: 5000
             })
                 .done((data) => {
@@ -308,9 +293,9 @@ const Dashboard = {
         $(document).on('click', '#clearCache', (event) => {
             event.preventDefault();
             $.ajax({
-                method: "POST",
+                method: 'POST',
                 url: $('#clearCache').attr('href'),
-                dataType: "JSON",
+                dataType: 'JSON',
                 timeout: 5000
             })
                 .done((data) => {
@@ -340,7 +325,20 @@ const Dashboard = {
                 });
             return false;
         });
-    }
+    },
+
+    // switch theme handler
+    onThemeChange() {
+        $window.on('theme-change', () => {
+            this.setColorScheme();
+            apexBarChart.destroy();
+            storageProgressChart.destroy();
+            setTimeout(() => {
+                this.visitsChart();
+                this.storageChart();
+            }, 100);
+        });
+    },
 
 };
 

@@ -66,7 +66,7 @@ const DashboardCommon = {
             $body.data('theme', newTheme);
             $('#themeSwitch').prop('checked', (newTheme === 'dark'));
 
-            window.dispatchEvent(new CustomEvent('themechange', {detail: {theme: newTheme}}));
+            window.dispatchEvent(new CustomEvent('theme-change', {detail: {theme: newTheme}}));
 
             return false;
         });
