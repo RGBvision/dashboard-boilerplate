@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.1
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -70,11 +70,12 @@ class LoginController extends Controller
     public function index(): void
     {
 
+        // Redirect to Dashboard if already logged in and has permission to view dashboard 
         if (Permission::has('dashboard_view')) {
             Router::response(true, '', ABS_PATH . 'dashboard');
         }
 
-        self::displayLoginForm();
+        $this->displayLoginForm();
     }
 
     /**
@@ -111,7 +112,7 @@ class LoginController extends Controller
 
         }
 
-        self::displayLoginForm(null, $error_message);
+        $this->displayLoginForm(null, $error_message);
 
     }
 
@@ -156,13 +157,13 @@ class LoginController extends Controller
                     'text/html'
                 );
 
-                self::displayLoginForm($Template->_get('login_reset_mail_sent'));
+                $this->displayLoginForm($Template->_get('login_reset_mail_sent'));
 
             }
 
         }
 
-        self::displayLoginForm(null, $Template->_get('login_wrong_email'));
+        $this->displayLoginForm(null, $Template->_get('login_wrong_email'));
 
     }
 
@@ -224,7 +225,7 @@ class LoginController extends Controller
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
         if (
             Request::post('email') &&

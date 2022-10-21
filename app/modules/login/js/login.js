@@ -93,7 +93,7 @@ const Login = {
                     minlength: 6,
                 },
                 password_confirm: {
-                    equalTo: "#user_password"
+                    equalTo: '#user_password'
                 },
             },
             messages: {
