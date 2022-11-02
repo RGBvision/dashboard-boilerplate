@@ -26,7 +26,7 @@ class DashboardController extends Controller
         parent::__construct();
 
         // Check if user has permission at least to view module default page
-        if (!Permission::has('dashboard_view')) {
+        if (!Permissions::has('dashboard_view')) {
             // Redirect to login page because dashboard is default module for authorized users
             // So we assume user is not logged in if user has no access to this module
             Router::response(false, '', ABS_PATH . 'login');
@@ -99,7 +99,7 @@ class DashboardController extends Controller
     public function backup_db()
     {
         $status = false;
-        if (Permission::has('dashboard_backup_db')) {
+        if (Permissions::has('dashboard_backup_db')) {
             $status = DB::backup();
             Response::setStatus($status ? 200 : 503);
         }
@@ -111,7 +111,7 @@ class DashboardController extends Controller
      */
     public function clear_cache()
     {
-        if (Permission::has('dashboard_clear_cache')) {
+        if (Permissions::has('dashboard_clear_cache')) {
             Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/smarty');
             Json::output(['success' => true], true);
         }

@@ -2,10 +2,10 @@
     <div class="col-12">
         <div class="card rounded">
             <div class="card-header d-flex justify-content-between align-items-baseline">
-                <h6 class="card-title mb-0">{#groups_page_header#}</h6>
-                {if isset($smarty.session.permissions.groups_edit) or isset($smarty.session.permissions.all_permissions)}
-                    <div class="text-right d-none d-md-block">
-                        <a href="{$ABS_PATH}groups/add" class="btn btn-primary btn-icon-text">
+                <h6 class="card-title mb-0">{#roles_page_header#}</h6>
+                {if Permissions::has('roles_edit')}
+                    <div class="text-end d-none d-md-block">
+                        <a href="{$ABS_PATH}roles/add" class="btn btn-primary btn-icon-text">
                             <i class="mdi mdi-plus btn-icon-prepend"></i> {#button_add#}
                         </a>
                     </div>
@@ -14,8 +14,8 @@
                             <i class="mdi mdi-dots-vertical"></i>
                         </button>
                         <div class="dropdown-menu" aria-labelledby="userListMenu">
-                            <a class="dropdown-item d-flex align-items-center" href="{$ABS_PATH}groups/add">
-                                <i class="mdi mdi-plus mr-1"></i>
+                            <a class="dropdown-item d-flex align-items-center" href="{$ABS_PATH}roles/add">
+                                <i class="mdi mdi-plus me-1"></i>
                                 <span>{#button_add#}</span>
                             </a>
                         </div>
@@ -27,30 +27,30 @@
                     <table class="table table-hover text-nowrap align-middle">
                         <thead>
                         <tr>
-                            <th class="text-left">{#groups_table_name#}</th>
-                            <th class="text-left">{#groups_table_users#}</th>
+                            <th class="text-start">{#roles_table_name#}</th>
+                            <th class="text-start">{#roles_table_users#}</th>
                             <th class="text-center" width="1%" data-orderable="false"><i class="mdi mdi-dots-horizontal m-0"></i></th>
                         </tr>
                         </thead>
                         <tbody>
-                        {if $groups}
-                            {foreach from=$groups item=group key=key}
+                        {if $roles}
+                            {foreach from=$roles item=role key=key}
                                 <tr>
-                                    <td class="text-left">
-                                        {if $group.editable}
-                                            <a title="{#button_edit#}" href="{$ABS_PATH}groups/edit?user_group_id={$group.user_group_id}">
-                                                {$group.name}
+                                    <td class="text-start">
+                                        {if $role.editable}
+                                            <a title="{#button_edit#}" href="{$ABS_PATH}roles/edit/{$role.user_role_id}">
+                                                {$role.name}
                                             </a>
                                         {else}
-                                            {$group.name}
+                                            {$role.name}
                                         {/if}
                                     </td>
-                                    <td class="text-left">
-                                        {$group.users|default:"-"}
+                                    <td class="text-start">
+                                        {$role.users|default:"-"}
                                     </td>
                                     <td class="text-center py-1">
-                                        {if $group.editable}
-                                            <a class="btn btn-sm btn-icon btn-primary" title="{#button_edit#}" href="{$ABS_PATH}groups/edit?user_group_id={$group.user_group_id}">
+                                        {if $role.editable}
+                                            <a class="btn btn-sm btn-icon btn-primary" title="{#button_edit#}" href="{$ABS_PATH}roles/edit/{$role.user_role_id}">
                                                 <i class="mdi mdi-pen"></i>
                                             </a>
                                         {else}
@@ -58,8 +58,8 @@
                                                 <i class="mdi mdi-pen"></i>
                                             </a>
                                         {/if}
-                                        {if $group.deletable}
-                                            <a class="btn btn-sm btn-icon btn-danger ConfirmDeleteUser" title="{#button_delete#}" href="{$ABS_PATH}groups/delete?user_group_id={$group.user_group_id}">
+                                        {if $role.deletable}
+                                            <a class="btn btn-sm btn-icon btn-danger" data-confirm="delete" title="{#button_delete#}" href="{$ABS_PATH}roles/delete/{$role.user_role_id}">
                                                 <i class="mdi mdi-trash-can-outline"></i>
                                             </a>
                                         {else}

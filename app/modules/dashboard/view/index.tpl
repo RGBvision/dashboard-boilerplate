@@ -50,13 +50,13 @@
                 <div class="row">
                     <div class="col-12 col-md-6">
                         <a id="backupDB"
-                           href="{$ABS_PATH}dashboard/backup_db"
-                           class="btn w-100 btn-success mb-2 {if !Permission::has('dashboard_backup_db')}disabled{/if}">{#dashboard_make_db_backup#}</a>
+                           {if Permissions::has('dashboard_backup_db')}href="{$ABS_PATH}dashboard/backup_db"{/if}
+                           class="btn w-100 btn-success mb-2 {if !Permissions::has('dashboard_backup_db')}disabled{/if}">{#dashboard_make_db_backup#}</a>
                     </div>
                     <div class="col-12 col-md-6">
                         <a id="clearCache"
-                           href="{$ABS_PATH}dashboard/clear_cache"
-                           class="btn w-100 btn-danger mb-2 {if !Permission::has('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
+                           {if Permissions::has('dashboard_clear_cache')}href="{$ABS_PATH}dashboard/clear_cache"{/if}
+                           class="btn w-100 btn-danger mb-2 {if !Permissions::has('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
                     </div>
                 </div>
             </div>

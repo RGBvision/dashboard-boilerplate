@@ -27,7 +27,7 @@ class ControllerProfile extends Controller
         parent::__construct();
 
         // Check if user has permission
-        if (!Permission::check('profile_view')) {
+        if (!Permissions::has('profile_view')) {
             Router::response(false, '', ABS_PATH);
         }
 

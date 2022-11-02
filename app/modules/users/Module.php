@@ -18,19 +18,29 @@ class UsersModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '4.0';
+    const ID = 'users';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '07.10.2022';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'users';
+    const DATE = '07.10.2022';
+
+    /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-account-multiple-outline';
+
+    /**
+     * Module permissions
+     */
+    const PERMISSIONS = ['users_view', 'users_add', 'users_edit', 'users_delete'];
 
     /**
      * Constructor
@@ -42,22 +52,22 @@ class UsersModule extends Module
         parent::__construct();
 
         // Module permissions
-        Permission::add('users', ['users_view', 'users_add', 'users_edit', 'users_delete'], 'mdi mdi-account-multiple-outline', 50);
+        Permissions::add(static::ID, static::PERMISSIONS, static::ICON, 1050);
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'name');
-        $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
 
         // Add navigation entry
         Navigation::add(
             10,
             $Template->_get('users_submenu_name'),
-            'mdi mdi-account-multiple-outline',
-            ABS_PATH . 'users',
-            'users',
+            static::ICON,
+            ABS_PATH . static::ID,
+            static::ID,
             Navigation::SIDEBAR,
             Navigation::SIDEBAR_CONTROL,
             '',

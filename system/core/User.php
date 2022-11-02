@@ -24,19 +24,19 @@ class User
     public static function isDeletable($user_id, $user_role_id): bool
     {
         return (
-            ($user_role_id !== UserRole::SUPERADMIN) &&
             ($user_id !== UID) &&
-            Permission::has('users_delete')
+            ($user_role_id !== UserRoles::SUPERADMIN) &&
+            Permissions::has('users_delete')
         );
     }
 
     public static function isEditable($user_id, $user_role_id): bool
     {
         return (
-            ((UROLE != 1) && (UROLE == $user_role_id)) ||
-            ((UROLE != 1) && ($user_role_id == 1)) ||
-            ((UROLE != 1) && ($user_role_id == 2)) ||
-            Permission::has('users_edit')
+            ((UROLE !== UserRoles::SUPERADMIN) && (UROLE == $user_role_id)) ||
+            ((UROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::SUPERADMIN)) ||
+            ((UROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::ANONYMOUS)) ||
+            Permissions::has('users_edit')
         );
     }
 
@@ -62,8 +62,8 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UROLE !== UserRole::SUPERADMIN) {
-            $where = 'grp.user_role_id != ' . UserRole::SUPERADMIN;
+        if (UROLE !== UserRoles::SUPERADMIN) {
+            $where = 'grp.user_role_id != ' . UserRoles::SUPERADMIN;
         }
 
         $rows = DB::Query("
@@ -87,7 +87,7 @@ class User
 
             $row['phone'] = Valid::internationalPhone($row['phone'], $row['country_code']);
 
-            $row['deletable'] = self::isDeletable($row['user_id'], $row['role_id']) and ($row['owner'] != '1');
+            $row['deletable'] = self::isDeletable($row['user_id'], $row['role_id']);
             $row['editable'] = self::isEditable($row['user_id'], $row['role_id']);
             $row['avatar'] = self::getAvatar((int)$row['user_id']);
 
@@ -109,8 +109,8 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UROLE !== UserRole::SUPERADMIN) {
-            $where = 'grp.user_role_id != ' . UserRole::SUPERADMIN;
+        if (UROLE !== UserRoles::SUPERADMIN) {
+            $where = 'grp.user_role_id != ' . UserRoles::SUPERADMIN;
         }
 
         return (int)DB::cell("
@@ -135,9 +135,8 @@ class User
 
     public static function saveAvatar(int $id, string $photo): bool
     {
-        $img_decoded = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $photo));
 
-        if ($img_decoded != false) {
+        if ($img_decoded = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $photo))) {
 
             $_tmp_file = DASHBOARD_DIR . TEMP_DIR . '/uploads/' . md5($id) . '.jpg';
             $_new_file = DASHBOARD_DIR . '/uploads/avatars/' . md5($id) . '_' . sprintf('%08x', time()) . '.jpg';

@@ -76,7 +76,7 @@ class MailerController extends Controller
             ],
         ];
 
-        $permission = Permission::perm('mailer_edit');
+        $permission = Permissions::has('mailer_edit');
 
         //-- To Smarty
         $Template

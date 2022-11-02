@@ -26,7 +26,7 @@ class EventLogController extends Controller
         parent::__construct();
 
         // Check if user has permission at least to view module default page
-        if (!Permission::has('event_log_view')) {
+        if (!Permissions::has('event_log_view')) {
             Router::response(false, '', ABS_PATH);
         }
 

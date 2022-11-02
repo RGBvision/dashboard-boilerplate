@@ -55,14 +55,13 @@ class DashboardModule extends Module
         Router::addAlias(ABS_PATH, static::ID, 'index');
 
         // Module permissions
-        Permission::add(static::ID, static::PERMISSIONS, static::ICON, 1);
+        Permissions::add(static::ID, static::PERMISSIONS, static::ICON, 1);
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
         $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
-        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
 
         // Add navigation entry
         Navigation::add(

@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -27,7 +27,7 @@ class UsersController extends Controller
         parent::__construct();
 
         // Check if user has permission
-        if (!Permission::check('users_view')) {
+        if (!Permissions::has('users_view')) {
             Router::response(false, '', ABS_PATH);
         }
 
@@ -39,7 +39,7 @@ class UsersController extends Controller
             ABS_PATH . 'assets/vendors/libphonenumber/libphonenumber-max.js',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.css',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.js',
-            ABS_PATH . 'app/modules/users/js/users.js',
+            $this->module->uri . '/js/users.js',
         ];
 
         foreach ($files as $i => $file) {
@@ -54,15 +54,15 @@ class UsersController extends Controller
     /**
      * Users list page
      */
-    public static function index()
+    public function index()
     {
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'main');
-        $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
 
         $data = [
 
@@ -95,18 +95,18 @@ class UsersController extends Controller
         // Push data to template engine
         $Template
             ->assign('data', $data)
-            ->assign('groups', UserGroup::getList())
+            ->assign('roles', UserRoles::getList())
             ->assign('countries', Valid::getAllCountries())
-            ->assign('can_add_user', self::$model::canAddUser())
-            ->assign('can_edit_user', Permission::check('users_edit'))
-            ->assign('add_user_tpl', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/add.tpl'))
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/index.tpl'));
+            ->assign('can_add_user', $this->model::canAddUser())
+            ->assign('can_edit_user', Permissions::has('users_edit'))
+            ->assign('add_user_tpl', $Template->fetch($this->module->path . '/view/add.tpl'))
+            ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
     }
 
     /**
      * Get users list data
      */
-    public static function get()
+    public function get()
     {
 
         $_order_column_id = (int)Request::post('order.0.column');
@@ -133,7 +133,7 @@ class UsersController extends Controller
      * @param int $user_id
      * @throws \libphonenumber\NumberParseException
      */
-    public static function view(int $user_id)
+    public function view(int $user_id)
     {
 
         if (!$user_id) {
@@ -184,9 +184,9 @@ class UsersController extends Controller
         $Template
             ->assign('data', $data)
             ->assign('formatted_phone', $phoneUtil->format($phone, \libphonenumber\PhoneNumberFormat::INTERNATIONAL))
-            ->assign('can_edit_user', Permission::check('users_edit'))
+            ->assign('can_edit_user', Permissions::has('users_edit'))
             ->assign('user', $user)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/view.tpl'));
+            ->assign('content', $Template->fetch($this->module->path . '/view/view.tpl'));
     }
 
     /**
@@ -194,10 +194,10 @@ class UsersController extends Controller
      *
      * @param int $user_id
      */
-    public static function edit(int $user_id)
+    public function edit(int $user_id)
     {
 
-        if (!$user_id || !Permission::check('users_edit')) {
+        if (!$user_id || !Permissions::has('users_edit')) {
             Router::response(false, '', Request::referrer());
         }
 
@@ -235,27 +235,27 @@ class UsersController extends Controller
             ],
         ];
 
-        $groups = UserGroup::getList();
+        $roles = UserRoles::getList();
 
-        if (UGROUP !== UserGroup::SUPERADMIN) {
-            $path = explode('.', Arrays::pathByKeyValue($groups, 'user_group_id', UserGroup::SUPERADMIN));
-            Arrays::delete($groups, $path[0]);
+        if (UROLE !== UserRoles::SUPERADMIN) {
+            $path = explode('.', Arrays::pathByKeyValue($roles, 'user_role_id', UserRoles::SUPERADMIN));
+            Arrays::delete($roles, $path[0]);
         }
 
         $Template
             ->assign('data', $data)
             ->assign('user', self::$model::getUser($user_id))
             ->assign('countries', Valid::getAllCountries())
-            ->assign('groups', $groups)
+            ->assign('roles', $roles)
             ->assign('action', 'save')
-            ->assign('cropper_tpl', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/cropper.tpl'))
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/users/view/edit.tpl'));
+            ->assign('cropper_tpl', $Template->fetch($this->module->path . '/view/cropper.tpl'))
+            ->assign('content', $Template->fetch($this->module->path . '/view/edit.tpl'));
     }
 
     /**
      * Add user
      */
-    public static function add()
+    public function add()
     {
 
         Loader::addDirectory(DASHBOARD_DIR . '/libraries/PhoneLib/');
@@ -264,7 +264,7 @@ class UsersController extends Controller
         try {
 
             if (
-                Permission::check('users_add') &&
+                Permissions::has('users_add') &&
                 ($firstname = Request::post('firstname')) &&
                 ($lastname = Request::post('lastname')) &&
                 ($code = Request::post('code')) &&
@@ -273,9 +273,9 @@ class UsersController extends Controller
                 ($phoneUtil->isValidNumber($phone)) &&
                 ($email = Valid::normalizeEmail(Request::post('email'))) &&
                 ($pass = Request::post('password')) &&
-                ($group = (int)Request::post('group'))
+                ($role = (int)Request::post('role'))
             ) {
-                User::saveUser(null, $firstname, $lastname, mb_strtoupper($code), $phone->getNationalNumber(), $email, $pass, $group, null, ((int)Request::post('send_email') === 1));
+                User::saveUser(null, $firstname, $lastname, mb_strtoupper($code), $phone->getNationalNumber(), $email, $pass, $role, null, ((int)Request::post('send_email') === 1));
             }
 
         } catch (\libphonenumber\NumberParseException $e) {
@@ -288,7 +288,7 @@ class UsersController extends Controller
     /**
      * Save user data
      */
-    public static function save()
+    public function save()
     {
 
         Loader::addDirectory(DASHBOARD_DIR . '/libraries/PhoneLib/');
@@ -297,7 +297,7 @@ class UsersController extends Controller
         try {
 
             if (
-                Permission::perm('users_edit') &&
+                Permissions::has('users_edit') &&
                 ($id = (int)Request::post('user_id')) &&
                 ($firstname = trim(Request::post('firstname'))) &&
                 ($lastname = trim(Request::post('lastname'))) &&
@@ -306,13 +306,13 @@ class UsersController extends Controller
                 ($phone = $phoneUtil->parse($_phone, $code)) &&
                 ($phoneUtil->isValidNumber($phone)) &&
                 ($email = Valid::normalizeEmail(Request::post('email'))) &&
-                ($group = (int)Request::post('group'))
+                ($role = (int)Request::post('role'))
             ) {
 
                 $photo = Request::post('new_avatar') ?: null;
                 $pass = Request::post('password') ?: null;
 
-                User::saveUser($id, $firstname, $lastname, mb_strtoupper($code), $phone->getNationalNumber(), $email, $pass, $group, $photo, ((int)Request::post('send_email') === 1));
+                User::saveUser($id, $firstname, $lastname, mb_strtoupper($code), $phone->getNationalNumber(), $email, $pass, $role, $photo, ((int)Request::post('send_email') === 1));
             }
 
         } catch (\libphonenumber\NumberParseException $e) {
@@ -324,10 +324,10 @@ class UsersController extends Controller
     /**
      * Save user avatar
      */
-    public static function save_avatar()
+    public function save_avatar()
     {
         if (
-            (Permission::perm('users_edit')) &&
+            (Permissions::has('users_edit')) &&
             ($id = (int)Request::post('user_id')) &&
             ($photo = Request::post('new_avatar'))
         ) {
@@ -341,10 +341,10 @@ class UsersController extends Controller
     /**
      * Block user
      */
-    public static function block()
+    public function block()
     {
         if (
-            (Permission::perm('users_edit')) &&
+            (Permissions::has('users_edit')) &&
             ($id = Request::get('user_id'))
         ) {
             User::block($id);
@@ -355,10 +355,10 @@ class UsersController extends Controller
     /**
      * Unblock user
      */
-    public static function unblock()
+    public function unblock()
     {
         if (
-            (Permission::perm('users_edit')) &&
+            (Permissions::has('users_edit')) &&
             ($id = Request::get('user_id'))
         ) {
             User::unblock($id);
@@ -369,10 +369,10 @@ class UsersController extends Controller
     /**
      * Delete user
      */
-    public static function delete()
+    public function delete()
     {
         if (
-            (Permission::perm('users_delete')) &&
+            (Permissions::has('users_delete')) &&
             ($id = Request::get('user_id'))
         ) {
             User::delete($id);
@@ -383,10 +383,10 @@ class UsersController extends Controller
     /**
      * Restore deleted user
      */
-    public static function restore()
+    public function restore()
     {
         if (
-            (Permission::perm('users_delete')) &&
+            (Permissions::has('users_delete')) &&
             ($id = Request::get('user_id'))
         ) {
             User::restore($id);
@@ -397,7 +397,7 @@ class UsersController extends Controller
     /**
      * Check if phone number used by another user
      */
-    public static function check_phone()
+    public function check_phone()
     {
 
         $res = false;
@@ -427,7 +427,7 @@ class UsersController extends Controller
     /**
      * Check if email used by another user
      */
-    public static function check_email()
+    public function check_email()
     {
 
         $res = false;

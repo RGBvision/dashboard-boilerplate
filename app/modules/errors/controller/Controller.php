@@ -31,12 +31,12 @@ class ErrorsController extends Controller
      * @param string $header
      * @param string $message
      */
-    private static function displayError(string $header, string $message)
+    private function displayError(string $header, string $message)
     {
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $data = [
 
@@ -66,19 +66,19 @@ class ErrorsController extends Controller
             ->assign('data', $data)
             ->assign('_header', $header)
             ->assign('_message', $message)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/errors/view/index.tpl'));
+            ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
 
     }
 
     /**
      * 404 error (default)
      */
-    public static function index()
+    public function index()
     {
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $header = $Template->_get('header_404');
         $message = $Template->_get('message_404');
@@ -90,12 +90,12 @@ class ErrorsController extends Controller
     /**
      * Module not found
      */
-    public static function module()
+    public function module()
     {
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load( $this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $module = Request::get('module');
 
@@ -109,12 +109,12 @@ class ErrorsController extends Controller
     /**
      * Model not found
      */
-    public static function model()
+    public function model()
     {
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load( $this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $model = Request::get('model');
 
@@ -128,12 +128,12 @@ class ErrorsController extends Controller
     /**
      * Controller not found
      */
-    public static function controller()
+    public function controller()
     {
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load( $this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $controller = Request::get('controller');
 
@@ -147,12 +147,12 @@ class ErrorsController extends Controller
     /**
      * Method not found
      */
-    public static function method()
+    public function method()
     {
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load( $this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $request = Request::get('method');
 
@@ -171,12 +171,12 @@ class ErrorsController extends Controller
     /**
      * Access denied
      */
-    public static function denied()
+    public function denied()
     {
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/errors/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load( $this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
 
         $header = $Template->_get('header_denied');
         $message = $Template->_get('message_denied');

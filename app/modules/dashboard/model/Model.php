@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.2
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -40,7 +40,7 @@ class DashboardModel extends Model
 
     public function getStorageSize(): int
     {
-        return 100 * pow(1024, 3);
+        return 10 * pow(1024, 3);
     }
 
     public function getStorageUsage(): array

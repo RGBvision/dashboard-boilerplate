@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class UserRole
+class UserRoles
 {
 
     const SUPERADMIN = 1;
@@ -22,22 +22,22 @@ class UserRole
 
     protected static array $sortable_fields = ['id', 'name', 'users'];
 
-    public static function isDeletable($user_role_id, $count)
+    public static function isDeletable($user_role_id, $count): bool
     {
         return !(
-            ($user_role_id == 1) ||
-            ($user_role_id == 2) ||
+            ($user_role_id === self::SUPERADMIN) ||
+            ($user_role_id === self::ANONYMOUS) ||
             ($count > 0) ||
-            !Permission::has('roles_delete')
+            !Permissions::has('roles_delete')
         );
     }
 
-    public static function isEditable($user_role_id)
+    public static function isEditable($user_role_id): bool
     {
         return (
-            ((UROLE != 1) && ($user_role_id == 1)) ||
-            ((UROLE != 1) && ($user_role_id == 2)) ||
-            Permission::has('roles_edit')
+            ((UROLE !== self::SUPERADMIN) && ($user_role_id === self::SUPERADMIN)) ||
+            ((UROLE !== self::SUPERADMIN) && ($user_role_id === self::ANONYMOUS)) ||
+            Permissions::has('roles_edit')
         );
     }
 
@@ -48,11 +48,7 @@ class UserRole
             $sort = self::$sortable_fields[0];
         }
 
-        $limits = '';
-
-        if (!is_null($limit) && !is_null($start)) {
-            $limits = "LIMIT $start, $limit";
-        }
+        $limits = (!is_null($limit) && !is_null($start)) ? "LIMIT $start, $limit" : '';
 
         $like = '';
 
@@ -61,11 +57,9 @@ class UserRole
             $like = ($_like) ? " AND ($_like)" : '';
         }
 
-        $where = 'role.user_role_id != ' . self::ANONYMOUS;
-
-        if (UROLE !== self::SUPERADMIN) {
-            $where = 'role.user_role_id NOT IN (' . self::ANONYMOUS . ',' . self::SUPERADMIN . ')';
-        }
+        $where = (UROLE === self::SUPERADMIN)
+            ? 'role.user_role_id != ' . self::ANONYMOUS
+            : 'role.user_role_id NOT IN (' . self::ANONYMOUS . ',' . self::SUPERADMIN . ')';
 
         $res = [];
 
@@ -80,7 +74,7 @@ class UserRole
                 ON usr.user_role_id = role.user_role_id AND usr.deleted = 0            
             WHERE $where $like
             GROUP BY role.user_role_id
-            ORDER BY $sort $order, role.user_role_id ASC
+            ORDER BY $sort $order, role.user_role_id
             $limits
         ");
 

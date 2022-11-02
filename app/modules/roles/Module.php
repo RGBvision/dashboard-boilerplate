@@ -14,23 +14,33 @@
  * @since      File available since Release 1.0
  */
 
-class GroupsModule extends Module
+class RolesModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '4.0';
+    const ID = 'roles';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '07.10.2022';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'groups';
+    const DATE = '07.10.2022';
+
+    /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-key-chain';
+
+    /**
+     * Module permissions
+     */
+    const PERMISSIONS = ['roles_view', 'roles_edit', 'roles_delete'];
 
     /**
      * Constructor
@@ -42,22 +52,21 @@ class GroupsModule extends Module
         parent::__construct();
 
         // Module permissions
-        Permission::add('groups', ['groups_view', 'groups_edit', 'groups_delete'], 'mdi mdi-key-chain', 4010);
+        Permissions::add(static::ID, static::PERMISSIONS, static::ICON, 4010);
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'name');
-        $Template->_load(DASHBOARD_DIR . '/app/modules/groups/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
 
         // Add navigation entry
         Navigation::add(
             10,
-            $Template->_get('groups_menu_name'),
-            'mdi mdi-key-chain',
-            ABS_PATH . 'groups',
-            'groups',
+            $Template->_get('roles_menu_name'),
+            static::ICON,
+            ABS_PATH . static::ID,
+            static::ID,
             Navigation::SIDEBAR,
             Navigation::SIDEBAR_SETTINGS,
             '',

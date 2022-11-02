@@ -20,13 +20,11 @@ class MailerModel extends Model
 {
     public static function saveMailer()
     {
-        Router::demo();
-
         $type = 'danger';
 
         $Smarty = Template::getInstance();
 
-        $permission = Permission::perm('mailer_edit');
+        $permission = Permissions::has('mailer_edit');
 
         if ($permission) {
             $message = $Smarty->_get('mailer_message_edit_success');

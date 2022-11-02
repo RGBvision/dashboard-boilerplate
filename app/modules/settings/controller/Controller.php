@@ -61,7 +61,7 @@ class SettingsController extends Controller
             ],
         ];
 
-        $permission = Permission::perm('settings_edit');
+        $permission = Permissions::has('settings_edit');
 
         //-- To Smarty
         $Template

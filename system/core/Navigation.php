@@ -86,7 +86,7 @@ class Navigation
 
         foreach (self::$items as $nav) {
 
-            if (($nav['link'] !== '') && !Permission::has($nav['id'] . '_view')) {
+            if (($nav['link'] !== '') && !Permissions::has($nav['id'] . '_view')) {
                 continue;
             }
 

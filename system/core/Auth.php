@@ -185,7 +185,7 @@ class Auth
         self::setSessionVars($user);
         self::setConstants((int)$user->user_id, (int)$user->user_role_id, $user->template);
 
-        Permission::set(Json::decode($user->permissions ?? '[]'));
+        Permissions::set(Json::decode($user->permissions ?? '[]'));
 
         return true;
     }
@@ -194,7 +194,7 @@ class Auth
     // Check permissions
     public static function authCheckPermission(): bool
     {
-        if (!defined('UID') || !Permission::checkAccess('admin_panel')) {
+        if (!defined('UID') || !Permissions::checkAccess('admin_panel')) {
             self::userLogout();
             return false;
         }
@@ -295,7 +295,7 @@ class Auth
         self::setSessionVars($user);
         self::setConstants((int)$user->user_id, (int)$user->user_role_id, $user->template);
 
-        Permission::set(Json::decode($user->permissions ?? '[]'));
+        Permissions::set(Json::decode($user->permissions ?? '[]'));
 
         $expire = $keep_in ? ($time + COOKIE_LIFETIME) : 0;
 

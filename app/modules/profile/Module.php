@@ -18,19 +18,29 @@ class ProfileModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '4.0';
+    const ID = 'profile';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '07.10.2022';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'profile';
+    const DATE = '07.10.2022';
+
+    /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-account-circle-outline';
+
+    /**
+     * Module permissions
+     */
+    const PERMISSIONS = ['profile_view', 'profile_edit', 'profile_delete'];
 
     /**
      * Constructor
@@ -41,25 +51,25 @@ class ProfileModule extends Module
         // Parent
         parent::__construct();
 
-        // Router aliases
-        Router::addAlias(ABS_PATH . 'profile/set/(.*)/(.*)', self::$moduleName, 'settings_set');
-
         // Module permissions
-        Permission::add('profile', ['profile_view'], 'mdi mdi-account-circle-outline', 10);
+        Permissions::add(static::ID, static::PERMISSIONS, static::ICON, 1010);
+
+        // Router aliases
+        Router::addAlias(ABS_PATH . static::ID . '/set/(.*)/(.*)', static::ID, 'settings_set');
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/profile/i18n/' . Session::getvar('current_language') . '.ini', 'name');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'name');
 
         // Add navigation entry
         Navigation::add(
             10,
             $Template->_get('profile_menu_name'),
-            'mdi mdi-account-circle-outline',
-            ABS_PATH . 'profile',
-            'profile',
+            static::ICON,
+            ABS_PATH . static::ID,
+            static::ID,
             Navigation::USER,
             1,
             '',

@@ -38,7 +38,7 @@ class SettingsModule extends Module
         |--------------------------------------------------------------------------------------
         |
         */
-        Permission::add('settings', ['settings_view', 'settings_edit'], 'mdi mdi-cogs', 70);
+        Permissions::add('settings', ['settings_view', 'settings_edit'], 'mdi mdi-cogs', 70);
 
 
         /*

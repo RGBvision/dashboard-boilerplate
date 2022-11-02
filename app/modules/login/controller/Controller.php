@@ -71,7 +71,7 @@ class LoginController extends Controller
     {
 
         // Redirect to Dashboard if already logged in and has permission to view dashboard 
-        if (Permission::has('dashboard_view')) {
+        if (Permissions::has('dashboard_view')) {
             Router::response(true, '', ABS_PATH . 'dashboard');
         }
 

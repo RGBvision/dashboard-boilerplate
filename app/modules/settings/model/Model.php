@@ -79,7 +79,7 @@ class SettingsModel extends Model
 
         $Smarty = Tpl::getInstance();
 
-        $permission = Permission::perm('admin_settings_edit');
+        $permission = Permissions::has('admin_settings_edit');
 
         $default = self::getSettings();
 

@@ -1,29 +1,22 @@
-{assign var=disable value=''}
-{if $disabled}{assign var=disable value='disabled'}{/if}
 <div class="row">
     <div class="col-12">
-        {if ! $editable}
+        {if ! $access}
             <div class="text-danger">
                 <h4 class="h4">{#no_permissions_title#}</h4>
-                <p>{#no_permissions_descr_edit#}</p>
-            </div>
-        {elseif ! $exists}
-            <div class="text-danger">
-                <h4 class="h4">{#groups_help_danger_header#}</h4>
-                <p>{#groups_help_danger_descr#}</p>
+                <p>{#no_permissions_descr_add#}</p>
             </div>
         {/if}
-        {if $editable AND $exists}
-            <div class="card">
-                {if ! $disabled}
-                <form id="GroupForm" action="{$ABS_PATH}groups/save" method="post">
-                    <input type="hidden" name="user_group_id" value="{$user_group_id}">
-                    {/if}
+
+        {if $access}
+            <div class="card rounded">
+                <form id="RoleForm" action="{$ABS_PATH}roles/save" method="post">
+                    <input type="hidden" name="action" value="add">
                     <div class="card-body pb-0">
-                        <h6 class="card-title">{#groups_input_name#}</h6>
+                        <h6 class="card-title">{#roles_input_name#}</h6>
                         <div class="form-group mb-4">
-                            <input class="form-control input-sm" type="text" name="user_group_name" value="{$user_group_name|default:""}" id="group_name" autocomplete="off" required>
+                            <input class="form-control input-sm" type="text" name="user_role_name" value="{$user_role_name|default:""}" id="role_name" autocomplete="off" required>
                         </div>
+                        <h6 class="card-title">{#roles_permissions#}</h6>
                         {foreach from=$permissions key=key item="inner"}
                             {assign var=header_title value=$inner.name}
                             <div class="mb-4">
@@ -44,16 +37,10 @@
                         {/foreach}
                     </div>
                     <div class="card-footer text-end">
-                        <a href="{$smarty.server.HTTP_REFERER}" class="btn btn-secondary btn-icon-text"><i class="mdi mdi-arrow-left btn-icon-prepend"></i> {#button_return#}</a>
-                        {if $editable && !$disabled && $exists}
-                            <button type="submit" class="SaveGroupBtn btn btn-primary btn-icon-text"><i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
-                        {else}
-                            <button type="button" disabled class="SaveGroupBtn btn btn-primary btn-icon-text disabled"><i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
-                        {/if}
+                        <a href="{$smarty.server.HTTP_REFERER}" class="btn btn-secondary btn-icon-text"><i class="mdi mdi-undo btn-icon-prepend"></i> {#button_cancel#}</a>
+                        <button type="submit" class="SaveRoleBtn btn btn-primary btn-icon-text"> <i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
                     </div>
-                    {if ! $disabled}
                 </form>
-                {/if}
             </div>
         {/if}
     </div>

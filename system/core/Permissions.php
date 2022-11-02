@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class Permission
+class Permissions
 {
     protected static array $_permissions = [];
 
@@ -42,7 +42,7 @@ class Permission
      *
      * @return array
      */
-    public static function get(): array
+    public static function getList(): array
     {
         return self::$_permissions;
     }

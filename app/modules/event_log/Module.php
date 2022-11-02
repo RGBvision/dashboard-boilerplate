@@ -52,7 +52,7 @@ class EventLogModule extends Module
         parent::__construct();
 
         // Module permissions
-        Permission::add(static::ID, static::PERMISSIONS, static::ICON, 5010);
+        Permissions::add(static::ID, static::PERMISSIONS, static::ICON, 5010);
 
         // Template engine instance
         $Template = Template::getInstance();

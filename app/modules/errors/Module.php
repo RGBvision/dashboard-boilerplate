@@ -18,19 +18,19 @@ class ErrorsModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '4.0';
+    const ID = 'errors';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '07.10.2022';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'errors';
+    const DATE = '07.10.2022';
 
     /**
      * Constructor

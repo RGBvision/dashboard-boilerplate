@@ -6,7 +6,7 @@
                     <div class="col">
                         <h6 class="card-title mb-0">{#users_page_title#}</h6>
                     </div>
-                    {if Permission::perm('users_add')}
+                    {if Permissions::has('users_add')}
                         <div class="col-auto order-sm-last">
                             <div class="d-none d-md-block">
                                 <button type="button" class="btn btn-primary btn-icon-text" data-bs-toggle="modal" data-bs-target="#addUserModal">
@@ -58,7 +58,7 @@
                             <a class="btn btn-sm btn-icon btn-secondary" title="{#button_view#}" href="{$ABS_PATH}users/view/:id">
                                 <i class="mdi mdi-eye"></i>
                             </a>
-                            {if Permission::perm('users_edit')}
+                            {if Permissions::has('users_edit')}
                                 <a class="btn btn-sm btn-icon btn-primary disabled" title="{#button_edit#}" href="{$ABS_PATH}users/edit/:id" disabled>
                                     <i class="mdi mdi-pen"></i>
                                 </a>
@@ -73,7 +73,7 @@
                                     <i class="mdi mdi-eye me-2"></i>
                                     <span>{#button_view#}</span>
                                 </a>
-                                {if Permission::perm('users_edit')}
+                                {if Permissions::has('users_edit')}
                                     <a class="dropdown-item my-1 d-flex align-items-center disabled" href="{$ABS_PATH}users/edit/:id" disabled>
                                         <i class="mdi mdi-pen me-2"></i>
                                         <span>{#button_edit#}</span>

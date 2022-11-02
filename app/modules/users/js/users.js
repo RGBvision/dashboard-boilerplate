@@ -1,6 +1,6 @@
-var Password = {
+const Password = {
 
-    _pattern: /[a-zA-Z0-9_\-\+\.]/,
+    _pattern: /[a-zA-Z0-9_\-+.]/,
 
 
     _getRandomByte: function () {
@@ -36,7 +36,7 @@ var Password = {
 
 let controlTable, controlFilter = '', controlFilterTimerId;
 
-var Users = {
+const Users = {
 
     redirect: false,
     redirect_add: false,
@@ -122,7 +122,7 @@ var Users = {
                     }
                 },
                 {
-                    data: 'group_name'
+                    data: 'role_name'
                 },
                 {
                     data: 'last_activity',
@@ -188,7 +188,7 @@ var Users = {
         }
 
         function matchCustom(params, data) {
-            // If there are no search terms, return all of the data
+            // If there are no search terms, return all the data
             if ($.trim(params.term) === '') {
                 return data;
             }
