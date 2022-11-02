@@ -37,15 +37,7 @@ class ApiRouter
         self::$controller = $controller;
         self::$controller_file = $file;
         self::$method = strtolower($_SERVER['REQUEST_METHOD']) . '_' . str_replace('/', '_', trim($route, '/'));
-        if (strtolower($_SERVER['REQUEST_METHOD']) === 'get') {
-            self::$params = $_GET;
-        } else {
-            if (mb_strtolower(Request::header('Content-Type')) === 'application/json') {
-                self::$params = Json::decode(file_get_contents("php://input"));
-            } else {
-                self::$params = $_POST;
-            }
-        }
+        self::$params = (strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') ? $_GET : Json::decode(file_get_contents("php://input"));
     }
 
     public static function execute(): array
