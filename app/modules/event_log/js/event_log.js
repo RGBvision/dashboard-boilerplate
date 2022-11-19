@@ -53,7 +53,7 @@ const EventLog = {
                     data: 'message',
                     render: function (data, type, row) {
                         const data_string = String(data);
-                        return (data_string.length > 50) ? `<span title="${data_string}">${data_string.slice(0, 49)}&hellip;</span>` : data_string;
+                        return (data_string.length > 50) ? `<span title="${data_string.replace(/"/g, '&quot;')}">${data_string.slice(0, 49)}&hellip;</span>` : data_string;
                     },
                 }
             ],
