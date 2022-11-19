@@ -38,8 +38,8 @@ Core::init();
 Auth::authRestore();
 
 // Load user settings if authorized
-if (defined('UID')) {
-    Settings::loadUserSettings(UID);
+if (defined('USERID')) {
+    Settings::loadUserSettings(USERID);
 }
 
 // System i18n

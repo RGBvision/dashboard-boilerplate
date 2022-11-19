@@ -63,7 +63,7 @@
         </div>
     </div>
 </div>
-{if $smarty.const.UID == 1} {* Only Superuser can generate modules *}
+{if $smarty.const.USERID == 1} {* Only Superuser can generate modules *}
     <div class="row">
         <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
             <div class="card">

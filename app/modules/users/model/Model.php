@@ -21,7 +21,7 @@ class UsersModel extends Model
     {
         return (
             ($user_role_id !== 1) &&
-            ($user_id !== UID) &&
+            ($user_id !== USERID) &&
             Permissions::has('users_delete')
         );
     }
@@ -29,9 +29,9 @@ class UsersModel extends Model
     public static function isEditable($user_id, $user_role_id): bool
     {
         return (
-            ((UROLE != 1) && (UROLE == $user_role_id)) ||
-            ((UROLE != 1) && ($user_role_id == 1)) ||
-            ((UROLE != 1) && ($user_role_id == 2)) ||
+            ((USERROLE != 1) && (USERROLE == $user_role_id)) ||
+            ((USERROLE != 1) && ($user_role_id == 1)) ||
+            ((USERROLE != 1) && ($user_role_id == 2)) ||
             Permissions::has('users_edit')
         );
     }

@@ -87,9 +87,9 @@ class Settings
     /**
      * Load user settings
      *
-     * @param int $uid user ID
+     * @param int $user_id user ID
      */
-    public static function loadUserSettings(int $uid): void
+    public static function loadUserSettings(int $user_id): void
     {
         $sql = "
 				SELECT
@@ -101,7 +101,7 @@ class Settings
 				LIMIT 1
 			";
 
-        if ($settings = DB::cell($sql, $uid)) {
+        if ($settings = DB::cell($sql, $user_id)) {
             self::$settings['user_settings'] = Json::decode($settings);
         }
 

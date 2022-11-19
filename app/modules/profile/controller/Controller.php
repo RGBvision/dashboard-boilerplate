@@ -92,7 +92,7 @@ class ControllerProfile extends Controller
         ];
 
         // Get user data
-        $user = self::$model->getUser(UID);
+        $user = self::$model->getUser(USERID);
 
         // Push data to template engine
         $Template
@@ -113,9 +113,9 @@ class ControllerProfile extends Controller
         $success = false;
 
         if (
-            UID && ($photo = Request::post('new_avatar'))
+            USERID && ($photo = Request::post('new_avatar'))
         ) {
-            $success = User::saveAvatar(UID, $photo);
+            $success = User::saveAvatar(USERID, $photo);
         }
 
         Router::response($success, '', Request::referrer());
@@ -134,9 +134,9 @@ class ControllerProfile extends Controller
             ($_key = Secure::sanitize($key)) &&
             ($_val = Secure::sanitize($val))
         ) {
-            if (UID > 0) {
+            if (USERID > 0) {
                 Settings::set('user_settings', $_key, $_val);
-                Settings::saveUserSettings(UID);
+                Settings::saveUserSettings(USERID);
             } else {
                 if (in_array($_key, ['user_lang', 'current_language'])) {
                     Session::setvar('current_language', $_val);

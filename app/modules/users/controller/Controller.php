@@ -237,7 +237,7 @@ class UsersController extends Controller
 
         $roles = UserRoles::getList();
 
-        if (UROLE !== UserRoles::SUPERADMIN) {
+        if (USERROLE !== UserRoles::SUPERADMIN) {
             $path = explode('.', Arrays::pathByKeyValue($roles, 'user_role_id', UserRoles::SUPERADMIN));
             Arrays::delete($roles, $path[0]);
         }

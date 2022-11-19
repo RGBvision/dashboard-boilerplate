@@ -128,7 +128,7 @@ class DashboardController extends Controller
         $success = false;
 
         if (
-            (UID === 1) &&
+            (USERID === 1) &&
             ($name = preg_replace('/[^a-z ]/i', '', Request::post('module'))) &&
             ($dir_name = preg_replace('/\s+/', '', strtolower($name))) &&
             (!Dir::exists(DASHBOARD_DIR . MODULES_DIR . DS . $dir_name))

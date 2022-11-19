@@ -35,8 +35,8 @@ class UserRoles
     public static function isEditable($user_role_id): bool
     {
         return (
-            ((UROLE !== self::SUPERADMIN) && ($user_role_id === self::SUPERADMIN)) ||
-            ((UROLE !== self::SUPERADMIN) && ($user_role_id === self::ANONYMOUS)) ||
+            ((USERROLE !== self::SUPERADMIN) && ($user_role_id === self::SUPERADMIN)) ||
+            ((USERROLE !== self::SUPERADMIN) && ($user_role_id === self::ANONYMOUS)) ||
             Permissions::has('roles_edit')
         );
     }
@@ -57,7 +57,7 @@ class UserRoles
             $like = ($_like) ? " AND ($_like)" : '';
         }
 
-        $where = (UROLE === self::SUPERADMIN)
+        $where = (USERROLE === self::SUPERADMIN)
             ? 'role.user_role_id != ' . self::ANONYMOUS
             : 'role.user_role_id NOT IN (' . self::ANONYMOUS . ',' . self::SUPERADMIN . ')';
 

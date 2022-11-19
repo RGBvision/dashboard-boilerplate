@@ -22,10 +22,10 @@ class Auth
         //
     }
 
-    protected static function setConstants(int $uid, int $role, string $template): void
+    protected static function setConstants(int $user_id, int $role, string $template): void
     {
-        define('UID', $uid);
-        define('UROLE', $role);
+        define('USERID', $user_id);
+        define('USERROLE', $role);
         define('TPL_DIR', $template);
     }
 
@@ -194,7 +194,7 @@ class Auth
     // Check permissions
     public static function authCheckPermission(): bool
     {
-        if (!defined('UID') || !Permissions::checkAccess('admin_panel')) {
+        if (!defined('USERID') || !Permissions::checkAccess('admin_panel')) {
             self::userLogout();
             return false;
         }
@@ -207,8 +207,8 @@ class Auth
     public static function userLogout(): void
     {
 
-        DB::delete("users_session", ["user_id" => UID]);
-        DB::delete("sessions", ["user_id" => UID]);
+        DB::delete("users_session", ["user_id" => USERID]);
+        DB::delete("sessions", ["user_id" => USERID]);
 
         Cookie::set('auth', '', 0, Core::getCookieDomain(), ABS_PATH);
 
@@ -216,8 +216,8 @@ class Auth
 
         $_SESSION = [];
 
-        if (defined('UID') && UID) {
-            Log::log(Log::INFO, 'System\Auth', "User (" . UID . ") logged out");
+        if (defined('USERID') && USERID) {
+            Log::log(Log::INFO, 'System\Auth', "User (" . USERID . ") logged out");
         }
     }
 

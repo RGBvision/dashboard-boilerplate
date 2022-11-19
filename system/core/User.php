@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.42
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -24,7 +24,8 @@ class User
     public static function isDeletable($user_id, $user_role_id): bool
     {
         return (
-            ($user_id !== UID) &&
+            ($user_id !== self::SUPERUSER) &&
+            ($user_id !== USERID) &&
             ($user_role_id !== UserRoles::SUPERADMIN) &&
             Permissions::has('users_delete')
         );
@@ -33,9 +34,9 @@ class User
     public static function isEditable($user_id, $user_role_id): bool
     {
         return (
-            ((UROLE !== UserRoles::SUPERADMIN) && (UROLE == $user_role_id)) ||
-            ((UROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::SUPERADMIN)) ||
-            ((UROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::ANONYMOUS)) ||
+            ((USERROLE !== UserRoles::SUPERADMIN) && (USERROLE == $user_role_id)) ||
+            ((USERROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::SUPERADMIN)) ||
+            ((USERROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::ANONYMOUS)) ||
             Permissions::has('users_edit')
         );
     }
@@ -62,7 +63,7 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UROLE !== UserRoles::SUPERADMIN) {
+        if (USERROLE !== UserRoles::SUPERADMIN) {
             $where = 'grp.user_role_id != ' . UserRoles::SUPERADMIN;
         }
 
@@ -109,7 +110,7 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UROLE !== UserRoles::SUPERADMIN) {
+        if (USERROLE !== UserRoles::SUPERADMIN) {
             $where = 'grp.user_role_id != ' . UserRoles::SUPERADMIN;
         }
 
@@ -154,7 +155,7 @@ class User
 
                 Log::log(Log::INFO, 'System\User', "Avatar for user ($id) saved");
 
-                if ($id === UID) {
+                if ($id === USERID) {
                     Session::setvar('user_avatar', self::getAvatar($id));
                 }
 
