@@ -30,7 +30,7 @@ class ErrorsModule extends Module
     /**
      * Module release date
      */
-    const DATE = '07.10.2022';
+    const DATE = '20.11.2022';
 
     /**
      * Constructor
