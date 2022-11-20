@@ -1,7 +1,7 @@
 <div class="sidebar-body">
     <ul class="nav">
 
-        {foreach from=$sidebar_headers key=key item=header}
+        {foreach from=$sidebar_rubrics key=key item=header}
 
             {if !empty($sidebar_menu_items.$key)}
 

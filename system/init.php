@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -18,8 +18,8 @@
 define('DASHBOARD_DIR', str_replace("\\", '/', dirname(__DIR__)));
 
 // Check PHP version
-if (PHP_VERSION_ID < 70400) {
-    exit ('This application require PHP 7.4 or higher.');
+if (PHP_VERSION_ID < 80101) {
+    exit ('This application require PHP 8.1.1 or higher.');
 }
 
 // DB connection config
@@ -38,15 +38,15 @@ Core::init();
 Auth::authRestore();
 
 // Load user settings if authorized
-if (defined('UID')) {
-    Settings::loadUserSettings(UID);
+if (defined('USERID')) {
+    Settings::loadUserSettings(USERID);
 }
 
 // System i18n
 i18n::init(DASHBOARD_DIR . '/system/i18n/', Session::getvar('current_language'));
 
 // App modules
-Loader::addModules(DASHBOARD_DIR . '/app/modules/');
+Loader::addModules(DASHBOARD_DIR . MODULES_DIR);
 
 // App classes
-Loader::addDirectory(DASHBOARD_DIR . '/app/classes/');
+Loader::addDirectory(DASHBOARD_DIR . CLASSES_DIR);

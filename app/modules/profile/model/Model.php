@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelProfile extends Model
+class ProfileModel extends Model
 {
 
     /**
@@ -28,12 +28,12 @@ class ModelProfile extends Model
         $sql = "
 				SELECT
 					usr.*,
-					grp.name AS group_name
+					role.name AS role_name
 				FROM
 					users AS usr
 				LEFT JOIN
-					user_groups AS grp
-					ON usr.user_group_id = grp.user_group_id
+					user_roles AS role
+					ON usr.user_role_id = role.user_role_id
 				WHERE
 				    usr.user_id = " . (int)$user_id . "
 				LIMIT 1

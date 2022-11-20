@@ -2,31 +2,28 @@
 
 
 /**
- * This source file is part of the AVE.cms. More information,
- * documentation and tutorials can be found at http://www.ave-cms.ru
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * @package      AVE.cms
- * @file         admin/modules/mailer/model/model.php
- * @author       AVE.cms <support@ave-cms.ru>
- * @copyright    2007-2017 (c) AVE.cms
- * @link         http://www.ave-cms.ru
- * @version      4.0
- * @since        $date$
- * @license      license GPL v.2 http://www.ave-cms.ru/license.txt
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2022, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
  */
 
-
-class ModelMailer extends Model
+class MailerModel extends Model
 {
-    public static function saveMailer()
+    public function saveMailer()
     {
-        Router::demo();
-
         $type = 'danger';
 
         $Smarty = Template::getInstance();
 
-        $permission = Permission::perm('mailer_edit');
+        $permission = Permissions::has('mailer_edit');
 
         if ($permission) {
             $message = $Smarty->_get('mailer_message_edit_success');
@@ -35,6 +32,6 @@ class ModelMailer extends Model
             $message = $Smarty->_get('mailer_message_perm_danger');
         }
 
-        Router::response($type, $message, 'index.php?router=mailer');
+        Router::response($type, $message, ABS_PATH . 'mailer');
     }
 }

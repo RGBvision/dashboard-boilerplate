@@ -16,31 +16,20 @@
 
 class Number
 {
-    protected function __construct()
-    {
-        //
-    }
-
 
     /**
      * Format size in bytes
      *
      * @param int $size
+     * @param int $precision
      * @return string
      */
-    public static function formatSize(int $size): string
+    public static function formatSize(int $size, int $precision = 2): string
     {
-        if ($size >= 1073741824) {
-            $result = round($size / 1073741824 * 100) / 100 . ' Gb';
-        } elseif ($size >= 1048576) {
-            $result = round($size / 1048576 * 100) / 100 . ' Mb';
-        } elseif ($size >= 1024) {
-            $result = round($size / 1024 * 100) / 100 . ' Kb';
-        } else {
-            $result = $size . ' b';
-        }
-
-        return $result;
+        if ($size <= 0) return '0B';
+        $base = log($size, 1024);
+        $suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
     }
 
 
@@ -60,13 +49,13 @@ class Number
 
 
     /**
-     * Get microtime difference
+     * Get micro time difference
      *
      * @param string $a start time in `msec sec` format
      * @param string $b end time in `msec sec` format
      * @return float
      */
-    public static function microtimeDiff(string $a, string $b): float
+    public static function microTimeDiff(string $a, string $b): float
     {
         [$a_dec, $a_sec] = explode(' ', $a);
         [$b_dec, $b_sec] = explode(' ', $b);

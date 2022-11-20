@@ -1,61 +1,73 @@
 <?php
 
-define('TIMEZONE', 'Europe/Moscow');
+const TIMEZONE = 'Europe/Moscow';
 
-define('SYSTEM_ENVIRONMENT', 'public');
+const SYSTEM_ENVIRONMENT = 'public';
 
-define('LOGIN_USER_IP', false);
+const LOGIN_USER_IP = false;
 
-define('PWD_PEPPER', 'uI50XZoFT7sajhwa');
+const PWD_PEPPER = 'uI50XZoFT7sajhwa';
 
-define('TEMP_DIR', '/tmp');
+const AUTH_TOKEN_LIFETIME = 3600;
 
-define('ATTACH_DIR', '/tmp/attachments');
+const REFRESH_TOKEN_LIFETIME = 604800;
 
-define('UPLOAD_DIR', '/uploads');
+const MODULES_DIR = '/app/modules';
 
-define('SESSION_DIR', '/tmp/sessions');
+const CLASSES_DIR = '/app/classes';
 
-define('SESSION_SAVE_HANDLER', 'db');
+const API_URI_PREFIX = 'api';
 
-define('SESSION_LIFETIME', 86400);
+const API_DIR = '/app/api';
 
-define('COOKIE_DOMAIN', '');
+const TEMP_DIR = '/tmp';
 
-define('COOKIE_LIFETIME', 1209600);
+const ATTACH_DIR = '/tmp/attachments';
 
-define('SMARTY_COMPILE_CHECK', true);
+const UPLOAD_DIR = '/uploads';
 
-define('SMARTY_USE_SUB_DIRS', true);
+const SESSION_DIR = '/tmp/sessions';
 
-define('CACHE_DOC_TPL', false);
+const SESSION_SAVE_HANDLER = 'db';
 
-define('CACHE_LIFETIME', 3600);
+const SESSION_LIFETIME = 86400;
 
-define('SYSTEM_CACHE_LIFETIME', 300);
+const COOKIE_DOMAIN = '';
 
-define('PHP_DEBUGGING', false);
+const COOKIE_LIFETIME = 1209600;
 
-define('SELF_ERROR', false);
+const SMARTY_COMPILE_CHECK = true;
 
-define('SMARTY_DEBUGGING', false);
+const SMARTY_USE_SUB_DIRS = true;
 
-define('SQL_DEBUGGING', false);
+const SYSTEM_CACHE_LIFETIME = 300;
 
-define('SQL_ERRORS_STOP', false);
+const PHP_DEBUGGING = false;
 
-define('SEND_SQL_ERROR', false);
+const SELF_ERROR = false;
 
-define('SQL_PROFILING', false);
+const SMARTY_DEBUGGING = false;
 
-define('PROFILING', false);
+const SQL_DEBUGGING = false;
 
-define('HTML_COMPRESSION', false);
+const SQL_ERRORS_STOP = false;
 
-define('GZIP_COMPRESSION', true);
+const SEND_SQL_ERROR = false;
 
-define('OUTPUT_EXPIRE', false);
+const SQL_PROFILING = false;
 
-define('OUTPUT_EXPIRE_OFFSET', 3600);
+const SQL_CACHE = true;
 
-define('CHECK_VERSION', false);
+const SQL_CACHE_LIFETIME = 60;
+
+const PROFILING = false;
+
+const HTML_COMPRESSION = true;
+
+const GZIP_COMPRESSION = true;
+
+const OUTPUT_EXPIRE = true;
+
+const OUTPUT_EXPIRE_OFFSET = 3600;
+
+const CHECK_VERSION = false;

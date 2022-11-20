@@ -104,7 +104,7 @@ class Sessions
                 date('Y-m-d H:i:s', (time() + self::$sessLifetime)),
                 $data,
                 IP::getIp(),
-                (defined('UID') ? UID : 0),
+                (defined('USERID') ? USERID : 0),
                 $sessionId,
                 date('Y-m-d H:i:s')
             );
@@ -137,12 +137,12 @@ class Sessions
     public static function _insert($sessionId, $data)
     {
         DB::insert("sessions", [
-            "token" => token(),
+            "token" => Secure::randomToken(),
             "sesskey" => $sessionId,
             "expire" => date('Y-m-d H:i:s', (time() + self::$sessLifetime)),
             "value" => $data,
             "ip" => IP::getIp(),
-            "user_id" => (defined('UID') ? UID : 0)
+            "user_id" => (defined('USERID') ? USERID : 0)
         ]);
 
         return true;

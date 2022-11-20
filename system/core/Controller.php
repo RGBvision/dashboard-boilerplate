@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.4
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -18,24 +18,22 @@ abstract class Controller
 {
 
     /**
-     * @var string Route ID
+     * @var Module Module class
      */
-    public static string $route_id;
+    public Module $module;
 
     /**
      * @var Model Model class
      */
-    protected static Model $model;
+    protected Model $model;
 
     /**
      * Constructor
      */
     public function __construct()
     {
-
-        self::$route_id = Router::getId();
-        self::$model = Router::model();
-
+        $this->module = Router::getModule();
+        $this->model = Router::getModel();
     }
 
 }

@@ -8,7 +8,7 @@ use ParagonIE\Corner\CornerTrait;
  *
  * @package ParagonIE\EasyDB
  */
-class InvalidIdentifier extends \InvalidArgumentException implements ExceptionInterface
+class InvalidIdentifier extends EasyDBException
 {
     use CornerTrait;
 }

@@ -1,47 +1,33 @@
 <?php
 
 /**
- * This source file is part of the AVE.cms. More information,
- * documentation and tutorials can be found at http://www.ave-cms.ru
+ * This file is part of the dashboard.rgbvision.net package.
  *
- * @package      AVE.cms
- * @file         admin/modules/mailer/controller/controller.php
- * @author       AVE.cms <support@ave-cms.ru>
- * @copyright    2007-2017 (c) AVE.cms
- * @link         http://www.ave-cms.ru
- * @version      4.0
- * @since        $date$
- * @license      license GPL v.2 http://www.ave-cms.ru/license.txt
+ * (c) Alex Graham <contact@rgbvision.net>
+ *
+ * @package    dashboard.rgbvision.net
+ * @author     Alex Graham <contact@rgbvision.net>
+ * @copyright  Copyright 2017-2022, Alex Graham
+ * @license    https://dashboard.rgbvision.net/license.txt MIT License
+ * @version    3.0
+ * @link       https://dashboard.rgbvision.net
+ * @since      File available since Release 1.0
  */
 
-
-class ControllerMailer extends Controller
+class MailerController extends Controller
 {
 
-    /*
-     |--------------------------------------------------------------------------------------
-     | ControllerMailer конструктор
-     |--------------------------------------------------------------------------------------
-     |
-     */
     public function __construct()
     {
         parent::__construct();
     }
 
 
-    /*
-     |--------------------------------------------------------------------------------------
-     | Router: mailer
-     |--------------------------------------------------------------------------------------
-     | По умолчанию
-     |
-     */
-    public static function index()
+    public function index()
     {
 
         Dependencies::add(
-            ABS_PATH . 'modules/mailer/js/mailer.js',
+            ABS_PATH . 'app/modules/mailer/js/mailer.js',
             100
         );
 
@@ -49,7 +35,7 @@ class ControllerMailer extends Controller
         $Template = Template::getInstance();
 
         //-- Get Lang file
-        $Template->_load(DASHBOARD_DIR . '/app/modules/mailer/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load(DASHBOARD_DIR . '/app/modules/mailer/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         //-- Data page
         $data = [
@@ -76,13 +62,13 @@ class ControllerMailer extends Controller
             ],
         ];
 
-        $permission = Permission::perm('mailer_edit');
+        $permission = Permissions::has('mailer_edit');
 
         //-- To Smarty
         $Template
             ->assign('data', $data)
             ->assign('settings', Settings::get())
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/mailer/view/index.tpl'));
+            ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
     }
 
 

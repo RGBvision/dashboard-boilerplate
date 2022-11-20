@@ -9,13 +9,14 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.6
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
 class Request
 {
+
     protected function __construct()
     {
         //--
@@ -34,11 +35,13 @@ class Request
         if (headers_sent()) {
 
             if ($delay !== null) {
-                echo "<script>setTimeout(() => { document.location.href='" . $url . "'; }, " . $delay * 1000 . ");</script>\n";
+                echo "<script>setTimeout(() => { document.location.href='$url'}, $delay * 1000)</script>\n";
             } else {
-                echo "<script>document.location.href='" . $url . "';</script>\n";
+                echo "<script>document.location.href='$url';</script>\n";
             }
+
         } else {
+
             Response::setStatus($status);
 
             if ($delay !== null) {
@@ -46,7 +49,6 @@ class Request
             }
 
             Response::setHeader('Location:' . $url, true, $status);
-
             Response::shutDown();
         }
     }
@@ -55,9 +57,9 @@ class Request
      * Get GET value
      *
      * @param string $key parameter key or path
-     * @return array|mixed|null
+     * @return mixed
      */
-    public static function get(string $key)
+    public static function get(string $key): mixed
     {
         return Arrays::get($_GET, $key);
     }
@@ -66,9 +68,9 @@ class Request
      * Get POST value
      *
      * @param string $key parameter key or path
-     * @return array|mixed|null
+     * @return mixed
      */
-    public static function post(string $key)
+    public static function post(string $key): mixed
     {
         return Arrays::get($_POST, $key);
     }
@@ -77,9 +79,9 @@ class Request
      * Get GET or POST value
      *
      * @param string $key parameter key or path
-     * @return array|mixed|null
+     * @return mixed
      */
-    public static function request(string $key)
+    public static function request(string $key): mixed
     {
         return Arrays::get($_REQUEST, $key);
     }
@@ -87,7 +89,7 @@ class Request
     /**
      * Get Referrer
      *
-     * @return array|mixed|null
+     * @return string
      */
     public static function referrer(): string
     {
@@ -149,7 +151,7 @@ class Request
 
             return $tmp_name;
 
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException) {
             return null;
         }
     }

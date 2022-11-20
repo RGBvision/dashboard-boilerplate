@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -51,9 +51,9 @@ class Loader
     }
 
     /**
-     * Включить и выполнить PHP файлы по указанному пути
+     * Includes and evaluates all PHP files in specified directory
      *
-     * @param string $path путь к директории с файлами
+     * @param string $path path to directory with PHP files
      */
     public static function addFiles(string $path): void
     {
@@ -67,38 +67,38 @@ class Loader
     /**
      * Load modules
      *
-     * @param string $path modules directory
+     * @param string $path path to modules directory
      * @return array
      */
     public static function addModules(string $path = ''): array
     {
         $dir = dir($path);
 
-        while (false !== ($entry = $dir->read())) {
+        while ($entry = $dir->read()) {
 
-            if (strpos($entry, '.') === 0) {
+            if (str_starts_with($entry, '.')) {
                 continue;
             }
 
-            if (!empty(self::$modules['Module' . $entry])) {
+            if (!empty(self::$modules[$entry])) {
                 continue;
             }
 
-            $module_dir = $dir->path . '/' . $entry;
+            $module_dir = $dir->path . DS . $entry;
 
             if (!is_dir($module_dir)) {
                 continue;
             }
 
-            if (!(is_file($module_dir . '/Module.php') && include_once($module_dir . '/Module.php'))) {
+            if (is_file($module_dir . '/Module.php') && include_once($module_dir . '/Module.php')) {
+
+                $module_name = snakeToPascalCase($entry) . 'Module';
+                self::$modules[$entry] = new $module_name();
+
+            } else {
+                // ToDo: Log errors
                 $modules['errors'][] = $entry;
-                continue;
             }
-
-            $module_name = 'Module' . $entry;
-            new $module_name();
-
-            self::$modules[$entry] = $module_dir;
 
         }
 
@@ -117,9 +117,9 @@ class Loader
     {
         if (self::$modules[$name]) {
 
-            // Модель
-            $file = self::$modules[$name] . '/model/Model.php';
-            $model = 'Model' . $name;
+            // Model
+            $file = self::$modules[$name]->path . '/model/Model.php';
+            $model = snakeToPascalCase($name) . 'Model';
 
             if (is_file($file)) {
                 Loader::addClass($model, $file);
@@ -127,9 +127,9 @@ class Loader
                 Request::redirect('/errors/model?model=' . $model);
             }
 
-            // Контроллер
-            $file = self::$modules[$name] . '/controller/Controller.php';
-            $controller = 'Controller' . $name;
+            // Controller
+            $file = self::$modules[$name]->path . '/controller/Controller.php';
+            $controller = snakeToPascalCase($name) . 'Controller';
 
             if (is_file($file)) {
                 Loader::addClass($controller, $file);
@@ -144,6 +144,11 @@ class Loader
 
         return null;
 
+    }
+
+    public static function getModule(string $name): ?Module
+    {
+        return self::$modules[$name] ?? null;
     }
 
     /**
@@ -234,7 +239,7 @@ class Loader
         }
 
         foreach (self::$namespaces as $namespace => $path) {
-            if ((strpos($className, $namespace) === 0) && self::PSR0(substr($className, strlen($namespace)), $path)) {
+            if ((str_starts_with($className, $namespace)) && self::PSR0(substr($className, strlen($namespace)), $path)) {
                 return true;
             }
         }

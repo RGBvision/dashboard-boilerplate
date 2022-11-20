@@ -9,17 +9,17 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.18
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
 class Router
 {
-    static private string $id;
-    static private string $route;
-    static private string $method;
-    static private array $aliases = [];
+
+    private static ?Module $module = null;
+    private static string $method;
+    private static array $aliases = [];
     protected static ?Router $instance = null;
 
     /**
@@ -45,13 +45,24 @@ class Router
     }
 
     /**
-     * Get route ID
+     * Get module
      *
-     * @return string
+     * @return Module
      */
-    public static function getId(): string
+    public static function getModule(): Module
     {
-        return self::$id;
+        return self::$module;
+    }
+
+    /**
+     * Get model
+     *
+     * @return Model
+     */
+    public static function getModel(): Model
+    {
+        $model = snakeToPascalCase(static::$module::ID) . 'Model';
+        return new $model();
     }
 
     public static function addAlias(string $regex, ?string $module, string $function): void
@@ -65,29 +76,24 @@ class Router
     /**
      * Execute router
      *
-     * ToDo:: refactor
-     *
      * @param string $route
-     * @return bool|Exception|mixed
+     * @return mixed
      */
-    public static function execute(string $route)
+    public static function execute(string $route): mixed
     {
 
+        // Check if route matches aliases
         foreach (self::$aliases as $regex => $callback) {
             if ((preg_match('/^' . str_replace('/', '\/', $regex) . '$/', $route, $matches) === 1)) {
 
-                if ($callback['module']) {
-
-                    self::$id = $callback['module'];
+                if ($callback['module'] && (self::$module = Loader::getModule($callback['module']))) {
 
                     if (!$controller = Loader::loadModule($callback['module'])) {
                         Request::redirect(ABS_PATH . 'errors/controller?controller=' . $callback['module']);
                         return false;
                     }
 
-                    new $controller();
-
-                    $function = $controller . '::' . $callback['function'];
+                    $function = [new $controller(), $callback['function']];
 
                 } else {
 
@@ -111,29 +117,27 @@ class Router
 
             $_module = preg_replace('/[^a-z0-9_]/i', '', array_shift($parts));
 
-            $file = DASHBOARD_DIR . '/app/modules/' . $_module . '/controller/Controller.php';
-
-            if (is_file($file)) {
-                self::$id = $_module;
-                self::$route = $_module;
+            if (self::$module = Loader::getModule($_module)) {
+                // Default method: index()
+                self::$method = array_shift($parts) ?? 'index';
+            } else {
+                // Module not found
+                Request::redirect(ABS_PATH . "errors/module/$_module");
+                return false;
             }
 
-            // Default method: index()
-            self::$method = array_shift($parts) ?? 'index';
-
-        }
-
-        if (!isset(self::$route)) {
-            Request::redirect(ABS_PATH . 'errors/controller?controller=' . trim($route, '/'));
+        } else {
+            // Default module and/or method should be set as alias. Display error if not.
+            Request::redirect(ABS_PATH . "errors/default_route");
             return false;
         }
 
-        if (strpos(self::$method, '__') === 0) {
+        if (str_starts_with(self::$method, '__')) {
             return new \Exception('Error: Calls to magic methods are not allowed!');
         }
 
-        if (!$controller = Loader::loadModule(preg_replace('/[^a-z0-9_]/i', '', self::$route))) {
-            Request::redirect(ABS_PATH . 'errors/controller?controller=' . self::$route);
+        if (!$controller = Loader::loadModule(preg_replace('/[^a-z0-9_]/i', '', static::$module::ID))) {
+            Request::redirect(ABS_PATH . 'errors/controller/' . static::$module::ID);
             return false;
         }
 
@@ -144,8 +148,6 @@ class Router
             $reflection = new ReflectionClass($_controller);
 
             if ($reflection->hasMethod(self::$method) && $reflection->getMethod(self::$method)->getNumberOfRequiredParameters() <= count($parts)) {
-
-                // ToDo: add parameter type check
 
                 $arguments = [];
 
@@ -214,25 +216,11 @@ class Router
 
         } catch (ReflectionException $e) {
 
-            Request::redirect(ABS_PATH . 'errors/controller?controller=' . self::$route);
-
         }
 
-        Request::redirect(ABS_PATH . 'errors/method?method=' . self::$route . '/' . self::$method);
+        Request::redirect(ABS_PATH . 'errors/method/' . static::$module::ID . '/' . self::$method);
 
         return false;
-    }
-
-    /**
-     * Get model
-     *
-     * @return Model
-     */
-    public static function model(): Model
-    {
-        $id = str_replace('_', '', self::$id);
-        $model = 'Model' . $id;
-        return new $model();
     }
 
     /**
@@ -241,26 +229,30 @@ class Router
      * @param bool $success
      * @param string $message
      * @param string $url redirect URL
-     * @param array $arg
+     * @param array $args
+     * @param int|null $status response HTTP status
      */
-    public static function response(bool $success, string $message, string $url = '', array $arg = []): void
+    public static function response(bool $success, string $message, string $url = '', array $args = [], ?int $status = null): void
     {
 
-        $array = [
+        $_args = [
             'success' => $success,
             'message' => $message,
         ];
 
-        if (!empty($arg)) {
-            $array = array_merge($array, $arg);
+        if (!empty($args)) {
+            $_args = array_merge($_args, $args);
+        }
+
+        if (!$success) {
+            Response::setStatus($status ?? 400);
         }
 
         if (Request::isAjax()) {
-            if (!$success) {
-                Response::setStatus(400);
-            }
-            Json::show($array, true);
-        } else {
+            Json::output($_args, true);
+        }
+
+        if ($url) {
             Request::redirect($url);
         }
 

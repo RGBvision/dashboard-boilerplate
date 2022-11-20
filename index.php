@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -24,8 +24,8 @@ require_once __DIR__ . '/system/init.php';
 Hooks::action('system_after_init');
 
 // API call handler
-if (($path = Request::getPath()) && (strpos($path, ABS_PATH . 'api/') === 0)) {
-    ApiRouter::init('API', DASHBOARD_DIR . '/app/api/API.php', str_replace(ABS_PATH . 'api/', '', $path));
+if (($path = Request::getPath()) && (str_starts_with($path, ABS_PATH . API_URI_PREFIX . '/'))) {
+    ApiRouter::init('API', DASHBOARD_DIR . API_DIR . '/API.php', str_replace(ABS_PATH . API_URI_PREFIX . '/', '', $path));
     ApiRouter::response(ApiRouter::execute());
 }
 
@@ -46,27 +46,16 @@ $Template->_load(DASHBOARD_DIR . '/system/i18n/' . Session::getvar('current_lang
 // Execute router
 Router::execute(Request::getPath());
 
-// Display «No permission» page if user has no permission to access requested page
+// Display «No permission» page if user has no permission to access requested URL
 if (defined('NO_PERMISSION')) {
     Request::redirect('/errors/denied');
-}
-
-// Disable browser caching
-Response::setHeader('Cache-Control: no-store, no-cache, must-revalidate');
-Response::setHeader('Expires: ' . gmdate('r'));
-
-// Use GZIP compression if accepted
-if (GZIP_COMPRESSION && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) {
-    ob_start('ob_gzhandler');
-} else {
-    ob_start();
 }
 
 // Run hook before render
 Hooks::action('system_pre_render');
 
 // Set base template file
-$base_template = (Request::request('only') && (int)Request::request('only') === 1) ? 'only.tpl' : 'index.tpl';
+$base_template = defined('CONTENT_ONLY') ? 'content_only.tpl' : 'index.tpl';
 
 // Push all data to template engine
 $Template
@@ -74,14 +63,12 @@ $Template
     ->assign('APP_NAME', APP_NAME)
     ->assign('APP_BUILD', APP_BUILD)
 
-    ->assign('_is_ajax', Request::isAjax())
-
     ->assign('dependencies', Dependencies::get())
     ->assign('injections', Injections::get())
 
     ->assign('accept_lang', Session::getvar('accept_langs'))
     ->assign('current_language', Session::getvar('current_language'))
-    ->assign('sidebar_headers', Navigation::$sidebar_headers)
+    ->assign('sidebar_rubrics', Navigation::RUBRICS)
     ->assign('sidebar_menu_items', Navigation::get(Navigation::SIDEBAR))
     ->assign('user_menu_items', Navigation::get(Navigation::USER))
 
@@ -95,11 +82,10 @@ $Template
     ->assign('scripts_tpl', $Template->fetch('scripts.tpl'));
 
 // Render
-$Template->display($base_template);
-$render = ob_get_clean();
+$render = $Template->fetch($base_template);
 
 // Run hook after render
 Hooks::action('system_post_render');
 
 // Display result
-echo Html::output($render);
+Html::output($render);

@@ -9,28 +9,38 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
-class ModuleUsers extends Module
+class UsersModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '3.0';
+    const ID = 'users';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '01.11.2021';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'users';
+    const DATE = '20.11.2022';
+
+    /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-account-multiple-outline';
+
+    /**
+     * Module permissions
+     */
+    const PERMISSIONS = ['users_view', 'users_add', 'users_edit', 'users_delete'];
 
     /**
      * Constructor
@@ -42,22 +52,21 @@ class ModuleUsers extends Module
         parent::__construct();
 
         // Module permissions
-        Permission::add('users', ['users_view', 'users_add', 'users_edit', 'users_delete'], 'mdi mdi-account-multiple-outline', 50);
+        Permissions::add(static::ID, static::PERMISSIONS, static::ICON, 1050);
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'name');
-        $Template->_load(DASHBOARD_DIR . '/app/modules/users/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
 
         // Add navigation entry
         Navigation::add(
             10,
             $Template->_get('users_submenu_name'),
-            'mdi mdi-account-multiple-outline',
-            ABS_PATH . 'users',
-            'users',
+            static::ICON,
+            ABS_PATH . static::ID,
+            static::ID,
             Navigation::SIDEBAR,
             Navigation::SIDEBAR_CONTROL,
             '',

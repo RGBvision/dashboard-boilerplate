@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.42
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -19,24 +19,29 @@ class User
 
     const SUPERUSER = 1;
 
-    protected static array $sortable_fields = ['lastname', 'phone', 'email', 'group_name', 'last_activity'];
+    protected static array $sortable_fields = ['lastname', 'phone', 'email', 'role_name', 'last_activity'];
 
-    public static function isDeletable($user_id, $user_group_id): bool
+    public static function isDeletable($user_id, $user_role_id): bool
     {
         return (
-            ($user_group_id !== UserGroup::SUPERADMIN) &&
-            ($user_id !== UID) &&
-            Permission::perm('users_delete')
+            // Prevent delete SUPERUSER
+            ($user_id !== self::SUPERUSER) &&
+            // Prevent self delete
+            ($user_id !== USERID) &&
+            // Prevent delete SUPERADMIN if current user NOT SUPERADMIN
+            ((USERROLE !== UserRoles::SUPERADMIN) && ($user_role_id !== UserRoles::SUPERADMIN)) &&
+            Permissions::has('users_delete')
         );
     }
 
-    public static function isEditable($user_id, $user_group_id): bool
+    public static function isEditable($user_id, $user_role_id): bool
     {
         return (
-            ((UGROUP != 1) && (UGROUP == $user_group_id)) ||
-            ((UGROUP != 1) && ($user_group_id == 1)) ||
-            ((UGROUP != 1) && ($user_group_id == 2)) ||
-            Permission::perm('users_edit')
+            // Only SUPERUSER can edit own user data
+            (($user_id === self::SUPERUSER) && (USERID === self::SUPERUSER)) ||
+            // Prevent edit SUPERADMIN if current user NOT SUPERADMIN
+            ((USERROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::SUPERADMIN)) ||
+            Permissions::has('users_edit')
         );
     }
 
@@ -62,20 +67,20 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UGROUP !== UserGroup::SUPERADMIN) {
-            $where = 'grp.user_group_id != ' . UserGroup::SUPERADMIN;
+        if (USERROLE !== UserRoles::SUPERADMIN) {
+            $where = 'grp.user_role_id != ' . UserRoles::SUPERADMIN;
         }
 
         $rows = DB::Query("
 				SELECT
 					usr.user_id, usr.country_code, usr.phone, usr.email, usr.firstname, usr.lastname, usr.active, usr.last_activity, usr.deleted, usr.del_time, usr.settings,
-				    grp.user_group_id AS group_id,
-					grp.name AS group_name
+				    grp.user_role_id AS role_id,
+					grp.name AS role_name
 				FROM
 					users AS usr
 				LEFT JOIN
-					user_groups AS grp
-					ON usr.user_group_id = grp.user_group_id
+					user_roles AS grp
+					ON usr.user_role_id = grp.user_role_id
 				WHERE $where $like				
 				ORDER BY $sort $order, usr.lastname
                 $limits
@@ -87,8 +92,8 @@ class User
 
             $row['phone'] = Valid::internationalPhone($row['phone'], $row['country_code']);
 
-            $row['deletable'] = self::isDeletable($row['user_id'], $row['group_id']) and ($row['owner'] != '1');
-            $row['editable'] = self::isEditable($row['user_id'], $row['group_id']);
+            $row['deletable'] = self::isDeletable($row['user_id'], $row['role_id']);
+            $row['editable'] = self::isEditable($row['user_id'], $row['role_id']);
             $row['avatar'] = self::getAvatar((int)$row['user_id']);
 
             array_push($users, $row);
@@ -109,14 +114,14 @@ class User
 
         $where = 'usr.user_id IS NOT NULL';
 
-        if (UGROUP !== UserGroup::SUPERADMIN) {
-            $where = 'grp.user_group_id != ' . UserGroup::SUPERADMIN;
+        if (USERROLE !== UserRoles::SUPERADMIN) {
+            $where = 'grp.user_role_id != ' . UserRoles::SUPERADMIN;
         }
 
         return (int)DB::cell("
             SELECT COUNT(usr.user_id) 
             FROM users AS usr
-			LEFT JOIN user_groups AS grp ON usr.user_group_id = grp.user_group_id
+			LEFT JOIN user_roles AS grp ON usr.user_role_id = grp.user_role_id
 			WHERE $where $like
         ");
     }
@@ -135,9 +140,8 @@ class User
 
     public static function saveAvatar(int $id, string $photo): bool
     {
-        $img_decoded = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $photo));
 
-        if ($img_decoded != false) {
+        if ($img_decoded = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $photo))) {
 
             $_tmp_file = DASHBOARD_DIR . TEMP_DIR . '/uploads/' . md5($id) . '.jpg';
             $_new_file = DASHBOARD_DIR . '/uploads/avatars/' . md5($id) . '_' . sprintf('%08x', time()) . '.jpg';
@@ -155,7 +159,7 @@ class User
 
                 Log::log(Log::INFO, 'System\User', "Avatar for user ($id) saved");
 
-                if ($id === UID) {
+                if ($id === USERID) {
                     Session::setvar('user_avatar', self::getAvatar($id));
                 }
 
@@ -171,7 +175,7 @@ class User
 
     }
 
-    public static function saveUser(?int $id, string $firstname, string $lastname, string $country_code, string $phone, string $email, ?string $pass = null, int $group = 2, ?string $photo = null, bool $send_email = false): bool
+    public static function saveUser(?int $id, string $firstname, string $lastname, string $country_code, string $phone, string $email, ?string $pass = null, int $role = 2, ?string $photo = null, bool $send_email = false): bool
     {
 
         if ($id) { // Save
@@ -189,26 +193,26 @@ class User
                     "country_code" => $country_code,
                     "phone" => $phone,
                     "email" => $email,
-                    "user_group_id" => $group,
+                    "user_role_id" => $role,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             );
 
             if ($pass) { // Update pass
 
-                $salt = randomString();
+                $salt = Secure::randomString();
                 $password_hash = password_hash(hash_hmac("sha256", $pass, $salt . PWD_PEPPER), PASSWORD_ARGON2ID);
 
                 DB::update(
                     "users",
                     [
                         "password" => $password_hash,
-                        "salt" => $salt
+                        "salt" => $salt,
                     ],
                     [
-                        "user_id" => $id
+                        "user_id" => $id,
                     ]
                 );
 
@@ -226,13 +230,13 @@ class User
                 return false;
             }
 
-            $salt = randomString();
+            $salt = Secure::randomString();
             $password_hash = password_hash(hash_hmac("sha256", $pass, $salt . PWD_PEPPER), PASSWORD_ARGON2ID);
 
             $id = DB::insertGet(
                 "users",
                 [
-                    "user_group_id" => $group,
+                    "user_role_id" => $role,
                     "email" => $email,
                     "country_code" => $country_code,
                     "phone" => $phone,
@@ -241,7 +245,7 @@ class User
                     "firstname" => $firstname,
                     "lastname" => $lastname,
                     "active" => 1,
-                    "settings" => "{}"
+                    "settings" => "{}",
                 ],
                 "user_id"
             );
@@ -267,10 +271,10 @@ class User
                 [
                     "active" => 0,
                     "deleted" => 1,
-                    "del_time" => time()
+                    "del_time" => time(),
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }
@@ -282,10 +286,10 @@ class User
                 [
                     "active" => 1,
                     "deleted" => 0,
-                    "del_time" => null
+                    "del_time" => null,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }
@@ -295,10 +299,10 @@ class User
         return DB::update(
                 "users",
                 [
-                    "active" => 0
+                    "active" => 0,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }
@@ -308,10 +312,10 @@ class User
         return DB::update(
                 "users",
                 [
-                    "active" => 1
+                    "active" => 1,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }

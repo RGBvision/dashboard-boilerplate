@@ -9,17 +9,13 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.1
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
 class Cookie
 {
-	protected function __construct()
-	{
-		//---
-	}
 
     /**
      * Set cookie value
@@ -43,10 +39,10 @@ class Cookie
      * Get cookie value
      *
      * @param string $key ключ
-     * @return bool|mixed|string
+     * @return mixed
      */
-    public static function get(string $key)
-	{
+    public static function get(string $key): mixed
+    {
         return $_COOKIE[$key] ?? false;
     }
 
@@ -65,26 +61,25 @@ class Cookie
     /**
      * Set cookies domain
      *
-     * @param string $cookie_domain domain
+     * @param string $cookie_domain
+     * @return string
      */
-    public static function setDomain(string $cookie_domain = ''): void
+    public static function setDomain(string $cookie_domain = ''): string
     {
         if (empty($cookie_domain)) {
-            if (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN !== '') {
+            if (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN) {
                 $cookie_domain = COOKIE_DOMAIN;
-            } elseif (!empty($_SERVER['HTTP_HOST'])) {
+            } elseif ($_SERVER['HTTP_HOST']) {
                 $cookie_domain = htmlspecialchars($_SERVER['HTTP_HOST'], ENT_QUOTES);
             }
         }
 
-		// Delete `www` prefix and port number
-		$cookie_domain = ltrim($cookie_domain, '.');
+		// Cleanup domain name
+		$cookie_domain = ltrim(parse_url($cookie_domain, PHP_URL_HOST) ?? '', '.');
 
-		if (strpos($cookie_domain, 'www.') === 0) {
+		if (str_starts_with($cookie_domain, 'www.')) {
             $cookie_domain = substr($cookie_domain, 4);
         }
-
-		$cookie_domain = '.' . explode(':', $cookie_domain)[0];
 
 		// According to RFC 2109, the domain for cookies must be level 2 or higher.
 		// Therefore, you cannot set a cookie_domain for 'localhost' or IP address.
@@ -92,8 +87,8 @@ class Cookie
             ini_set('session.cookie_domain', $cookie_domain);
         }
 
-		Core::$cookie_domain = $cookie_domain;
-
 		ini_set('session.cookie_path', ABS_PATH);
+        return $cookie_domain;
+
 	}
 }

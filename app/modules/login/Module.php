@@ -9,28 +9,33 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.1
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
-class ModuleLogin extends Module
+class LoginModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '3.1';
+    const ID = 'login';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '07.10.2021';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'login';
+    const DATE = '20.11.2022';
+
+    /**
+     * Module icon
+     */
+    const ICON = 'mdi mdi-email-outline';
 
     /**
      * Constructor
@@ -41,14 +46,15 @@ class ModuleLogin extends Module
         // Parent
         parent::__construct();
 
-        // Module permissions
-        Permission::add('login', ['login_view', 'logout_view'], 'mdi mdi-account-circle-outline', 10);
+        // Router aliases
+        Router::addAlias(ABS_PATH . 'logout', static::ID, 'logout');
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/login/i18n/' . Session::getvar('current_language') . '.ini', 'main');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
         // Add navigation entry
         Navigation::add(

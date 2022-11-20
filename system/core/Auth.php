@@ -22,10 +22,10 @@ class Auth
         //
     }
 
-    protected static function setConstants(int $uid, int $group, string $template): void
+    protected static function setConstants(int $user_id, int $role, string $template): void
     {
-        define('UID', $uid);
-        define('UGROUP', $group);
+        define('USERID', $user_id);
+        define('USERROLE', $role);
         define('TPL_DIR', $template);
     }
 
@@ -35,7 +35,7 @@ class Auth
         Session::setvar('user_firstname', $user->firstname);
         Session::setvar('user_lastname', $user->lastname);
         Session::setvar('user_password', $user->password);
-        Session::setvar('user_group', (int)$user->user_group_id);
+        Session::setvar('user_role', (int)$user->user_role_id);
         Session::setvar('user_email', $user->email);
         Session::setvar('user_ip', IP::getIp());
         Session::setvar('user_avatar', User::getAvatar((int)$user->user_id));
@@ -64,7 +64,7 @@ class Auth
         if (!self::authSessions() && !self::authCookie()) {
             // Clear Session Data
             Session::delvar('user_id', 'user_password', 'permissions');
-            define('UGROUP', 2);
+            define('UROLE', 2);
         }
 
     }
@@ -109,7 +109,7 @@ class Auth
         DB::update("users", ["last_activity" => date('Y-m-d H:i:s')], ["user_id" => (int)Session::getvar('user_id')]);
         DB::update("users_session", ["last_activity" => date('Y-m-d H:i:s'), "ip" => IP::getIp()], ["user_id" => (int)Session::getvar('user_id')]);
 
-        self::setConstants(Session::getvar('user_id'), Session::getvar('user_group'), Session::getvar('tpl_dir'));
+        self::setConstants(Session::getvar('user_id'), Session::getvar('user_role'), Session::getvar('tpl_dir'));
 
         return true;
     }
@@ -135,14 +135,14 @@ class Auth
         $user_id = (int)DB::cell($sql, Secure::sanitize(Cookie::get('auth')), Secure::sanitize($_SERVER['HTTP_USER_AGENT']));
 
         if ($user_id === 0) {
-            Cookie::set('auth', '', 0, Core::$cookie_domain, ABS_PATH);
+            Cookie::set('auth', '', 0, Core::getCookieDomain(), ABS_PATH);
             return false;
         }
 
         $sql = "
 				SELECT
 				    usr.user_id,
-					usr.user_group_id,
+					usr.user_role_id,
 					usr.password,
 					usr.firstname,
 					usr.lastname,
@@ -154,8 +154,8 @@ class Auth
 				FROM
 					users AS usr
 				LEFT JOIN
-					user_groups AS grp
-					ON grp.user_group_id = usr.user_group_id
+					user_roles AS grp
+					ON grp.user_role_id = usr.user_role_id
 				LEFT JOIN
 					users_session AS usrs
 					ON usr.user_id = usrs.user_id
@@ -175,7 +175,7 @@ class Auth
                 DB::delete("users_session", ["hash" => Secure::sanitize(Cookie::get('auth'))]);
             }
 
-            Cookie::set('auth', '', 0, ABS_PATH, Core::$cookie_domain);
+            Cookie::set('auth', '', 0, ABS_PATH, Core::getCookieDomain());
             return false;
         }
 
@@ -183,9 +183,9 @@ class Auth
         DB::update("users_session", ["last_activity" => date('Y-m-d H:i:s'), "ip" => IP::getIp()], ["user_id" => $user_id]);
 
         self::setSessionVars($user);
-        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->template);
+        self::setConstants((int)$user->user_id, (int)$user->user_role_id, $user->template);
 
-        Permission::set($user->permissions);
+        Permissions::set(Json::decode($user->permissions ?? '[]'));
 
         return true;
     }
@@ -194,7 +194,7 @@ class Auth
     // Check permissions
     public static function authCheckPermission(): bool
     {
-        if (!defined('UID') || !Permission::checkAccess('admin_panel')) {
+        if (!defined('USERID') || !Permissions::checkAccess('admin_panel')) {
             self::userLogout();
             return false;
         }
@@ -207,17 +207,17 @@ class Auth
     public static function userLogout(): void
     {
 
-        DB::delete("users_session", ["user_id" => UID]);
-        DB::delete("sessions", ["user_id" => UID]);
+        DB::delete("users_session", ["user_id" => USERID]);
+        DB::delete("sessions", ["user_id" => USERID]);
 
-        Cookie::set('auth', '', 0, Core::$cookie_domain, ABS_PATH);
+        Cookie::set('auth', '', 0, Core::getCookieDomain(), ABS_PATH);
 
         Session::destroy();
 
         $_SESSION = [];
 
-        if (defined('UID') && UID) {
-            Log::log(Log::INFO, 'System\Auth', "User (" . UID . ") logged out");
+        if (defined('USERID') && USERID) {
+            Log::log(Log::INFO, 'System\Auth', "User (" . USERID . ") logged out");
         }
     }
 
@@ -246,7 +246,7 @@ class Auth
         $sql = "
 				SELECT
 					usr.user_id,
-					usr.user_group_id,
+					usr.user_role_id,
 					usr.firstname,
 					usr.lastname,
 					usr.email,
@@ -260,8 +260,8 @@ class Auth
 				FROM
 					users AS usr
 				INNER JOIN
-					user_groups AS grp
-					ON grp.user_group_id = usr.user_group_id
+					user_roles AS grp
+					ON grp.user_role_id = usr.user_role_id
 				WHERE
 					usr.email = ?
 				LIMIT 1
@@ -277,7 +277,7 @@ class Auth
             return self::USER_INACTIVE;
         }
 
-        $salt = randomString();
+        $salt = Secure::randomString();
 
         $password_hash =  self::getPasswordHash($password, $salt);
 
@@ -293,9 +293,9 @@ class Auth
         ], ["user_id" => $user->user_id]);
 
         self::setSessionVars($user);
-        self::setConstants((int)$user->user_id, (int)$user->user_group_id, $user->template);
+        self::setConstants((int)$user->user_id, (int)$user->user_role_id, $user->template);
 
-        Permission::set($user->permissions);
+        Permissions::set(Json::decode($user->permissions ?? '[]'));
 
         $expire = $keep_in ? ($time + COOKIE_LIFETIME) : 0;
 
@@ -311,7 +311,7 @@ class Auth
             "last_activity" => date('Y-m-d H:i:s', $time),
         ]);
 
-        Cookie::set('auth', $auth, $expire, Core::$cookie_domain, ABS_PATH);
+        Cookie::set('auth', $auth, $expire, Core::getCookieDomain(), ABS_PATH);
 
         Log::log(Log::INFO, 'System\Auth', "User ($user->user_id) logged in");
 

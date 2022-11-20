@@ -1,0 +1,13 @@
+{
+  "api": {
+    "auth": {
+      "fail": "Authentication failed"
+    },
+    "file": {
+      "wrong_data": "Wrong file data"
+    },
+    "common": {
+      "error": "Internal system error"
+    }
+  }
+}

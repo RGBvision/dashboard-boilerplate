@@ -9,28 +9,28 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.1
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
-class ModuleErrors extends Module
+class ErrorsModule extends Module
 {
 
     /**
-     * @var string Module version
+     * Module ID
      */
-    public static string $version = '1.0';
+    const ID = 'errors';
 
     /**
-     * @var string Module release date
+     * Module version
      */
-    public static string $date = '11.10.2021';
+    const VERSION = '4.0';
 
     /**
-     * @var string Module system name
+     * Module release date
      */
-    public static string $moduleName = 'errors';
+    const DATE = '20.11.2022';
 
     /**
      * Constructor

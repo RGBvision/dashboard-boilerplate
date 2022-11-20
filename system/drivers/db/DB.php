@@ -1,5 +1,7 @@
 <?php
 
+use ParagonIE\EasyDB\EasyDB, \ParagonIE\EasyDB\EasyStatement, ParagonIE\EasyDB\EasyPlaceholder;
+
 /**
  * This file is part of the dashboard.rgbvision.net package.
  *
@@ -9,37 +11,93 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.2
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
-
 class DB
 {
-    // Instance
+
+    /**
+     * Class (self) instance
+     *
+     * @var DB|null
+     */
     private static ?DB $instance = null;
-    // DB engine
+
+    /**
+     * DB engine
+     *
+     * @var string|mixed
+     */
     static public string $db_engine = 'mysql'; // default
-    // DB host
-    static protected $db_host;
-    // DB user
-    static protected $db_user;
-    // DB password
-    static protected $db_pass;
-    // DB port
-    static protected $db_port;
-    // DB socket
-    static protected $db_socket;
-    // DB name
-    static protected $db_name;
-    // This connect
-    static public $connect;
-    // driver (EasyDB)
-    static public $driver = null;
 
-    const TTL = 0;
+    /**
+     * DB host
+     *
+     * @var string|mixed|null
+     */
+    static protected ?string $db_host;
 
-    // Constructor
+    /**
+     * DB user
+     *
+     * @var string|mixed|null
+     */
+    static protected ?string $db_user;
+
+    /**
+     * DB password
+     *
+     * @var string|mixed|null
+     */
+    static protected ?string $db_pass;
+
+    /**
+     * DB port
+     *
+     * @var string|mixed|null
+     */
+    static protected ?string $db_port;
+
+    /**
+     * DB socket
+     *
+     * @var string|null
+     */
+    static protected ?string $db_socket;
+
+    /**
+     * DB name
+     *
+     * @var string|mixed|null
+     */
+    static protected ?string $db_name;
+
+    /**
+     * PDO connection
+     *
+     * @var PDO
+     */
+    static public PDO $connection;
+
+    /**
+     * driver (EasyDB)
+     *
+     * @var EasyDB|null
+     */
+    static public ?EasyDB $driver = null;
+
+    /**
+     * Cache lifetime
+     */
+    private static int $cache_TTL = 0;
+
+    /**
+     * Constructor
+     *
+     * @param array $config
+     */
     private function __construct(array $config)
     {
         self::$db_engine = $config['dbengine'];
@@ -66,23 +124,23 @@ class DB
             self::$db_port = ($config['dbsock'] ?? null);
         }
 
-        if (!is_object(self::$connect) || !self::$connect instanceof PDO) {
+        $connection_string = sprintf("%s:host=%s;port=%d;dbname=%s;user=%s;password=%s;charset=utf8;",
+            (self::$db_engine === 'postgresql') ? 'pgsql' : 'mysql',
+            self::$db_host,
+            self::$db_port,
+            self::$db_name,
+            self::$db_user,
+            self::$db_pass);
 
-            $connection_string = sprintf("%s:host=%s;port=%d;dbname=%s;user=%s;password=%s;charset=utf8;",
-                (self::$db_engine === 'postgresql') ? 'pgsql' : 'mysql',
-                self::$db_host,
-                self::$db_port,
-                self::$db_name,
-                self::$db_user,
-                self::$db_pass);
-
-            try {
-                self::$connect = @new PDO($connection_string);
-                self::$driver = new ParagonIE\EasyDB\EasyDB(self::$connect, self::$db_engine);
-            } catch (PDOException $pe) {
-                self::shutDown(__METHOD__ . ': ' . $pe->getMessage());
-            }
+        try {
+            self::$connection = @new PDO($connection_string);
+            self::$driver = new ParagonIE\EasyDB\EasyDB(self::$connection, self::$db_engine);
+        } catch (PDOException $pe) {
+            self::shutDown(__METHOD__ . ': ' . $pe->getMessage());
         }
+
+        self::$cache_TTL = (defined('SQL_CACHE') && SQL_CACHE) ? (defined('SQL_CACHE_LIFETIME') ? SQL_CACHE_LIFETIME : 0): 0;
+
     }
 
 
@@ -117,7 +175,7 @@ class DB
      *
      * @param string $error
      */
-    public static function shutDown(string $error = ''): void
+    public static function shutDown(string $error = ''): never
     {
         ob_start();
         header('HTTP/1.1 503 Service Temporarily Unavailable');
@@ -132,19 +190,19 @@ class DB
      *
      * @param string $statement
      * @param mixed ...$params
-     * @return array|bool|int|mixed|object
+     * @return array
      */
-    public static function query(string $statement, ...$params)
+    public static function query(string $statement, ...$params): array
     {
 
-        if ((self::TTL > 0) && (strtoupper(substr(trim($statement), 0, 6)) === 'SELECT')) {
+        if ((self::$cache_TTL > 0) && (strtoupper(substr(trim($statement), 0, 6)) === 'SELECT')) {
 
             $cache_file = md5($statement) . md5(print_r([...$params], true));
             $cache_dir = DASHBOARD_DIR . TEMP_DIR . '/cache/sql/' . substr($cache_file, 0, 2) . '/' . substr($cache_file, 2, 2) . '/' . substr($cache_file, 4, 2) . '/';
 
             Dir::create($cache_dir);
 
-            if (!(file_exists($cache_dir . $cache_file) && (@time() - @filemtime($cache_dir . $cache_file) < self::TTL))) {
+            if (!(file_exists($cache_dir . $cache_file) && (time() - @filemtime($cache_dir . $cache_file) < self::$cache_TTL))) {
                 $result = self::$driver->run($statement, ...$params);
                 file_put_contents($cache_dir . $cache_file, serialize($result));
             } else {
@@ -170,6 +228,11 @@ class DB
         return call_user_func_array([self::$driver, $name], $arguments);
     }
 
+    /**
+     * Get size of database
+     *
+     * @return int
+     */
     public static function getSize(): int
     {
 
@@ -183,14 +246,18 @@ class DB
         }
 
         if (self::$db_engine === 'postgresql') {
-            $db_size = (int)DB::cell('SELECT pg_database_size(?)', self::$db_name);
+            $db_size = (int)self::$driver->cell('SELECT pg_database_size(?)', self::$db_name);
         }
 
         return $db_size;
     }
 
-    // ToDo: refactor
-    public static function backup(): bool
+    /**
+     * Creat database backup file
+     *
+     * @return bool
+     */
+    public static function backup(): bool // ToDo: refactor
     {
 
         $file = DASHBOARD_DIR . TEMP_DIR . '/backup/' . gmdate('Y-m-d_H-i-s') . '_backup.sql';
@@ -211,7 +278,7 @@ class DB
         }
 
         if (self::$db_engine === 'postgresql') {
-
+            //--
         }
 
         $res = (File::exists($file) && (File::size($file) > 0));
@@ -221,8 +288,13 @@ class DB
         return $res;
     }
 
-    // ToDo: refactor
-    public static function restore(string $file): bool
+    /**
+     * Restore database from backup file
+     *
+     * @param string $file
+     * @return bool
+     */
+    public static function restore(string $file): bool // ToDo: refactor
     {
 
         if ((File::exists($file) && (File::size($file) > 0))) {
@@ -243,7 +315,7 @@ class DB
             }
 
             if (self::$db_engine === 'postgresql') {
-
+                //--
             }
 
             return true;
@@ -285,6 +357,28 @@ class DB
         }
 
         return $like;
+    }
+
+    /**
+     * Creates DB statement
+     *
+     * @return EasyStatement
+     */
+    public static function statement(): EasyStatement
+    {
+        return EasyStatement::open();
+    }
+
+    /**
+     * Creates query placeholder
+     *
+     * @param string $mask
+     * @param ...$values
+     * @return EasyPlaceholder
+     */
+    public static function placeholder(string $mask, ...$values): EasyPlaceholder
+    {
+        return new EasyPlaceholder($mask, $values);
     }
 
 }

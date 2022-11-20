@@ -9,30 +9,13 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.1
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
 class IP
 {
-	public static $ip;
-	public static $charset;
-
-	public function __construct($options = null)
-	{
-
-		if (!isset($options['ip']) || !self::isValid($options['ip'])) {
-            self::$ip = self::getIp();
-        } elseif (self::isValid($options['ip'])) {
-            self::$ip = $options['ip'];
-        }
-
-		if (isset($options['charset']) && $options['charset'] && $options['charset'] !== 'windows-1251') {
-            self::$charset = $options['charset'];
-        }
-	}
-
 
     /**
      * Get user IP address

@@ -10,7 +10,7 @@
                         </div>
                         <span class="h4 ms-3">{$user.firstname|default:""} {$user.lastname|default:""}</span>
                     </div>
-                    {if $can_edit_user}
+                    {if $user.editable}
                         <div class="d-none d-md-block">
                             <a href="{$ABS_PATH}users/edit/{$user.user_id}" class="btn btn-primary btn-icon-text">
                                 <i class="mdi mdi-pen btn-icon-prepend"></i> {#users_action_edit#}

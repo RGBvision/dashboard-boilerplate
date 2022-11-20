@@ -20,13 +20,13 @@
                     <div class="col-6 d-flex justify-content-end">
                         <div>
                             <label class="d-flex align-items-center justify-content-end tx-10 text-uppercase fw-normal">{#dashboard_storage_size#} <span class="p-1 ms-1 rounded-circle bg-primary"></span></label>
-                            <h5 class="fw-bold mb-0 text-end">{$storage_size|formatSize}</h5>
+                            <h5 class="fw-bold mb-0 text-end">{Number::formatSize($storage_size)}</h5>
                         </div>
                     </div>
                     <div class="col-6">
                         <div>
                             <label class="d-flex align-items-center tx-10 text-uppercase fw-normal"><span class="p-1 me-1 rounded-circle bg-danger"></span> {#dashboard_storage_used#}</label>
-                            <h5 class="fw-bold mb-0">{$storage_usage.size|formatSize}</h5>
+                            <h5 class="fw-bold mb-0">{Number::formatSize($storage_usage.size)}</h5>
                         </div>
                     </div>
                 </div>
@@ -41,8 +41,8 @@
             <div class="card-body">
                 {foreach from=$storage_usage.details key=key item=item name=foo}
                     <div class="row py-2 bg-highlight-hover {if !$smarty.foreach.foo.last} border-bottom {/if}">
-                        <div class="col">{$key}</div>
-                        <div class="col text-end">{$item|formatSize}</div>
+                        <div class="col">{#$key#}</div>
+                        <div class="col text-end">{Number::formatSize($item)}</div>
                     </div>
                 {/foreach}
             </div>
@@ -50,21 +50,20 @@
                 <div class="row">
                     <div class="col-12 col-md-6">
                         <a id="backupDB"
-                           href="{$ABS_PATH}dashboard/backup_db"
-                           class="btn w-100 btn-success mb-2 {if !Permission::check('dashboard_backup_db')}disabled{/if}">{#dashboard_make_db_backup#}</a>
+                           {if Permissions::has('dashboard_backup_db')}href="{$ABS_PATH}dashboard/backup_db"{/if}
+                           class="btn w-100 btn-success mb-2 {if !Permissions::has('dashboard_backup_db')}disabled{/if}">{#dashboard_make_db_backup#}</a>
                     </div>
                     <div class="col-12 col-md-6">
                         <a id="clearCache"
-                           href="{$ABS_PATH}dashboard/clear_cache"
-                           class="btn w-100 btn-danger mb-2 {if !Permission::check('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
+                           {if Permissions::has('dashboard_clear_cache')}href="{$ABS_PATH}dashboard/clear_cache"{/if}
+                           class="btn w-100 btn-danger mb-2 {if !Permissions::has('dashboard_clear_cache')}disabled{/if}">{#dashboard_clear_cache#}</a>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
-{if $smarty.const.UID == 1} {* Only Superuser can generate modules *}
+{if $smarty.const.USERID == 1} {* Only Superuser can generate modules *}
     <div class="row">
         <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
             <div class="card">

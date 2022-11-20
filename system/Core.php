@@ -9,18 +9,15 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    3.0
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
 
 class Core
 {
-    protected static $instance;
-
-    public static $environment;
-    public static $cookie_domain;
-
+    protected static Core $instance;
+    private static string $cookie_domain;
 
     /**
      * Check if valid Timezone
@@ -44,16 +41,6 @@ class Core
     protected function __construct()
     {
 
-        // Check if Timezone in HTTP header
-        if (($_http_timezone = $_SERVER['HTTP_TIMEZONE']) && self::isValidTimezoneId($_http_timezone)) {
-            define('TIMEZONE', $_http_timezone);
-        }
-
-        // Check if Timezone in cookie
-        if (!defined('TIMEZONE') && ($_browser_timezone = $_COOKIE['browser_timezone']) && self::isValidTimezoneId($_browser_timezone)) {
-            define('TIMEZONE', $_browser_timezone);
-        }
-
         // DB connection configuration
         $config = [];
         include_once(DASHBOARD_DIR . '/configs/db.config.php');
@@ -63,9 +50,6 @@ class Core
 
         // Errors handler
         self::phpErrors();
-
-        // Environment type
-        self::$environment = SYSTEM_ENVIRONMENT;
 
         // HTTP headers
         $headers = [
@@ -117,7 +101,7 @@ class Core
         self::setHost();
 
         // Set cookie domain
-        Cookie::setDomain();
+        self::$cookie_domain = Cookie::setDomain();
 
         // DB initialization
         DB::init($config);
@@ -143,14 +127,6 @@ class Core
 
         // Router initialization
         Router::init();
-
-        // Router aliases
-        $routes = [];
-        include_once(DASHBOARD_DIR . '/configs/routes.php');
-
-        foreach ($routes as $alias) {
-            Router::addAlias(ABS_PATH . $alias[0], $alias[1], $alias[2]);
-        }
 
         // Response HEADERS
         Response::setHeaders($headers);
@@ -186,15 +162,11 @@ class Core
 
         $ssl = self::isSSL();
 
-        $schema = ($ssl)
-            ? 'https://'
-            : 'http://';
+        $schema = ($ssl) ? 'https://' : 'http://';
 
         $host = str_replace(':' . $_SERVER['SERVER_PORT'], '', $_SERVER['HTTP_HOST']);
 
-        $port = ((int)$_SERVER['SERVER_PORT'] === 80 || (int)$_SERVER['SERVER_PORT'] === 443 || $ssl)
-            ? ''
-            : ':' . $_SERVER['SERVER_PORT'];
+        $port = ((int)$_SERVER['SERVER_PORT'] === 80 || (int)$_SERVER['SERVER_PORT'] === 443 || $ssl) ? '' : ':' . $_SERVER['SERVER_PORT'];
 
         define('HOST', $schema . $host . $port);
     }
@@ -205,10 +177,7 @@ class Core
      */
     protected static function absPath(): void
     {
-        $abs_path = dirname(
-            ((strpos($_SERVER['PHP_SELF'], $_SERVER['SCRIPT_NAME']) === false) && (PHP_SAPI === 'cgi'))
-                ? $_SERVER['PHP_SELF']
-                : $_SERVER['SCRIPT_NAME']);
+        $abs_path = dirname(((!str_contains($_SERVER['PHP_SELF'], $_SERVER['SCRIPT_NAME'])) && (PHP_SAPI === 'cgi')) ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME']);
 
         if (defined('DASHBOARD_DIR')) {
             $abs_path = dirname($abs_path);
@@ -337,6 +306,11 @@ class Core
         }
     }
 
+    public static function getCookieDomain(): string
+    {
+        return self::$cookie_domain ?? '';
+    }
+
 
     /**
      * Instantiate class
@@ -352,9 +326,4 @@ class Core
         return self::$instance;
     }
 
-
-    protected function __clone()
-    {
-        //---
-    }
 }

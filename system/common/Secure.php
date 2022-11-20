@@ -16,10 +16,6 @@
 
 class Secure
 {
-    protected function __construct()
-    {
-        //--
-    }
 
     /**
      * Get string without escaping and HTML entities
@@ -45,7 +41,7 @@ class Secure
      */
     public static function sanitize(string $string, bool $trim = false, bool $int = false, bool $str = false): string
     {
-        $string = filter_var($string, FILTER_SANITIZE_STRING);
+        $string = htmlspecialchars($string);
         $string = trim($string);
         $string = stripslashes($string);
         $string = strip_tags($string);
@@ -76,6 +72,42 @@ class Secure
         }
 
         return $string;
+    }
+
+    /**
+     * Get random string
+     *
+     * @param int $length
+     * @param string $chars
+     * @return string
+     */
+    public static function randomString(int $length = 16, string $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQSTUVWXYZ~!@#$%^&*()-_=+{[;:/?.,]}0123456789'): string
+    {
+
+        $s_len = strlen($chars) - 1;
+
+        $string = '';
+
+        while (strlen($string) < $length) {
+            try {
+                $string .= $chars[random_int(0, $s_len)];
+            } catch (Exception $e) {
+
+            }
+        }
+
+        return $string;
+    }
+
+    /**
+     * Get random token
+     *
+     * @param int $length
+     * @return string
+     */
+    public static function randomToken(int $length = 32): string
+    {
+        return self::randomString($length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
     }
 
 }

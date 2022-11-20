@@ -14,75 +14,39 @@
  * @since      File available since Release 1.0
  */
 
-class ModelUsers extends Model
+class UsersModel extends Model
 {
 
-    public static function isDeletable($user_id, $user_group_id): bool
+    public static function getUser(int $user_id)
     {
-        return (
-            ($user_group_id !== 1) &&
-            ($user_id !== UID) &&
-            Permission::perm('users_delete')
-        );
-    }
 
-    public static function isEditable($user_id, $user_group_id): bool
-    {
-        return (
-            ((UGROUP != 1) && (UGROUP == $user_group_id)) ||
-            ((UGROUP != 1) && ($user_group_id == 1)) ||
-            ((UGROUP != 1) && ($user_group_id == 2)) ||
-            Permission::perm('users_edit')
-        );
-    }
-
-    public static function canAddUser(): bool
-    {
-        return Permission::perm('users_add');
-    }
-
-    public static function getUser($user_id)
-    {
-        $sql = "
+        $user = DB::row('
 				SELECT
 					usr.*,
-					grp.name AS group_name
+					role.name AS role_name
 				FROM
 					users AS usr
 				LEFT JOIN
-					user_groups AS grp
-					ON usr.user_group_id = grp.user_group_id
+					user_roles AS role
+					ON usr.user_role_id = role.user_role_id
 				WHERE
-				    usr.user_id = " . (int)$user_id . "
+				    usr.user_id = ?
 				LIMIT 1
-			";
+			', $user_id);
 
-        $user = DB::row($sql);
-
-        $user['deletable'] = self::isDeletable($user_id, $user['user_group_id']);
-        $user['editable'] = self::isEditable($user_id, $user['user_group_id']);
-        $user['user_avatar'] = User::getAvatar((int)$user_id);
+        $user['deletable'] = User::isDeletable($user_id, $user['user_role_id']);
+        $user['editable'] = User::isEditable($user_id, $user['user_role_id']);
+        $user['user_avatar'] = User::getAvatar($user_id);
 
         return $user;
     }
 
-    public static function getDisabled($user_id, $user_group_id)
-    {
-        $disabled = (
-            ($user_group_id == 1) or
-            ($user_group_id == 2)
-        );
-
-        return $disabled;
-    }
-
-    
-    public static function getGroups(): array
+    public static function getRoles(): array
     {
 
         $res = [];
 
-        $rows = DB::Query("SELECT * FROM user_groups WHERE user_group_id NOT IN (1,2) AND deleted = 0");
+        $rows = DB::Query("SELECT * FROM user_roles WHERE user_role_id NOT IN (1,2) AND deleted = 0");
 
         foreach ($rows as $row) {
             $res[] = $row;
