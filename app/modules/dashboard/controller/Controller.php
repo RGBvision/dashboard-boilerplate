@@ -113,6 +113,8 @@ class DashboardController extends Controller
     {
         if (Permissions::has('dashboard_clear_cache')) {
             Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/smarty');
+            Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/sql');
+            Dir::delete_contents(DASHBOARD_DIR . TEMP_DIR . '/cache/thumbs');
             Json::output(['success' => true], true);
         }
         Json::output(['success' => false], true);
@@ -128,7 +130,7 @@ class DashboardController extends Controller
         $success = false;
 
         if (
-            (USERID === 1) &&
+            (USERID === User::SUPERUSER) &&
             ($name = preg_replace('/[^a-z ]/i', '', Request::post('module'))) &&
             ($dir_name = preg_replace('/\s+/', '', strtolower($name))) &&
             (!Dir::exists(DASHBOARD_DIR . MODULES_DIR . DS . $dir_name))

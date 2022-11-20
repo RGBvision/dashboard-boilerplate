@@ -24,22 +24,25 @@
                         <div class="mb-4">
                             <input class="form-control" type="text" name="user_role_name" value="{$user_role_name|default:""}" id="role_name" autocomplete="off" required>
                         </div>
-                        {foreach from=$permissions key=key item="inner"}
+                        {foreach from=$permissions key=key item=inner name=modules}
                             {assign var=header_title value=$inner.name}
-                            <div class="mb-4">
-                                <h6 class="mb-1"><i class="{$inner.icon|default:"icon-list"} me-3 icon-md"></i> {$smarty.config.$header_title}</h6>
-                                <div class="mb-3">
-                                    {foreach from=$inner.perm key=permission item="value"}
+                            <div>
+                                <h6 class="mb-2"><i class="{$inner.icon|default:"mdi mdi-adjust"} me-3 icon-md"></i> {$smarty.config.$header_title}</h6>
+                                <div>
+                                    {foreach from=$inner.permission key=permission item=value}
                                         {assign var=permission_title value="perm_$permission"}
                                         <div class="form-check form-switch mb-2">
                                             <input type="checkbox" class="form-check-input"
                                                    id="checkbox-{$permission}"
                                                    name="permissions[]"
-                                                    {$disable} value="{$permission}" {if $value || $disabled}checked{/if}>
+                                                   {$disable} value="{$permission}" {if $value || $disabled}checked{/if}>
                                             <label class="form-check-label" for="checkbox-{$permission}">{$smarty.config.$permission_title}</label>
                                         </div>
                                     {/foreach}
                                 </div>
+                                {if !$smarty.foreach.modules.last}
+                                    <hr>
+                                {/if}
                             </div>
                         {/foreach}
                     </div>
@@ -48,7 +51,7 @@
                         {if $editable && !$disabled && $exists}
                             <button type="submit" class="SaveRoleBtn btn btn-primary btn-icon-text"><i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
                         {else}
-                            <button type="button" disabled class="SaveGroupBtn btn btn-primary btn-icon-text disabled"><i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
+                            <button type="button" disabled class="SaveRoleBtn btn btn-primary btn-icon-text disabled"><i class="mdi mdi-check btn-icon-prepend"></i> {#button_save#}</button>
                         {/if}
                     </div>
                     {if ! $disabled}

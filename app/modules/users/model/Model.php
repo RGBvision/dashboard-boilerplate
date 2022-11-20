@@ -17,66 +17,30 @@
 class UsersModel extends Model
 {
 
-    public static function isDeletable($user_id, $user_role_id): bool
+    public static function getUser(int $user_id)
     {
-        return (
-            ($user_role_id !== 1) &&
-            ($user_id !== USERID) &&
-            Permissions::has('users_delete')
-        );
-    }
 
-    public static function isEditable($user_id, $user_role_id): bool
-    {
-        return (
-            ((USERROLE != 1) && (USERROLE == $user_role_id)) ||
-            ((USERROLE != 1) && ($user_role_id == 1)) ||
-            ((USERROLE != 1) && ($user_role_id == 2)) ||
-            Permissions::has('users_edit')
-        );
-    }
-
-    public static function canAddUser(): bool
-    {
-        return Permissions::has('users_add');
-    }
-
-    public static function getUser($user_id)
-    {
-        $sql = "
+        $user = DB::row('
 				SELECT
 					usr.*,
-					grp.name AS role_name
+					role.name AS role_name
 				FROM
 					users AS usr
 				LEFT JOIN
-					user_roles AS grp
-					ON usr.user_role_id = grp.user_role_id
+					user_roles AS role
+					ON usr.user_role_id = role.user_role_id
 				WHERE
-				    usr.user_id = " . (int)$user_id . "
+				    usr.user_id = ?
 				LIMIT 1
-			";
+			', $user_id);
 
-        $user = DB::row($sql);
-
-        $user['deletable'] = self::isDeletable($user_id, $user['user_role_id']);
-        $user['editable'] = self::isEditable($user_id, $user['user_role_id']);
-        $user['user_avatar'] = User::getAvatar((int)$user_id);
+        $user['deletable'] = User::isDeletable($user_id, $user['user_role_id']);
+        $user['editable'] = User::isEditable($user_id, $user['user_role_id']);
+        $user['user_avatar'] = User::getAvatar($user_id);
 
         return $user;
     }
 
-    public static function getDisabled($user_id, $user_role_id)
-    {
-        $disabled = (
-            ($user_role_id == 1) or
-            ($user_role_id == 2)
-        );
-
-        return $disabled;
-    }
-
-    
     public static function getRoles(): array
     {
 

@@ -54,4 +54,14 @@ abstract class Module
         $this->uri = ABS_PATH . ltrim(MODULES_DIR, '/') . DS . static::ID . DS;
     }
 
+    /**
+     * Returns module path
+     *
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+
 }

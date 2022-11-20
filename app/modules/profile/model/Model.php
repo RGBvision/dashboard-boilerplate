@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ModelProfile extends Model
+class ProfileModel extends Model
 {
 
     /**

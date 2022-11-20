@@ -21,19 +21,21 @@ class RolesModel extends Model
     {
         $sql = "
 				SELECT
-					grp.user_role_id,
-					grp.name,
+					roles.user_role_id,
+					roles.name,
 					COUNT(usr.user_id) AS users
 				FROM
-					user_roles AS grp
+					user_roles AS roles
 				LEFT JOIN
 					users AS usr
-					ON usr.user_role_id = grp.user_role_id
+					ON usr.user_role_id = roles.user_role_id
 				WHERE
-					grp.deleted != 1 AND
-					grp.user_role_id != 2
+					roles.deleted != 1 AND
+					roles.user_role_id != 2
 				AND 
-					grp.user_role_id = ?
+					roles.user_role_id = ?
+                GROUP BY
+                    roles.user_role_id
 			";
 
         if (!$role = DB::row($sql, $user_role_id)) {
@@ -60,7 +62,7 @@ class RolesModel extends Model
         $action = Request::post('action');
 
         if ($permissions and is_array($permissions))
-            $permissions = implode('|', $permissions);
+            $permissions = Json::encode(array_values($permissions));
 
         if (!is_numeric($user_role_id)) $save = false;
 
@@ -168,19 +170,18 @@ class RolesModel extends Model
 
             $permissions[$category]['name'] = 'perm_header_' . $category;
 
-            if (is_array($permission['perm'])) {
-                foreach ($permission['perm'] as $perm) {
-                    $permissions[$category]['perm'][$perm] = in_array($perm, $role_permissions);
+            if (is_array($permission['permission'])) {
+                foreach ($permission['permission'] as $_permission) {
+                    $permissions[$category]['permission'][$_permission] = in_array($_permission, $role_permissions);
                 }
             }
 
-            if (isset($permission['icon']))
+            if (isset($permission['icon'])) {
                 $permissions[$category]['icon'] = $permission['icon'];
+            }
 
             $permissions[$category]['priority'] = $permission['priority'];
         }
-
-        unset($_permissions, $role_permissions);
 
         return Arrays::multiSort($permissions, 'priority');
     }

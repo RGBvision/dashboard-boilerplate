@@ -9,19 +9,19 @@
                     {if Permissions::has('users_add')}
                         <div class="col-auto order-sm-last">
                             <div class="d-none d-md-block">
-                                <button type="button" class="btn btn-primary btn-icon-text" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                <a href="#addUserModal" class="btn btn-primary btn-icon-text" data-bs-toggle="modal" data-bs-target="#addUserModal">
                                     <i class="mdi mdi-plus btn-icon-prepend"></i> {#button_add#}
-                                </button>
+                                </a>
                             </div>
                             <div class="dropdown d-md-none">
                                 <button class="btn p-0 me-n2" type="button" id="userListMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="mdi mdi-dots-vertical"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="userListMenu">
-                                    <button type="button" class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                    <a href="#addUserModal" class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addUserModal">
                                         <i class="mdi mdi-plus me-2"></i>
                                         <span>{#button_add#}</span>
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -53,13 +53,13 @@
 
                         </tbody>
                     </table>
-                    <div id="menuTpl" class="d-none">
+                    <template id="menuTpl" class="d-none">
                         <div class="d-none d-md-block">
-                            <a class="btn btn-sm btn-icon btn-secondary" title="{#button_view#}" href="{$ABS_PATH}users/view/:id">
+                            <a class="btn btn-sm btn-icon btn-primary" title="{#button_view#}" href="{$ABS_PATH}users/view/:id">
                                 <i class="mdi mdi-eye"></i>
                             </a>
                             {if Permissions::has('users_edit')}
-                                <a class="btn btn-sm btn-icon btn-primary disabled" title="{#button_edit#}" href="{$ABS_PATH}users/edit/:id" disabled>
+                                <a class="btn btn-sm btn-icon btn-secondary disabled" title="{#button_edit#}" href="{$ABS_PATH}users/edit/:id" disabled>
                                     <i class="mdi mdi-pen"></i>
                                 </a>
                             {/if}
@@ -81,7 +81,7 @@
                                 {/if}
                             </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>

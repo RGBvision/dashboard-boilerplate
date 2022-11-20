@@ -30,7 +30,7 @@ class Permissions
     {
         if (!empty($permission)) {
             self::$_permissions[$module] = [
-                'perm' => $permission,
+                'permission' => $permission,
                 'icon' => $icon,
                 'priority' => $priority,
             ];

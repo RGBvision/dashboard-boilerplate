@@ -4,13 +4,6 @@
 class SettingsController extends Controller
 {
 
-    /*
-     |--------------------------------------------------------------------------------------
-     | SettingsController конструктор
-     |--------------------------------------------------------------------------------------
-     | Сразу назначаем Model из Router
-     |
-     */
     public function __construct()
     {
         parent::__construct();
@@ -21,20 +14,13 @@ class SettingsController extends Controller
     }
 
 
-    /*
-     |--------------------------------------------------------------------------------------
-     | Router: settings
-     |--------------------------------------------------------------------------------------
-     | По умолчанию
-     |
-     */
-    public static function index()
+    public function index()
     {
         //-- Get Smarty Instance
         $Template = Template::getInstance();
 
         //-- Get Lang file
-        $Template->_load(DASHBOARD_DIR . '/app/modules/settings/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         //-- Data page
         $data = [
@@ -63,28 +49,23 @@ class SettingsController extends Controller
 
         $permission = Permissions::has('settings_edit');
 
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
+
         //-- To Smarty
         $Template
-            ->assign('configs', self::$model->getSettings())
+            ->assign('configs', $this->model->getSettings())
             ->assign('permission', $permission)
             ->assign('data', $data)
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/settings/view/index.tpl'));
+            ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
     }
 
 
-    /*
-     |--------------------------------------------------------------------------------------
-     | Router: settings/save
-     |--------------------------------------------------------------------------------------
-     |
-     |
-     */
-    public static function save()
+    public function save()
     {
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/settings/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
-        self::$model->saveSettings();
+        $this->model->saveSettings();
     }
 }

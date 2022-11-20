@@ -24,9 +24,12 @@ class User
     public static function isDeletable($user_id, $user_role_id): bool
     {
         return (
+            // Prevent delete SUPERUSER
             ($user_id !== self::SUPERUSER) &&
+            // Prevent self delete
             ($user_id !== USERID) &&
-            ($user_role_id !== UserRoles::SUPERADMIN) &&
+            // Prevent delete SUPERADMIN if current user NOT SUPERADMIN
+            ((USERROLE !== UserRoles::SUPERADMIN) && ($user_role_id !== UserRoles::SUPERADMIN)) &&
             Permissions::has('users_delete')
         );
     }
@@ -34,9 +37,10 @@ class User
     public static function isEditable($user_id, $user_role_id): bool
     {
         return (
-            ((USERROLE !== UserRoles::SUPERADMIN) && (USERROLE == $user_role_id)) ||
+            // Only SUPERUSER can edit own user data
+            (($user_id === self::SUPERUSER) && (USERID === self::SUPERUSER)) ||
+            // Prevent edit SUPERADMIN if current user NOT SUPERADMIN
             ((USERROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::SUPERADMIN)) ||
-            ((USERROLE !== UserRoles::SUPERADMIN) && ($user_role_id == UserRoles::ANONYMOUS)) ||
             Permissions::has('users_edit')
         );
     }
@@ -192,7 +196,7 @@ class User
                     "user_role_id" => $role,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             );
 
@@ -205,10 +209,10 @@ class User
                     "users",
                     [
                         "password" => $password_hash,
-                        "salt" => $salt
+                        "salt" => $salt,
                     ],
                     [
-                        "user_id" => $id
+                        "user_id" => $id,
                     ]
                 );
 
@@ -241,7 +245,7 @@ class User
                     "firstname" => $firstname,
                     "lastname" => $lastname,
                     "active" => 1,
-                    "settings" => "{}"
+                    "settings" => "{}",
                 ],
                 "user_id"
             );
@@ -267,10 +271,10 @@ class User
                 [
                     "active" => 0,
                     "deleted" => 1,
-                    "del_time" => time()
+                    "del_time" => time(),
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }
@@ -282,10 +286,10 @@ class User
                 [
                     "active" => 1,
                     "deleted" => 0,
-                    "del_time" => null
+                    "del_time" => null,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }
@@ -295,10 +299,10 @@ class User
         return DB::update(
                 "users",
                 [
-                    "active" => 0
+                    "active" => 0,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }
@@ -308,10 +312,10 @@ class User
         return DB::update(
                 "users",
                 [
-                    "active" => 1
+                    "active" => 1,
                 ],
                 [
-                    "user_id" => $id
+                    "user_id" => $id,
                 ]
             ) > 0;
     }

@@ -3,7 +3,7 @@
 class SettingsModel extends Model
 {
 
-    private static function generate_timezone_list()
+    private function generate_timezone_list()
     {
 
         $timezones = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
@@ -28,7 +28,7 @@ class SettingsModel extends Model
         return $timezone_list;
     }
 
-    public static function getSettings()
+    public function getSettings()
     {
         $new = [];
 
@@ -71,13 +71,12 @@ class SettingsModel extends Model
     }
 
 
-    public static function saveSettings()
+    public function saveSettings()
     {
-        Router::demo();
 
         $type = 'danger';
 
-        $Smarty = Tpl::getInstance();
+        $Smarty = Template::getInstance();
 
         $permission = Permissions::has('admin_settings_edit');
 

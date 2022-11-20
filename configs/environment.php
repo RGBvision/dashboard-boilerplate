@@ -56,9 +56,9 @@ const SEND_SQL_ERROR = false;
 
 const SQL_PROFILING = false;
 
-const SQL_CACHE = false;
+const SQL_CACHE = true;
 
-const SQL_CACHE_LIFETIME = 3600;
+const SQL_CACHE_LIFETIME = 60;
 
 const PROFILING = false;
 

@@ -14,7 +14,7 @@
  * @since      File available since Release 1.0
  */
 
-class ControllerProfile extends Controller
+class ProfileController extends Controller
 {
 
     /**
@@ -37,7 +37,7 @@ class ControllerProfile extends Controller
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.css',
             ABS_PATH . 'assets/vendors/cropperjs/cropper.min.js',
             ABS_PATH . 'assets/vendors/tinymce/tinymce.min.js',
-            ABS_PATH . 'app/modules/profile/js/profile.js',
+            $this->module->uri . '/js/profile.js',
         ];
 
         foreach ($files as $i => $file) {
@@ -51,15 +51,14 @@ class ControllerProfile extends Controller
     /**
      * Profile page
      */
-    public static function index()
+    public function index()
     {
 
         // Template engine instance
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load(DASHBOARD_DIR . '/app/modules/profile/i18n/' . Session::getvar('current_language') . '.ini', 'main');
-        $Template->_load(DASHBOARD_DIR . '/app/modules/profile/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         $data = [
 
@@ -92,22 +91,24 @@ class ControllerProfile extends Controller
         ];
 
         // Get user data
-        $user = self::$model->getUser(USERID);
+        $user = $this->model->getUser(USERID);
+
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
         // Push data to template engine
         $Template
             ->assign('data', $data)
             ->assign('countries', Valid::getAllCountries())
             ->assign('user', $user)
-            ->assign('cropper_tpl', $Template->fetch(DASHBOARD_DIR . '/app/modules/profile/view/cropper.tpl'))
-            ->assign('content', $Template->fetch(DASHBOARD_DIR . '/app/modules/profile/view/index.tpl'));
+            ->assign('cropper_tpl', $Template->fetch($this->module->path . '/view/cropper.tpl'))
+            ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
     }
 
     /**
      * Save user avatar
      * ToDo: Crop and resize
      */
-    public static function save_avatar()
+    public function save_avatar()
     {
 
         $success = false;
@@ -128,7 +129,7 @@ class ControllerProfile extends Controller
      * @param string $key
      * @param string $val
      */
-    public static function settings_set(string $key, string $val)
+    public function settings_set(string $key, string $val)
     {
         if (
             ($_key = Secure::sanitize($key)) &&

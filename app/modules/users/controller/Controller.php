@@ -61,8 +61,7 @@ class UsersController extends Controller
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'main');
-        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         $data = [
 
@@ -92,13 +91,13 @@ class UsersController extends Controller
             ],
         ];
 
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
+
         // Push data to template engine
         $Template
             ->assign('data', $data)
             ->assign('roles', UserRoles::getList())
             ->assign('countries', Valid::getAllCountries())
-            ->assign('can_add_user', $this->model::canAddUser())
-            ->assign('can_edit_user', Permissions::has('users_edit'))
             ->assign('add_user_tpl', $Template->fetch($this->module->path . '/view/add.tpl'))
             ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
     }
@@ -142,15 +141,15 @@ class UsersController extends Controller
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/' . self::$module . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         $data = [
 
             'page' => 'users',
 
-            'page_title' => $Template->_get('users_page_edit_title'),
+            'page_title' => $Template->_get('users_page_view_title'),
 
-            'header' => $Template->_get('users_page_edit_header'),
+            'header' => $Template->_get('users_page_view_header'),
 
             'breadcrumbs' => [
                 [
@@ -160,13 +159,13 @@ class UsersController extends Controller
                     'active' => true,
                 ],
                 [
-                    'text' => $Template->_get('users_breadcrumb_parent'),
+                    'text' => $Template->_get('users_breadcrumb'),
                     'href' => ABS_PATH . 'users',
                     'page' => 'users',
                     'active' => true,
                 ],
                 [
-                    'text' => $Template->_get('users_breadcrumb_edit'),
+                    'text' => $Template->_get('users_breadcrumb_view'),
                     'href' => '',
                     'page' => '',
                     'active' => false,
@@ -174,7 +173,9 @@ class UsersController extends Controller
             ],
         ];
 
-        $user = self::$model::getUser($user_id);
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
+
+        $user = $this->model->getUser($user_id);
 
         Loader::addDirectory(DASHBOARD_DIR . '/libraries/PhoneLib/');
         $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
@@ -184,7 +185,6 @@ class UsersController extends Controller
         $Template
             ->assign('data', $data)
             ->assign('formatted_phone', $phoneUtil->format($phone, \libphonenumber\PhoneNumberFormat::INTERNATIONAL))
-            ->assign('can_edit_user', Permissions::has('users_edit'))
             ->assign('user', $user)
             ->assign('content', $Template->fetch($this->module->path . '/view/view.tpl'));
     }
@@ -203,7 +203,7 @@ class UsersController extends Controller
 
         $Template = Template::getInstance();
 
-        $Template->_load(DASHBOARD_DIR . '/app/modules/' . self::$module . '/i18n/' . Session::getvar('current_language') . '.ini', 'pages');
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'meta');
 
         $data = [
 
@@ -221,7 +221,7 @@ class UsersController extends Controller
                     'active' => true,
                 ],
                 [
-                    'text' => $Template->_get('users_breadcrumb_parent'),
+                    'text' => $Template->_get('users_breadcrumb'),
                     'href' => ABS_PATH . 'users',
                     'page' => 'users',
                     'active' => true,
@@ -235,6 +235,8 @@ class UsersController extends Controller
             ],
         ];
 
+        $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
+
         $roles = UserRoles::getList();
 
         if (USERROLE !== UserRoles::SUPERADMIN) {
@@ -244,7 +246,7 @@ class UsersController extends Controller
 
         $Template
             ->assign('data', $data)
-            ->assign('user', self::$model::getUser($user_id))
+            ->assign('user', $this->model->getUser($user_id))
             ->assign('countries', Valid::getAllCountries())
             ->assign('roles', $roles)
             ->assign('action', 'save')

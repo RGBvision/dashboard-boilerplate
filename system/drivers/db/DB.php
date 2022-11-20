@@ -202,7 +202,7 @@ class DB
 
             Dir::create($cache_dir);
 
-            if (!(file_exists($cache_dir . $cache_file) && (@time() - @filemtime($cache_dir . $cache_file) < self::$cache_TTL))) {
+            if (!(file_exists($cache_dir . $cache_file) && (time() - @filemtime($cache_dir . $cache_file) < self::$cache_TTL))) {
                 $result = self::$driver->run($statement, ...$params);
                 file_put_contents($cache_dir . $cache_file, serialize($result));
             } else {

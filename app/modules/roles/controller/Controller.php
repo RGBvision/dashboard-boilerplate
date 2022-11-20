@@ -96,7 +96,6 @@ class RolesController extends Controller
         $Template
             ->assign('data', $data)
             ->assign('roles', $roles)
-            ->assign('access', Permissions::has('roles_edit'))
             ->assign('content', $Template->fetch($this->module->path . '/view/index.tpl'));
     }
 
@@ -140,9 +139,13 @@ class RolesController extends Controller
             ],
         ];
 
-        $editable = UserRoles::isEditable($role_id);
-        $disabled = $this->model->isDisabled($role_id);
-        $exists = $this->model->getRole($role_id);
+        $permissions = $this->model->getAllPermissions($role_id);
+
+        foreach ($permissions as $_module => $_permissions) {
+            if ($module = Loader::getModule($_module)) {
+                $Template->_load($module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
+            }
+        }
 
         $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
@@ -150,9 +153,9 @@ class RolesController extends Controller
             ->assign('data', $data)
             ->assign('user_role_id', $role_id)
             ->assign('user_role_name', $user_role_name)
-            ->assign('disabled', $disabled)
-            ->assign('editable', $editable)
-            ->assign('exists', $exists)
+            ->assign('disabled', $this->model->isDisabled($role_id))
+            ->assign('editable', UserRoles::isEditable($role_id))
+            ->assign('exists', $this->model->getRole($role_id))
             ->assign('permissions', $this->model->getAllPermissions($role_id))
             ->assign('content', $Template->fetch($this->module->path . '/view/edit.tpl'));
     }
@@ -195,12 +198,20 @@ class RolesController extends Controller
             ],
         ];
 
+        $permissions = $this->model->getAllPermissions();
+
+        foreach ($permissions as $_module => $_permissions) {
+            if ($module = Loader::getModule($_module)) {
+                $Template->_load($module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'permissions');
+            }
+        }
+
         $Template->_load($this->module->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'content');
 
         $Template
             ->assign('data', $data)
             ->assign('access', Permissions::has('roles_edit'))
-            ->assign('permissions', $this->model->getAllPermissions())
+            ->assign('permissions', $permissions)
             ->assign('content', $Template->fetch($this->module->path . '/view/add.tpl'));
     }
 

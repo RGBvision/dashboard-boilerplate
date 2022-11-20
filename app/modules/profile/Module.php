@@ -61,7 +61,7 @@ class ProfileModule extends Module
         $Template = Template::getInstance();
 
         // Load i18n variables
-        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'name');
+        $Template->_load($this->path . '/i18n/' . Session::getvar('current_language') . '.ini', 'module');
 
         // Add navigation entry
         Navigation::add(
