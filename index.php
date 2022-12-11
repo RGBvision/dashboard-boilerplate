@@ -32,6 +32,13 @@ if (($path = Request::getPath()) && (str_starts_with($path, ABS_PATH . API_URI_P
 // Template engine instance
 $Template = Template::getInstance();
 
+$Template
+    ->assign('DASHBOARD_DIR', DASHBOARD_DIR)
+    ->assign('ABS_PATH', ABS_PATH)
+    ->assign('API_PATH', ABS_PATH . API_URI_PREFIX)
+    ->assign('APP_NAME', APP_NAME)
+    ->assign('APP_BUILD', APP_BUILD);
+
 // Define default template directory if not set
 if (!defined('TPL_DIR')) {
     define('TPL_DIR', 'default');
@@ -59,9 +66,6 @@ $base_template = defined('CONTENT_ONLY') ? 'content_only.tpl' : 'index.tpl';
 
 // Push all data to template engine
 $Template
-
-    ->assign('APP_NAME', APP_NAME)
-    ->assign('APP_BUILD', APP_BUILD)
 
     ->assign('dependencies', Dependencies::get())
     ->assign('injections', Injections::get())
