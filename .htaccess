@@ -174,9 +174,9 @@ Options -Indexes +FollowSymLinks
 	RewriteRule .* - [E=HTTP_IF_MODIFIED_SINCE:%{HTTP:If-Modified-Since}]
 	RewriteRule .* - [E=HTTP_IF_NONE_MATCH:%{HTTP:If-None-Match}]
 
-    # Authorization header forwarding
+	# Authorization header forwarding
 	RewriteCond %{HTTP:Authorization} ^(.*)
-    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+	RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
 	RewriteRule ^index.php$ - [L]
 	RewriteCond %{REQUEST_FILENAME} !-f
