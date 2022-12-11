@@ -150,7 +150,7 @@ class Sessions
 
     public static function _destroy($sessionId)
     {
-        return DB::delete("sessions", ["sesskey" => $sessionId]);
+        return DB::delete("sessions", ["sesskey" => $sessionId]) > 0;
     }
 
     public static function _gc($maxlifetime)
