@@ -9,7 +9,7 @@
  * @author     Alex Graham <contact@rgbvision.net>
  * @copyright  Copyright 2017-2022, Alex Graham
  * @license    https://dashboard.rgbvision.net/license.txt MIT License
- * @version    2.7
+ * @version    4.0
  * @link       https://dashboard.rgbvision.net
  * @since      File available since Release 1.0
  */
@@ -17,12 +17,14 @@
 class ApiRouter
 {
 
-    static private string $method;
-    static private ?array $params;
-    static private string $controller;
-    static private string $controller_file;
+    private static string $method;
+    private static ?array $params;
+    private static object $controller;
     protected static ?ApiRouter $instance = null;
 
+    /**
+     * @throws ReflectionException
+     */
     public static function init(string $controller, string $file, string $route): ?ApiRouter
     {
         if (!isset(self::$instance)) {
@@ -32,12 +34,51 @@ class ApiRouter
         return self::$instance;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function __construct(string $controller, string $file, string $route)
     {
-        self::$controller = $controller;
-        self::$controller_file = $file;
+
+        if (is_file($file)) {
+            Loader::addClass($controller, $file);
+            self::$controller = new $controller();
+        } else {
+            throw new Exception(i18n::_('router.error.controller'));
+        }
+
         self::$method = strtolower($_SERVER['REQUEST_METHOD']) . '_' . str_replace('/', '_', trim($route, '/'));
-        self::$params = (strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') ? $_GET : Json::decode(file_get_contents("php://input"));
+
+        $class = new ReflectionClass($controller);
+
+        $_params = [];
+
+        foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+
+            if (
+                (str_starts_with($method->name, strtolower($_SERVER['REQUEST_METHOD']) . '_')) &&
+                (strpos($method->name, '_ARG')) &&
+                (preg_match(
+                        '/^' . preg_replace('/(_ARG([a-z][a-z0-9]+))/', '\/(\w+)', preg_replace('/^' . strtolower($_SERVER['REQUEST_METHOD']) . '_/', '', $method->name)) . '$/',
+                        $route,
+                        $matches_route
+                    ) === 1) &&
+                (preg_match_all('/_ARG([a-z][a-zA-Z0-9]+)/', $method->name, $matches) === (count($matches_route) - 1)) &&
+                ($args = $matches[1]) &&
+                is_array($args)
+            ) {
+
+                self::$method = $method->name;
+
+                foreach ($args as $index => $arg) {
+                    $_params[$arg] = $matches_route[$index + 1];
+                }
+            }
+        }
+
+        self::$params = array_merge_recursive($_params, ((strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') ? $_GET : Json::decode(file_get_contents("php://input"))) ?: []);
+
     }
 
     public static function execute(): array
@@ -47,25 +88,15 @@ class ApiRouter
             return ['message' => i18n::_('router.error.magic_method')];
         }
 
-        $file = self::$controller_file;
-        $controller = self::$controller;
-
-        if (is_file($file)) {
-            Loader::addClass($controller, $file);
-            $controller = new $controller();
-        } else {
-            return ['message' => i18n::_('router.error.controller')];
-        }
-
         try {
 
-            $reflection = new ReflectionClass($controller);
+            $reflection = new ReflectionClass(self::$controller);
 
             if ($reflection->hasMethod(self::$method)) {
 
                 $arguments = [];
 
-                $reflectionMethod = new ReflectionMethod($controller, self::$method);
+                $reflectionMethod = new ReflectionMethod(self::$controller, self::$method);
 
                 foreach ($reflectionMethod->getParameters() as $parameter) {
 
@@ -125,7 +156,7 @@ class ApiRouter
 
                 }
 
-                return call_user_func_array([$controller, self::$method], $arguments);
+                return call_user_func_array([self::$controller, self::$method], $arguments);
             }
 
         } catch (ReflectionException $e) {
@@ -145,7 +176,7 @@ class ApiRouter
             Response::setStatus($data['response_code'] ?? 200);
         }
 
-        Arrays::filterKeys($data, ['success'], true);
+        Arrays::filterKeys($data, ['success', 'response_code'], true);
         Json::output($data, true);
     }
 }
