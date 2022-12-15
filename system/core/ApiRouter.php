@@ -48,29 +48,26 @@ class ApiRouter
             throw new Exception(i18n::_('router.error.controller'));
         }
 
-        self::$method = strtolower($_SERVER['REQUEST_METHOD']) . '_' . str_replace('/', '_', trim($route, '/'));
+        self::$method = strtolower($_SERVER['REQUEST_METHOD']) . '_' . str_replace(['/', '\\'], '_', trim($route, '/'));
 
         $class = new ReflectionClass($controller);
 
         $_params = [];
 
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-
             if (
                 (str_starts_with($method->name, strtolower($_SERVER['REQUEST_METHOD']) . '_')) &&
                 (strpos($method->name, '_ARG')) &&
                 (preg_match(
-                        '/^' . preg_replace('/(_ARG([a-z][a-z0-9]+))/', '\/(\w+)', preg_replace('/^' . strtolower($_SERVER['REQUEST_METHOD']) . '_/', '', $method->name)) . '$/',
+                        '#^' . preg_replace('/(\/ARG([a-z][a-zA-Z0-9]*))/', '/([a-zA-Z_0-9]+)', str_replace('_', '/', preg_replace('/^' . strtolower($_SERVER['REQUEST_METHOD']) . '_/', '', $method->name))) . '$#',
                         $route,
                         $matches_route
                     ) === 1) &&
-                (preg_match_all('/_ARG([a-z][a-zA-Z0-9]+)/', $method->name, $matches) === (count($matches_route) - 1)) &&
+                (preg_match_all('/_ARG([a-z][a-zA-Z0-9]*)/', $method->name, $matches) === (count($matches_route) - 1)) &&
                 ($args = $matches[1]) &&
                 is_array($args)
             ) {
-
                 self::$method = $method->name;
-
                 foreach ($args as $index => $arg) {
                     $_params[$arg] = $matches_route[$index + 1];
                 }
