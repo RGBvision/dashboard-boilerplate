@@ -74,7 +74,7 @@ class ApiRouter
             }
         }
 
-        self::$params = array_merge_recursive($_params, ((strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') ? $_GET : Json::decode(file_get_contents("php://input"))) ?: []);
+        self::$params = array_replace_recursive(((strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') ? $_GET : Json::decode(file_get_contents("php://input"))) ?: [], $_params);
 
     }
 
