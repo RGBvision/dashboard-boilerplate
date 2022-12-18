@@ -45,8 +45,8 @@ if (defined('USERID')) {
 // System i18n
 i18n::init(DASHBOARD_DIR . '/system/i18n/', Session::getvar('current_language'));
 
-// App modules
-Loader::addModules(DASHBOARD_DIR . MODULES_DIR);
-
 // App classes
 Loader::addDirectory(DASHBOARD_DIR . CLASSES_DIR);
+
+// App modules
+Loader::addModules(DASHBOARD_DIR . MODULES_DIR);
