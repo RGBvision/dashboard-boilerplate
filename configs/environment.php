@@ -16,6 +16,8 @@ const MODULES_DIR = '/app/modules';
 
 const CLASSES_DIR = '/app/classes';
 
+const I18N_DIR = '/app/i18n';
+
 const API_URI_PREFIX = 'api';
 
 const API_DIR = '/app/api';

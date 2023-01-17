@@ -43,7 +43,10 @@ if (defined('USERID')) {
 }
 
 // System i18n
-i18n::init(DASHBOARD_DIR . '/system/i18n/', Session::getvar('current_language'));
+i18n::init(DASHBOARD_DIR . '/system/i18n', Session::getvar('current_language'));
+
+// App i18n
+i18n::load(DASHBOARD_DIR . I18N_DIR);
 
 // App classes
 Loader::addDirectory(DASHBOARD_DIR . CLASSES_DIR);

@@ -34,6 +34,12 @@ class i18n
         self::loadTranslation();
     }
 
+    public static function load(string $path): void
+    {
+        self::$_path = $path;
+        self::loadTranslation();
+    }
+
     // Change default language and fallback language
     public static function setLanguage($language, $fallback = null): void
     {
@@ -82,8 +88,8 @@ class i18n
     private static function loadTranslation(): void
     {
 
-        $_translation_files = self::$_path . '*.' . self::$_language . '.lang.json';
-        $_fallback_files = self::$_path . '*.' . self::$_fallbackLanguage . '.lang.json';
+        $_translation_files = self::$_path . DS . '*.' . self::$_language . '.lang.json';
+        $_fallback_files = self::$_path . DS . '*.' . self::$_fallbackLanguage . '.lang.json';
 
         $dir = glob($_translation_files);
 
