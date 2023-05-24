@@ -58,16 +58,18 @@
                 </form>
                 <ul class="navbar-nav">
 
-                    <li class="nav-item dropdown ms-3 me-0">
-                        <button class="nav-link dropdown-toggle" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="flag-icon flag-icon-{$current_language} mt-n1" title="{$current_language}"></i> <span class="font-weight-medium mx-1 d-none d-md-inline-block">{$current_language|mb_strtoupper}</span>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="languageDropdown">
-                            {foreach from=$accept_lang key=lang item=item}
-                                <a href="{$ABS_PATH}profile/set/user_lang/{$lang}" class="dropdown-item py-2"><i class="flag-icon flag-icon-{$lang}" title="{$item}" id="{$lang}"></i><span class="ms-2">{$item}</span></a>
-                            {/foreach}
-                        </div>
-                    </li>
+                    {if count($accept_lang) > 1}
+                        <li class="nav-item dropdown ms-3 me-0">
+                            <button class="nav-link dropdown-toggle" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="flag-icon flag-icon-{$current_language} mt-n1" title="{$current_language}"></i> <span class="font-weight-medium mx-1 d-none d-md-inline-block">{$current_language|mb_strtoupper}</span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="languageDropdown">
+                                {foreach from=$accept_lang key=lang item=item}
+                                    <a href="{$ABS_PATH}profile/set/user_lang/{$lang}" class="dropdown-item py-2"><i class="flag-icon flag-icon-{$lang}" title="{$item}" id="{$lang}"></i><span class="ms-2">{$item}</span></a>
+                                {/foreach}
+                            </div>
+                        </li>
+                    {/if}
 
                     {$user_tpl}
 
