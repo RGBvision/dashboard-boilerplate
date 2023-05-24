@@ -34,14 +34,6 @@ include DASHBOARD_DIR . '/system/Core.php';
 // Core initialization
 Core::init();
 
-// Restore user authorization
-Auth::authRestore();
-
-// Load user settings if authorized
-if (defined('USERID')) {
-    Settings::loadUserSettings(USERID);
-}
-
 // System i18n
 i18n::init(DASHBOARD_DIR . '/system/i18n', Session::getvar('current_language'));
 

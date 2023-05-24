@@ -20,6 +20,14 @@ define('START_MEMORY', memory_get_usage());
 // System initialisation
 require_once __DIR__ . '/system/init.php';
 
+// Restore user authorization
+Auth::authRestore();
+
+// Load user settings if authorized
+if (defined('USERID')) {
+    Settings::loadUserSettings(USERID);
+}
+
 // Run hook after system initialised
 Hooks::action('system_after_init');
 
